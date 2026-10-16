@@ -10,29 +10,15 @@ const MIN = 50
 const CHIPS = [50, 100, 250, 500]
 const HOLD_MIN = 60
 
+// Only USDT on TRON (TRC20) is accepted.
+const DEPOSIT_ADDRESS = 'TPuff85NhMAfMoALCuqkVtdgmuJb7McG6D'
+
 const COINS = [
-  { s: 'BTC', n: 'Bitcoin', dec: 8, nets: ['BTC'] },
-  { s: 'ETH', n: 'Ethereum', dec: 6, nets: ['ERC20'] },
-  { s: 'USDT', n: 'Tether', dec: 2, stable: true, nets: ['TRC20', 'ERC20', 'BEP20'] },
-  { s: 'USDC', n: 'USD Coin', dec: 2, stable: true, nets: ['ERC20', 'BEP20'] },
-  { s: 'TRX', n: 'Tron', dec: 6, nets: ['TRC20'] },
-  { s: 'BNB', n: 'BNB', dec: 6, nets: ['BEP20'] },
-  { s: 'SOL', n: 'Solana', dec: 6, nets: ['SOL'] },
-  { s: 'XRP', n: 'XRP', dec: 6, nets: ['XRP'] },
-  { s: 'LTC', n: 'Litecoin', dec: 6, nets: ['LTC'] },
-  { s: 'DOGE', n: 'Dogecoin', dec: 4, nets: ['DOGE'] },
+  { s: 'USDT', n: 'Tether', dec: 2, stable: true, nets: ['TRC20'] },
 ]
 
-// Replace every address below with your real wallet address for that network.
 const NETS = {
-  BTC: { label: 'Bitcoin (BTC)', icon: 'BTC', address: 'YOUR_BTC_ADDRESS' },
-  ERC20: { label: 'Ethereum (ERC20)', icon: 'ETH', address: 'YOUR_ERC20_ADDRESS' },
-  TRC20: { label: 'Tron (TRC20) - Low Fee', icon: 'TRX', address: 'YOUR_TRC20_ADDRESS' },
-  BEP20: { label: 'BNB Smart Chain (BEP20) - Low Fee', icon: 'BNB', address: 'YOUR_BEP20_ADDRESS' },
-  SOL: { label: 'Solana (SOL)', icon: 'SOL', address: 'YOUR_SOL_ADDRESS' },
-  XRP: { label: 'XRP Ledger (XRP)', icon: 'XRP', address: 'YOUR_XRP_ADDRESS' },
-  LTC: { label: 'Litecoin (LTC)', icon: 'LTC', address: 'YOUR_LTC_ADDRESS' },
-  DOGE: { label: 'Dogecoin (DOGE)', icon: 'DOGE', address: 'YOUR_DOGE_ADDRESS' },
+  TRC20: { label: 'Tron (TRC20) - Low Fee', icon: 'TRX', address: DEPOSIT_ADDRESS },
 }
 
 // [label, tone, icon, spin?]
@@ -97,8 +83,8 @@ export default function Deposit() {
 
   const [step, setStep] = useState(1)
   const [amount, setAmount] = useState('')
-  const [coin, setCoin] = useState('')
-  const [net, setNet] = useState('')
+  const [coin, setCoin] = useState('USDT')
+  const [net, setNet] = useState('TRC20')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const [dep, setDep] = useState(null)
@@ -141,6 +127,7 @@ export default function Deposit() {
     setErr('')
     const n = NETS[net]
     if (!coinInfo || !n) return
+    if (coinInfo.s !== 'USDT' || net !== 'TRC20') return setErr('Only USDT on the Tron (TRC20) network is accepted.')
     if (isPlaceholder(n.address)) return setErr('Deposits on this network are not available yet.')
     setBusy(true)
     let price = 1
@@ -166,7 +153,7 @@ export default function Deposit() {
     setBusy(false); setDep(rec); setHistory((h) => [rec, ...h]); setStep(3)
   }
 
-  const reset = () => { setStep(1); setDep(null); setAmount(''); setCoin(''); setNet(''); setErr(''); setNote('') }
+  const reset = () => { setStep(1); setDep(null); setAmount(''); setCoin('USDT'); setNet('TRC20'); setErr(''); setNote('') }
 
   const statusOf = (d) => (d.status === 'pending' && new Date(d.expires).getTime() < now ? 'expired' : d.status)
   const left = dep ? Math.max(0, Math.floor((new Date(dep.expires).getTime() - now) / 1000)) : 0
