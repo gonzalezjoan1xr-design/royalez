@@ -8,21 +8,30 @@
   --nav-green-bg: rgba(25, 230, 140, 0.1);
   --nav-green-border: rgba(25, 230, 140, 0.28);
   --nav-red: #ff3b4e;
-  --nav-h: 64px;
+  --nav-h: 56px;
+}
+
+/* header is fixed, so push page content down by its height */
+body {
+  padding-top: var(--nav-h);
 }
 
 /* ---------- Header ---------- */
 .nav {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   height: var(--nav-h);
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 0 24px;
+  gap: 12px;
+  padding: 0 16px;
   background: var(--nav-bg);
   border-bottom: 1px solid var(--nav-border);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .nav__logo {
@@ -31,7 +40,7 @@
   flex-shrink: 0;
 }
 .nav__logo img {
-  height: 44px;
+  height: 36px;
   width: auto;
   display: block;
 }
@@ -39,26 +48,36 @@
 .nav__links {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
+  min-width: 0;
 }
 
 .nav__link {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 42px;
-  padding: 0 16px;
-  border-radius: 10px;
+  gap: 6px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
   border: 1px solid transparent;
   color: var(--nav-text);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
+  outline: none;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.nav__link svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
 }
 .nav__link:hover {
   color: var(--nav-text-strong);
+}
+.nav__link:focus-visible {
+  border-color: var(--nav-green-border);
 }
 .nav__link.is-active {
   color: var(--nav-green);
@@ -70,17 +89,22 @@
 .nav__search {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex: 1;
-  max-width: 300px;
-  min-width: 160px;
-  height: 46px;
-  padding: 0 16px;
+  gap: 8px;
+  flex: 1 1 140px;
+  max-width: 240px;
+  min-width: 110px;
+  height: 36px;
+  padding: 0 12px;
   background: var(--nav-surface);
   border: 1px solid var(--nav-border);
-  border-radius: 10px;
+  border-radius: 8px;
   color: var(--nav-text);
   transition: border-color 0.15s;
+}
+.nav__search svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 .nav__search:focus-within {
   border-color: var(--nav-green-border);
@@ -92,7 +116,7 @@
   border: 0;
   outline: 0;
   color: var(--nav-text-strong);
-  font-size: 15px;
+  font-size: 13px;
 }
 .nav__search input::placeholder {
   color: var(--nav-text);
@@ -103,26 +127,33 @@
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .nav__app,
 .nav__balance {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 16px;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
   background: var(--nav-surface);
   border: 1px solid var(--nav-border);
-  border-radius: 10px;
+  border-radius: 8px;
   color: var(--nav-text);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
   text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
   transition: border-color 0.15s, color 0.15s;
+}
+.nav__app svg,
+.nav__balance svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 .nav__app:hover,
 .nav__balance:hover {
@@ -144,18 +175,24 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   padding: 0;
   background: transparent;
   border: 0;
-  border-radius: 10px;
+  border-radius: 8px;
   color: var(--nav-text-strong);
   cursor: pointer;
   text-decoration: none;
+  outline: none;
   transition: background 0.15s;
 }
-.nav__icon:hover {
+.nav__icon svg {
+  width: 18px;
+  height: 18px;
+}
+.nav__icon:hover,
+.nav__icon:focus-visible {
   background: var(--nav-surface);
 }
 .nav__icon--green {
@@ -167,18 +204,18 @@
 
 .nav__badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
+  top: 1px;
+  right: 1px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--nav-green);
   color: #04130c;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   line-height: 1;
 }
@@ -193,14 +230,50 @@
   display: none;
 }
 
+/* ---------- Step 1: tighten up on medium desktops ---------- */
+@media (max-width: 1360px) {
+  .nav {
+    gap: 8px;
+    padding: 0 12px;
+  }
+  .nav__link {
+    padding: 0 8px;
+    gap: 5px;
+  }
+  .nav__search {
+    max-width: 180px;
+  }
+  .nav__app {
+    padding: 0 10px;
+  }
+}
+
+/* ---------- Step 2: Get App becomes icon only ---------- */
+@media (max-width: 1240px) {
+  .nav__app {
+    font-size: 0;
+    gap: 0;
+    padding: 0;
+    width: 36px;
+    justify-content: center;
+  }
+  .nav__search {
+    max-width: 150px;
+  }
+}
+
 /* ---------- Mobile / tablet ---------- */
 @media (max-width: 1100px) {
+  :root {
+    --nav-h: 54px;
+  }
+
   .nav {
-    padding: 0 14px;
-    gap: 8px;
+    padding: 0 12px;
+    gap: 6px;
   }
   .nav__logo img {
-    height: 36px;
+    height: 32px;
   }
 
   .nav__links,
@@ -240,8 +313,8 @@
     right: 0;
     bottom: 0;
     z-index: 210;
-    width: min(78vw, 320px);
-    padding: 22px 22px 28px;
+    width: min(78vw, 300px);
+    padding: 18px 18px 24px;
     background: #0b0c0b;
     border-left: 1px solid var(--nav-border);
     overflow-y: auto;
@@ -258,11 +331,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
   .drawer__head h2 {
     margin: 0;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--nav-text-strong);
   }
@@ -270,8 +343,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     background: transparent;
     border: 0;
     border-radius: 8px;
@@ -286,18 +359,18 @@
   .drawer__nav {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
   }
   .drawer__link {
     display: flex;
     align-items: center;
-    gap: 14px;
-    height: 46px;
-    padding: 0 16px;
+    gap: 12px;
+    height: 42px;
+    padding: 0 14px;
     border: 1px solid transparent;
     border-radius: 10px;
     color: var(--nav-text);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
     text-decoration: none;
     transition: color 0.15s, background 0.15s;
@@ -316,22 +389,22 @@
 
   .drawer__divider {
     height: 1px;
-    margin: 18px 0;
+    margin: 14px 0;
     background: var(--nav-border);
   }
 
   .drawer__balance {
     display: flex;
     align-items: center;
-    gap: 12px;
-    height: 48px;
-    padding: 0 16px;
-    margin-bottom: 14px;
+    gap: 10px;
+    height: 44px;
+    padding: 0 14px;
+    margin-bottom: 10px;
     background: var(--nav-surface);
     border: 1px solid var(--nav-border);
     border-radius: 10px;
     color: var(--nav-text-strong);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     text-decoration: none;
@@ -344,9 +417,9 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    height: 48px;
-    padding: 0 16px;
-    margin-bottom: 14px;
+    height: 44px;
+    padding: 0 14px;
+    margin-bottom: 10px;
     background: var(--nav-surface);
     border: 1px solid var(--nav-border);
     border-radius: 10px;
@@ -362,7 +435,7 @@
     border: 0;
     outline: 0;
     color: var(--nav-text-strong);
-    font-size: 15px;
+    font-size: 14px;
   }
   .drawer__search input::placeholder {
     color: var(--nav-text);
@@ -371,14 +444,14 @@
   .drawer__stores {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
   .drawer__store {
     display: flex;
     align-items: center;
-    gap: 12px;
-    height: 52px;
-    padding: 0 16px;
+    gap: 10px;
+    height: 48px;
+    padding: 0 14px;
     background: #000;
     border: 1px solid #3a3d3b;
     border-radius: 10px;
@@ -389,7 +462,7 @@
   .drawer__store span {
     display: flex;
     flex-direction: column;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     line-height: 1.15;
   }
@@ -404,6 +477,6 @@
 
 @media (max-width: 380px) {
   .nav__icon {
-    width: 36px;
+    width: 32px;
   }
 }
