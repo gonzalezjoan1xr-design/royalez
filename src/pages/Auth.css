@@ -1,14 +1,136 @@
-.auth { min-height: 100vh; display: grid; place-content: center; justify-items: center; gap: 28px; padding: 24px; }
-.auth__card { width: min(420px, 92vw); display: grid; gap: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 32px; }
-.auth__card h1 { font-size: 26px; letter-spacing: -0.02em; }
-.auth__card p { color: var(--muted); margin-top: -8px; }
-.auth__card label { display: grid; gap: 8px; font-size: 14px; font-weight: 600; color: var(--muted); }
-.auth__card input { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 13px 14px; color: var(--text); font-size: 16px; }
-.auth__card input:focus { border-color: var(--green); outline: none; }
-.auth__submit { background: var(--green); color: #04130a; font-weight: 700; padding: 14px; border-radius: 10px; font-size: 17px; }
+.auth {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  padding: 40px 16px;
+  position: relative;
+}
+
+/* Back link, top-left of the page */
+.auth__back {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.auth__back:hover { color: var(--text); }
+.auth__back:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 4px; }
+
+.auth__card {
+  width: min(360px, 100%);
+  display: grid;
+  gap: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px 18px 20px;
+}
+
+.auth__logo { justify-self: center; display: block; }
+
+.auth__head { text-align: center; display: grid; gap: 8px; margin-bottom: 4px; }
+.auth__head h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; color: var(--text); }
+.auth__head p { font-size: 12px; color: var(--muted); }
+
+/* Labels + inputs */
+.auth__card label,
+.auth__label {
+  display: grid;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.auth__card input,
+.auth__card select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 11px;
+  height: 32px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 400;
+  font-family: inherit;
+}
+.auth__card input::placeholder { color: var(--muted); }
+.auth__card input:focus,
+.auth__card select:focus { border-color: var(--green); outline: none; }
+
+.auth__row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Phone: country select + dial code + number */
+.auth__field { display: grid; gap: 8px; }
+.auth__phone { display: grid; grid-template-columns: 48px 1fr; gap: 6px; }
+
+.auth__country { position: relative; }
+.auth__country select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0 14px 0 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.auth__country svg {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.auth__dial {
+  display: flex;
+  align-items: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  height: 32px;
+  padding-left: 11px;
+}
+.auth__dial:focus-within { border-color: var(--green); }
+.auth__dial span {
+  font-size: 12px;
+  color: var(--muted);
+  padding-right: 10px;
+  margin-right: 10px;
+  border-right: 1px solid var(--border);
+  line-height: 14px;
+}
+.auth__dial input { border: 0; background: transparent; height: 100%; padding: 0; border-radius: 0; }
+.auth__dial input:focus { border: 0; }
+
+/* Submit */
+.auth__submit {
+  background: var(--green);
+  color: #04130a;
+  font-weight: 600;
+  font-size: 12px;
+  height: 32px;
+  border-radius: 6px;
+  margin-top: 6px;
+  cursor: pointer;
+}
+.auth__submit:hover { filter: brightness(1.05); }
+.auth__submit:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 .auth__submit:disabled { opacity: 0.6; cursor: wait; }
-.auth__msg { padding: 10px 12px; border-radius: 10px; font-size: 14px; }
+
+/* Messages */
+.auth__msg { padding: 8px 10px; border-radius: 6px; font-size: 12px; }
 .auth__msg--err { background: var(--red-soft); color: var(--red); }
 .auth__msg--ok { background: var(--green-soft); color: var(--green); }
-.auth__switch { text-align: center; color: var(--muted); font-size: 14px; }
+
+.auth__switch { text-align: center; color: var(--muted); font-size: 12px; }
 .auth__switch a { color: var(--green); font-weight: 600; }
+
+@media (max-width: 380px) {
+  .auth__row { grid-template-columns: 1fr; }
+}
