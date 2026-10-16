@@ -83,7 +83,7 @@ export default function Auth({ mode }) {
         Back
       </Link>
 
-      <form className="auth__card" onSubmit={submit}>
+      <form className={`auth__card${isSignup ? '' : ' auth__card--login'}`} onSubmit={submit}>
         <Link to="/" className="auth__logo"><Logo /></Link>
 
         <div className="auth__head">
