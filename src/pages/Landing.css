@@ -146,3 +146,20 @@
 @media (max-width: 900px) {
   .prices { padding: 30px 20px 70px; }
 }
+
+/* ---------- sixth block: figures + closing call to action ---------- */
+.closing__stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; max-width: 1500px; margin: 0 auto; padding: 56px 120px; border-top: 1px solid #0d2a1b; border-bottom: 1px solid #0d2a1b; background: linear-gradient(180deg, #02150d, #010a06); }
+.closing__stat { display: flex; flex-direction: column; align-items: center; text-align: center; color: var(--lp-green-bright); }
+.closing__stat strong { margin-top: 14px; font-size: 36px; font-weight: 700; letter-spacing: -0.02em; color: #fff; }
+.closing__stat span { margin-top: 6px; font-size: 15px; color: #8a8a8a; }
+.closing__cta { max-width: 620px; margin: 0 auto; padding: 80px 20px 90px; text-align: center; }
+.closing__cta h2 { font-size: clamp(30px, 4vw, 46px); line-height: 1.12; letter-spacing: -0.03em; font-weight: 700; color: #fff; }
+.closing__cta p { margin-top: 18px; color: #8a8a8a; font-size: 17px; line-height: 1.6; }
+.closing__buttons { display: flex; justify-content: center; gap: 14px; margin-top: 32px; flex-wrap: wrap; }
+.closing__main { background: var(--lp-green-bright); padding: 16px 36px; font-size: 16px; }
+.closing__alt { padding: 16px 36px; font-size: 16px; }
+.closing__cta small { display: block; margin-top: 22px; font-size: 13px; color: #7a7a7a; }
+@media (max-width: 900px) {
+  .closing__stats { grid-template-columns: repeat(2, 1fr); padding: 40px 20px; row-gap: 36px; }
+  .closing__cta { padding: 56px 20px 70px; }
+}
