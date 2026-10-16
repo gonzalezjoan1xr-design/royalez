@@ -29,8 +29,8 @@
 
 /* "Get started" uses the logo text colour; change --logo-color to match your Logo exactly */
 .landing { --logo-color: var(--green, #22c55e); }
-.landing__start { padding: 8px 16px; font-size: 13px; border-radius: 5px; background: #06140d; border: 1px solid var(--logo-color); color: var(--logo-color); }
-.landing__start:hover { background: var(--logo-color); color: #03140c; }
+.landing__start { padding: 10px 22px; font-size: 15px; font-weight: 500; border-radius: 7px; background: #22c55e; border: 1px solid #22c55e; color: #04130a; }
+.landing__start:hover { background: #2fd36b; border-color: #2fd36b; color: #04130a; }
 
 /* live price tape */
 .landing__tape { overflow: hidden; border-bottom: 1px solid #111; background: #000; }
