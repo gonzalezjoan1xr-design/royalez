@@ -131,6 +131,22 @@
 .auth__switch { text-align: center; color: var(--muted); font-size: 12px; }
 .auth__switch a { color: var(--green); font-weight: 600; }
 
+/* Forgot password link (sign in only) */
+.auth__forgot {
+  justify-self: end;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green);
+  cursor: pointer;
+}
+.auth__forgot:hover { text-decoration: underline; }
+.auth__forgot:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 4px; }
+.auth__card--login .auth__forgot { font-size: 15px; }
+
 /* Larger sign in card */
 .auth__card--login {
   width: min(540px, 100%);
