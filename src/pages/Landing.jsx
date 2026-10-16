@@ -291,6 +291,55 @@ export default function Landing() {
           <small>Free to join. No hidden setup costs.</small>
         </div>
       </section>
+      <section className="legal">
+        <div className="legal__inner">
+          <p>
+            <strong>Royal Markets Ltd</strong> is a licensed securities dealer incorporated in
+            [Jurisdiction], company number [Registration No.], and regulated by [Regulator Name]
+            under licence [Licence No.]. Its registered address is [Registered Address].
+          </p>
+          <p>
+            <strong>Royal Markets B.V.</strong> operates as a securities intermediary in
+            [Jurisdiction], company number [Registration No.], and holds authorisation from
+            [Regulator Name] under licence [Licence No.]. Its registered address is [Registered Address].
+          </p>
+          <p>
+            <strong>Royal Markets (Intl) Ltd</strong> is approved by [Regulator Name] with company
+            number [Registration No.] and an investment business licence, reference [Licence No.].
+          </p>
+          <p>Each company listed here is permitted to trade under the Royal Markets name and logo.</p>
+          <p className="legal__risk">
+            <strong>Risk notice:</strong> Our offering includes leveraged products that are traded
+            over the counter rather than on an exchange. Because of leverage, you can lose your
+            capital quickly, and these products may not suit every investor. Royal Markets accepts
+            no responsibility for losses or damages, in whole or in part, that arise from your
+            investment decisions.
+          </p>
+          <p>Services are not available to people living in sanctioned or restricted regions, including but not limited to [Restricted Countries].</p>
+          <p>
+            Nothing on this website is investment advice, a personal recommendation or an offer to
+            buy or sell. Any action you take after visiting the site is your own, voluntary choice.
+            The content should not be read as an invitation to enter into, or acquire, any of our
+            financial products.
+          </p>
+          <p>
+            Site content may only be reproduced with written consent from Royal Markets. We follow
+            the Payment Card Industry Data Security Standard (PCI DSS) and run regular
+            vulnerability checks and penetration tests as our business model requires.
+          </p>
+        </div>
+      </section>
+
+      <footer className="foot">
+        <Logo accent />
+        <nav className="foot__nav" aria-label="Footer">
+          <Link to="/markets">Markets</Link>
+          <Link to="/trade">Spot trading</Link>
+          <Link to="/login">Log in</Link>
+          <Link to="/signup">Register</Link>
+        </nav>
+        <span className="foot__copy">&copy; {new Date().getFullYear()} Royal Markets. All rights reserved.</span>
+      </footer>
     </div>
   )
 }
