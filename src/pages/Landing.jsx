@@ -45,6 +45,17 @@ const market = [
   { k: 'TRX', n: 'TRON', c: '#2a2a2a', g: 'T', p: '$0.336000', ch: '+0.12%', h: '$0.338700', l: '$0.331200', up: true },
 ]
 
+const figures = [
+  { v: '35,000+', l: 'Verified members',
+    i: <><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6" /><path d="M16 4.5a3.5 3.5 0 010 7M18 14.3c2 .7 3.5 2.6 3.5 5.7" /></> },
+  { v: '$1.8B+', l: 'Monthly turnover',
+    i: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /> },
+  { v: '80+', l: 'Coin markets',
+    i: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" /></> },
+  { v: '99.95%', l: 'Platform availability',
+    i: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3.5 2" /></> },
+]
+
 export default function Landing() {
   return (
     <div className="landing">
@@ -254,6 +265,30 @@ export default function Landing() {
               ))}
             </tbody>
           </table>
+        </div>
+      </section>
+      <section className="closing">
+        <div className="closing__stats">
+          {figures.map((f) => (
+            <div key={f.l} className="closing__stat">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{f.i}</svg>
+              <strong>{f.v}</strong>
+              <span>{f.l}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="closing__cta">
+          <h2>Your First Trade Starts Here</h2>
+          <p>
+            Become part of a growing community of traders on Royal Markets. Register in
+            minutes and place your first order today.
+          </p>
+          <div className="closing__buttons">
+            <Link to="/signup" className="btn btn--primary closing__main">Open Your Account</Link>
+            <Link to="/login" className="btn btn--ghost closing__alt">Log in</Link>
+          </div>
+          <small>Free to join. No hidden setup costs.</small>
         </div>
       </section>
     </div>
