@@ -19,6 +19,21 @@ const snapshot = [
   { s: 'XRP/USDT', c: '#2b3036', t: 'X', p: '$1.34', ch: '+0.49%', up: true },
 ]
 
+const reasons = [
+  { t: 'Rapid Payouts', d: 'Withdrawals are handled in moments, so your money reaches you without delays or hassle.',
+    i: <><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /><path d="M6 12h.01M18 12h.01" /></> },
+  { t: 'Tight, Steady Spreads', d: 'Enjoy narrow and stable spreads that hold up even when the market gets turbulent.',
+    i: <><path d="M4.5 18a8.5 8.5 0 1115 0" /><path d="M12 18l4-6" /></> },
+  { t: 'Help Whenever You Need It', d: 'Reach a knowledgeable team at any hour by chat, phone or email, in several languages.',
+    i: <><path d="M4 14v-2a8 8 0 0116 0v2" /><rect x="3" y="14" width="4" height="6" rx="1.5" /><rect x="17" y="14" width="4" height="6" rx="1.5" /></> },
+  { t: 'No Charges For Holding Overnight', d: 'Keep popular positions open past the close without paying extra. Conditions may apply.',
+    i: <path d="M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z" /> },
+  { t: 'Accurate Order Fills', d: 'Orders are matched at high speed with very little difference from the price you saw.',
+    i: <><circle cx="12" cy="14" r="7" /><path d="M12 14V10M9 3h6" /></> },
+  { t: 'Bank-Level Account Safety', d: 'Client balances are kept in separate accounts backed by strong data protection.',
+    i: <><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 018 0v4" /></> },
+]
+
 export default function Landing() {
   return (
     <div className="landing">
@@ -159,6 +174,36 @@ export default function Landing() {
             <h3>Fast Order Placement</h3>
             <p>Send market or limit orders in seconds through a quick, responsive engine.</p>
           </article>
+        </div>
+      </section>
+      <section className="why">
+        <div className="why__list">
+          <span className="why__eyebrow">Our Advantages</span>
+          <h2>Built To Earn Your Trust</h2>
+          <ul>
+            {reasons.map((r, i) => (
+              <li key={r.t} className={`why__item${i === reasons.length - 1 ? ' why__item--lit' : ''}`}>
+                <span className="why__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{r.i}</svg>
+                </span>
+                <div>
+                  <h3>{r.t}</h3>
+                  <p>{r.d}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="why__art">
+          <div className="why__phone" role="img" aria-label="Image placeholder">
+            <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <circle cx="9" cy="10" r="1.6" />
+              <path d="M21 16l-5-5-8 9" />
+            </svg>
+            <span>Image placeholder</span>
+          </div>
         </div>
       </section>
     </div>
