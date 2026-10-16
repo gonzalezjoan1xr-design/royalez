@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import { ArrowUpRight, Wallet, Clock, ChevronDown, ChevronUp, Network, ArrowLeft, QrCode, Copy, Check, XCircle, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react'
+import { ArrowUpRight, Wallet, Clock, ChevronDown, ChevronUp, Network, ArrowLeft, QrCode, Copy, Check, XCircle, CheckCircle2, AlertCircle, RefreshCw, Loader2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { coinIcon } from '../hooks/useTickers'
@@ -35,16 +35,18 @@ const NETS = {
   DOGE: { label: 'Dogecoin (DOGE)', icon: 'DOGE', address: 'YOUR_DOGE_ADDRESS' },
 }
 
+// [label, tone, icon, spin?]
 const BADGE = {
   expired: ['Expired', 'red', XCircle],
-  pending: ['Pending', 'amber', Clock],
+  pending: ['Waiting', 'amber', Loader2, true],
   completed: ['Completed', 'green', CheckCircle2],
   failed: ['Failed', 'red', XCircle],
 }
 
+const isPlaceholder = (a = '') => a.startsWith('YOUR_')
 const shortAddr = (a = '') => (a.length > 20 ? `${a.slice(0, 18)}...` : a)
 const fmtDate = (iso) => new Date(iso).toLocaleDateString('en-US')
-const fmtUsd = (n) => `$${Number(n).toLocaleString('en-US')}`
+const fmtUsd = (n) => `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 const mmss = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
 const fromRow = (r) => ({
   id: r.id, usd: r.usd_amount, symbol: r.symbol, network: r.network, address: r.address,
@@ -66,7 +68,7 @@ function Dropdown({ selected, placeholder, items, onPick }) {
   const cur = items.find((i) => i.key === selected)
   const Chev = open ? ChevronUp : ChevronDown
   return (
-    <div className="dep__dd" ref={ref}>
+    <div className="dep__dd" ref={ref} onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false) }}>
       <button type="button" className="dep__trigger" onClick={() => setOpen((o) => !o)} aria-haspopup="listbox" aria-expanded={open}>
         {cur
           ? <span className="dep__opt"><Icon sym={cur.icon} size={30} /><b>{cur.title}</b>{cur.sub && <small>{cur.sub}</small>}</span>
@@ -108,13 +110,14 @@ export default function Deposit() {
   useEffect(() => {
     if (!user) return
     supabase.from('deposits').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
-      .then(({ data }) => setHistory((data || []).map(fromRow)))
+      .then(({ data, error }) => { if (!error) setHistory((data || []).map(fromRow)) })
   }, [user])
 
   const copy = async (text, key) => {
     try { await navigator.clipboard.writeText(String(text)); setCopied(key); setTimeout(() => setCopied(''), 1800) } catch { /* clipboard unavailable */ }
   }
 
+  const amountOk = Number(amount) >= MIN
   const coinInfo = COINS.find((c) => c.s === coin)
   const coinItems = COINS.map((c) => ({ key: c.s, icon: c.s, title: c.s, sub: c.n }))
   const netItems = (coinInfo?.nets || []).map((k) => ({ key: k, icon: NETS[k].icon, title: NETS[k].label }))
@@ -127,7 +130,7 @@ export default function Deposit() {
 
   const next = () => {
     setErr('')
-    if (!(Number(amount) >= MIN)) return setErr(`Minimum deposit is $${MIN}.`)
+    if (!amountOk) return setErr(`Minimum deposit is $${MIN}.`)
     setStep(2)
   }
 
@@ -135,24 +138,27 @@ export default function Deposit() {
     setErr('')
     const n = NETS[net]
     if (!coinInfo || !n) return
+    if (isPlaceholder(n.address)) return setErr('Deposits on this network are not available yet.')
     setBusy(true)
     let price = 1
     if (!coinInfo.stable) {
       try {
         const r = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${coinInfo.s}USDT`)
         if (!r.ok) throw new Error('price')
-        price = +(await r.json()).price
+        price = Number((await r.json()).price)
+        if (!Number.isFinite(price) || price <= 0) throw new Error('price')
       } catch { setBusy(false); return setErr('Price unavailable, try again.') }
     }
     const usd = Number(amount)
-    const coinAmt = Number((usd / price).toFixed(coinInfo.dec))
+    const coinAmt = (usd / price).toFixed(coinInfo.dec) // keep as string to avoid 1e-7 style output
     const expires = new Date(Date.now() + HOLD_MIN * 60000).toISOString()
     const rec = { id: `local-${Date.now()}`, usd, symbol: coinInfo.s, network: net, address: n.address, amount: coinAmt, status: 'pending', expires, created: new Date().toISOString() }
     if (user) {
-      const { data } = await supabase.from('deposits')
+      const { data, error } = await supabase.from('deposits')
         .insert({ user_id: user.id, usd_amount: usd, symbol: coinInfo.s, network: net, address: n.address, crypto_amount: coinAmt, status: 'pending', expires_at: expires })
         .select().single()
-      if (data) { rec.id = data.id; rec.created = data.created_at || rec.created }
+      if (error || !data) { setBusy(false); return setErr('Could not create the deposit. Try again.') }
+      rec.id = data.id; rec.created = data.created_at || rec.created
     }
     setBusy(false); setDep(rec); setHistory((h) => [rec, ...h]); setStep(3)
   }
@@ -161,6 +167,8 @@ export default function Deposit() {
 
   const statusOf = (d) => (d.status === 'pending' && new Date(d.expires).getTime() < now ? 'expired' : d.status)
   const left = dep ? Math.max(0, Math.floor((new Date(dep.expires).getTime() - now) / 1000)) : 0
+  const depStatus = dep ? statusOf(dep) : ''
+  const depLive = depStatus === 'pending'
 
   const checkStatus = async () => {
     if (!dep) return
@@ -217,12 +225,12 @@ export default function Deposit() {
                 <span>$</span>
                 <input id="dep-amt" type="number" inputMode="decimal" min="0" placeholder="100.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
               </div>
-              <small className="dep__hint">Minimum deposit: ${MIN}</small>
+              <small className={`dep__hint ${amount && !amountOk ? 'dep__hint--err' : ''}`}>Minimum deposit: ${MIN}</small>
               <div className="dep__chips">
                 {CHIPS.map((c) => <button key={c} type="button" onClick={() => setAmount(String(c))}>${c}</button>)}
               </div>
               {err && <p className="dep__err">{err}</p>}
-              <button className="dep__btn dep__btn--primary dep__btn--full" onClick={next}>Continue</button>
+              <button className="dep__btn dep__btn--primary dep__btn--full" disabled={!amountOk} onClick={next}>Continue</button>
             </div>
           )}
 
@@ -254,35 +262,55 @@ export default function Deposit() {
               <div className="dep__pay">
                 <div className="dep__time"><span>Time Remaining</span><b>{left > 0 ? mmss(left) : 'Expired'}</b></div>
 
-                <span className="dep__sm">Send Exactly</span>
-                <div className="dep__box">
-                  <b className="dep__big">{dep.amount} {dep.symbol}</b>
-                  <button type="button" onClick={() => copy(dep.amount, 'amt')} aria-label="Copy amount">{copied === 'amt' ? <Check size={20} /> : <Copy size={20} />}</button>
-                </div>
-                <p className="dep__amber">Copy and send the exact amount or your deposit won't be processed</p>
+                {depLive && (
+                  <div className="dep__wait"><Loader2 size={16} className="dep__spin" /> Waiting for payment</div>
+                )}
 
-                <span className="dep__sm">To This Address</span>
-                <div className="dep__box">
-                  <code>{dep.address}</code>
-                  <button type="button" onClick={() => copy(dep.address, 'addr')} aria-label="Copy address">{copied === 'addr' ? <Check size={20} /> : <Copy size={20} />}</button>
-                </div>
+                {depStatus === 'completed' && (
+                  <p className="dep__done"><CheckCircle2 size={18} /> Payment received</p>
+                )}
 
-                <div className="dep__qr"><QRCodeSVG value={dep.address} size={190} /></div>
+                {(depStatus === 'expired' || depStatus === 'failed') && (
+                  <p className="dep__gone">
+                    {depStatus === 'expired' ? 'This deposit has expired.' : 'This deposit failed.'} Start a new deposit to get a fresh address.
+                  </p>
+                )}
+
+                {depLive && (
+                  <>
+                    <span className="dep__sm">Send Exactly</span>
+                    <div className="dep__box">
+                      <b className="dep__big">{dep.amount} {dep.symbol}</b>
+                      <button type="button" onClick={() => copy(dep.amount, 'amt')} aria-label="Copy amount">{copied === 'amt' ? <Check size={20} /> : <Copy size={20} />}</button>
+                    </div>
+                    <p className="dep__amber">Copy and send the exact amount or your deposit won't be processed</p>
+
+                    <span className="dep__sm">To This Address</span>
+                    <div className="dep__box">
+                      <code>{dep.address}</code>
+                      <button type="button" onClick={() => copy(dep.address, 'addr')} aria-label="Copy address">{copied === 'addr' ? <Check size={20} /> : <Copy size={20} />}</button>
+                    </div>
+
+                    <div className="dep__qr"><QRCodeSVG value={dep.address} size={190} /></div>
+                  </>
+                )}
               </div>
 
-              <div className="dep__imp">
-                <AlertCircle size={20} />
-                <div>
-                  <b>Important</b>
-                  <p>Send only {dep.symbol} on the {NETS[dep.network].label} network. Sending any other cryptocurrency may result in permanent loss.</p>
+              {depLive && (
+                <div className="dep__imp">
+                  <AlertCircle size={20} />
+                  <div>
+                    <b>Important</b>
+                    <p>Send only {dep.symbol} on the {NETS[dep.network].label} network. Sending any other cryptocurrency may result in permanent loss.</p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {note && <p className="dep__note">{note}</p>}
 
               <div className="dep__pair">
                 <button className="dep__btn dep__btn--ghost" onClick={reset}>New Deposit</button>
-                <button className="dep__btn dep__btn--primary" disabled={checking} onClick={checkStatus}>
+                <button className="dep__btn dep__btn--primary" onClick={() => { if (!checking) checkStatus() }} aria-busy={checking}>
                   <RefreshCw size={18} className={checking ? 'dep__spin' : ''} /> {checking ? 'Checking…' : 'Check Status'}
                 </button>
               </div>
@@ -296,10 +324,13 @@ export default function Deposit() {
           {history.length === 0 && <p className="dep__empty">No deposits yet.</p>}
           <div className="dep__list">
             {history.map((d) => {
-              const [label, tone, Ic] = BADGE[statusOf(d)] || BADGE.pending
+              const [label, tone, Ic, spin] = BADGE[statusOf(d)] || BADGE.pending
               return (
                 <article className="dep__item" key={d.id}>
-                  <div className="dep__r1"><span><Icon sym={d.symbol} size={24} /> <b>{fmtUsd(d.usd)}</b></span><span className={`dep__badge ${tone}`}><Ic size={16} /> {label}</span></div>
+                  <div className="dep__r1">
+                    <span><Icon sym={d.symbol} size={24} /> <b>{fmtUsd(d.usd)}</b></span>
+                    <span className={`dep__badge ${tone}`}><Ic size={16} className={spin ? 'dep__spin' : ''} /> {label}</span>
+                  </div>
                   <div className="dep__r2">
                     <span>{shortAddr(d.address)} <button type="button" onClick={() => copy(d.address, d.id)} aria-label="Copy address">{copied === d.id ? <Check size={14} /> : <Copy size={14} />}</button></span>
                     <span>{fmtDate(d.created)}</span>
