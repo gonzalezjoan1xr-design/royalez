@@ -125,6 +125,42 @@ export default function Landing() {
           </ul>
         </div>
       </section>
+      <section className="perks">
+        <div className="perks__head">
+          <span className="perks__eyebrow">Built For Traders</span>
+          <h2>Tools That Keep You Ahead</h2>
+          <p>
+            Live prices and dependable features give you a clear view of every move
+            and the speed to act on it.
+          </p>
+        </div>
+
+        <div className="perks__grid">
+          <article className="perks__card">
+            <span className="perks__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="M7 15l4-5 3 3 5-6" /></svg>
+            </span>
+            <h3>Detailed Price Charts</h3>
+            <p>Study candlestick history with volume data and switch between time ranges in one tap.</p>
+          </article>
+
+          <article className="perks__card">
+            <span className="perks__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12h4l3-8 6 16 3-8h4" /></svg>
+            </span>
+            <h3>Always-On Market Watch</h3>
+            <p>Stay informed day and night with streaming quotes, depth views and the latest fills.</p>
+          </article>
+
+          <article className="perks__card">
+            <span className="perks__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z" /></svg>
+            </span>
+            <h3>Fast Order Placement</h3>
+            <p>Send market or limit orders in seconds through a quick, responsive engine.</p>
+          </article>
+        </div>
+      </section>
     </div>
   )
 }
