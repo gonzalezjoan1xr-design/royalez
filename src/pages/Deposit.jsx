@@ -142,7 +142,11 @@ export default function Deposit() {
       const { data, error } = await supabase.from('deposits')
         .insert({ user_id: user.id, usd_amount: usd, symbol: coinInfo.s, network: net, address: n.address, crypto_amount: coinAmt, status: 'pending', expires_at: expires })
         .select().single()
-      if (error || !data) { setBusy(false); return setErr('Could not create the deposit. Try again.') }
+      if (error || !data) {
+        console.error('Deposit insert failed:', error)
+        setBusy(false)
+        return setErr(`Could not create the deposit${error?.message ? `: ${error.message}` : ''}`)
+      }
       rec.id = data.id; rec.created = data.created_at || rec.created
     }
     setBusy(false); setDep(rec); setHistory((h) => [rec, ...h]); setStep(3)
