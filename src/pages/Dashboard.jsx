@@ -32,12 +32,10 @@ export default function Dashboard() {
   const { user, profile } = useAuth()
   const { tickers } = useTickers()
   const [holdings, setHoldings] = useState([])
-  const [watch, setWatch] = useState(['BTC', 'ETH', 'XRP'])
 
   useEffect(() => {
     if (!user) return
     supabase.from('holdings').select('*').eq('user_id', user.id).then(({ data }) => setHoldings(data || []))
-    supabase.from('watchlist').select('symbol').eq('user_id', user.id).then(({ data }) => data?.length && setWatch(data.map((d) => d.symbol)))
   }, [user])
 
   const bySym = useMemo(() => Object.fromEntries(tickers.map((t) => [t.symbol, t])), [tickers])
@@ -48,6 +46,8 @@ export default function Dashboard() {
   const gainer = tickers.length ? tickers.reduce((a, b) => (b.change > a.change ? b : a)) : null
   const loser = tickers.length ? tickers.reduce((a, b) => (b.change < a.change ? b : a)) : null
   const volume = tickers.reduce((s, t) => s + (Number(t.volume) || 0), 0)
+  const gainers = [...tickers].sort((a, b) => b.change - a.change).slice(0, 4)
+  const losers = [...tickers].sort((a, b) => a.change - b.change).slice(0, 4)
   const trending = [...tickers].sort((a, b) => Math.abs(b.change) - Math.abs(a.change)).slice(0, 6)
 
   return (
@@ -112,45 +112,23 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <div className="dash__grid">
-        <aside className="dash__panel">
-          <div className="dash__head"><h2>Watchlist</h2><Link to="/markets">See All</Link></div>
-          {watch.map((s) => {
-            const t = bySym[s]; if (!t) return null
-            return (
-              <div className="dash__row" key={s}>
-                <Coin s={s} />
-                <div className="dash__sym"><strong>{s}</strong><span>{COINS[s]}</span></div>
-                <div className="dash__px"><strong>{fmtPrice(t.price)}</strong><span className={t.change >= 0 ? 'up' : 'down'}>{pct(t.change)}</span></div>
+      <div className="dash__movers">
+        {[
+          { title: 'Top Gainers (24h)', list: gainers, up: true, Icon: TrendingUp },
+          { title: 'Top Losers (24h)', list: losers, up: false, Icon: TrendingDown },
+        ].map(({ title, list, up, Icon }) => (
+          <section className="dash__panel" key={title}>
+            <h2 className={`dash__panel-title ${up ? 'up' : 'down'}`}><Icon size={20} /> <span>{title}</span></h2>
+            {list.map((t, i) => (
+              <div className="dash__mover" key={t.symbol}>
+                <span className="dash__rank">{i + 1}</span>
+                <Coin s={t.symbol} />
+                <div className="dash__sym"><strong>{t.symbol}</strong><span>{fmtPrice(t.price)}</span></div>
+                <span className={`dash__pct ${t.change >= 0 ? 'up' : 'down'}`}>{pct(t.change)}</span>
               </div>
-            )
-          })}
-        </aside>
-
-        <section className="dash__holdings">
-          <div className="dash__head dash__head--plain"><h2>Your Crypto</h2><Link to="/markets">See All</Link></div>
-          {holdings.length === 0 ? (
-            <div className="dash__empty">You don't hold any crypto yet. <Link to="/deposit">Fund your account</Link>, then buy from <Link to="/markets">Markets</Link>.</div>
-          ) : (
-            <div className="dash__cards dash__cards--sm">
-              {holdings.map((h) => {
-                const t = bySym[h.symbol]; if (!t) return null
-                return (
-                  <article className="dash__card" key={h.id}>
-                    <div className="dash__card-top">
-                      <span className="dash__card-name"><Coin s={h.symbol} /><strong>{h.symbol}</strong></span>
-                      <span className={`dash__chip ${t.change >= 0 ? 'up' : 'down'}`}>{pct(t.change)}</span>
-                    </div>
-                    <div className="dash__big">{fmtPrice(t.price)}</div>
-                    <div className="dash__meta">Amount: <b>{h.amount} {h.symbol}</b></div>
-                    <div className="dash__meta">Value: <b>{fmtPrice(h.amount * t.price)}</b></div>
-                    <Spark up={t.change >= 0} />
-                  </article>
-                )
-              })}
-            </div>
-          )}
-        </section>
+            ))}
+          </section>
+        ))}
       </div>
     </div>
   )
