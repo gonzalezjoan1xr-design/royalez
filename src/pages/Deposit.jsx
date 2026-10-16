@@ -1,63 +1,285 @@
-import { useState } from 'react'
-import { Copy, Check, AlertTriangle } from 'lucide-react'
-import './Funds.css'
+import { Fragment, useEffect, useRef, useState } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
+import { ArrowUpRight, Wallet, Clock, ChevronDown, ChevronUp, Network, ArrowLeft, QrCode, Copy, Check, XCircle, CheckCircle2, AlertCircle } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
+import { coinIcon } from '../hooks/useTickers'
+import './Deposit.css'
 
-// Replace these with your real wallet addresses (or load per-user ones from your
-// `deposit_addresses` table).
-const COINS = {
-  USDT: { network: 'TRC20', address: 'YOUR_USDT_TRC20_ADDRESS', min: 10 },
-  BTC: { network: 'Bitcoin', address: 'YOUR_BTC_ADDRESS', min: 0.0005 },
-  ETH: { network: 'ERC20', address: 'YOUR_ETH_ADDRESS', min: 0.005 },
+const MIN = 50
+const CHIPS = [50, 100, 250, 500]
+const HOLD_MIN = 60
+
+const COINS = [
+  { s: 'BTC', n: 'Bitcoin', dec: 8, nets: ['BTC'] },
+  { s: 'ETH', n: 'Ethereum', dec: 6, nets: ['ERC20'] },
+  { s: 'USDT', n: 'Tether', dec: 2, stable: true, nets: ['TRC20', 'ERC20', 'BEP20'] },
+  { s: 'USDC', n: 'USD Coin', dec: 2, stable: true, nets: ['ERC20', 'BEP20'] },
+  { s: 'TRX', n: 'Tron', dec: 6, nets: ['TRC20'] },
+  { s: 'BNB', n: 'BNB', dec: 6, nets: ['BEP20'] },
+  { s: 'SOL', n: 'Solana', dec: 6, nets: ['SOL'] },
+  { s: 'XRP', n: 'XRP', dec: 6, nets: ['XRP'] },
+  { s: 'LTC', n: 'Litecoin', dec: 6, nets: ['LTC'] },
+  { s: 'DOGE', n: 'Dogecoin', dec: 4, nets: ['DOGE'] },
+]
+
+// Replace every address below with your real wallet address for that network.
+const NETS = {
+  BTC: { label: 'Bitcoin (BTC)', icon: 'BTC', address: 'YOUR_BTC_ADDRESS' },
+  ERC20: { label: 'Ethereum (ERC20)', icon: 'ETH', address: 'YOUR_ERC20_ADDRESS' },
+  TRC20: { label: 'Tron (TRC20) - Low Fee', icon: 'TRX', address: 'YOUR_TRC20_ADDRESS' },
+  BEP20: { label: 'BNB Smart Chain (BEP20) - Low Fee', icon: 'BNB', address: 'YOUR_BEP20_ADDRESS' },
+  SOL: { label: 'Solana (SOL)', icon: 'SOL', address: 'YOUR_SOL_ADDRESS' },
+  XRP: { label: 'XRP Ledger (XRP)', icon: 'XRP', address: 'YOUR_XRP_ADDRESS' },
+  LTC: { label: 'Litecoin (LTC)', icon: 'LTC', address: 'YOUR_LTC_ADDRESS' },
+  DOGE: { label: 'Dogecoin (DOGE)', icon: 'DOGE', address: 'YOUR_DOGE_ADDRESS' },
 }
 
-export default function Deposit() {
-  const [coin, setCoin] = useState('USDT')
-  const [copied, setCopied] = useState(false)
-  const info = COINS[coin]
+const BADGE = {
+  expired: ['Expired', 'red', XCircle],
+  pending: ['Pending', 'amber', Clock],
+  completed: ['Completed', 'green', CheckCircle2],
+  failed: ['Failed', 'red', XCircle],
+}
 
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(info.address)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1800)
-    } catch {
-      /* clipboard unavailable */
-    }
-  }
+const shortAddr = (a = '') => (a.length > 20 ? `${a.slice(0, 18)}...` : a)
+const fmtDate = (iso) => new Date(iso).toLocaleDateString('en-US')
+const fmtUsd = (n) => `$${Number(n).toLocaleString('en-US')}`
+const mmss = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+const fromRow = (r) => ({
+  id: r.id, usd: r.usd_amount, symbol: r.symbol, network: r.network, address: r.address,
+  amount: r.crypto_amount, status: r.status, expires: r.expires_at, created: r.created_at,
+})
 
+function Icon({ sym, size = 36 }) {
+  return <img className="dep__coin" style={{ width: size, height: size }} src={coinIcon(sym)} alt="" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
+}
+
+function Dropdown({ selected, placeholder, items, onPick }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  useEffect(() => {
+    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [])
+  const cur = items.find((i) => i.key === selected)
+  const Chev = open ? ChevronUp : ChevronDown
   return (
-    <div className="funds">
-      <h1 className="funds__title">Deposit</h1>
-      <p className="funds__sub">Send crypto to the address below. Funds are credited after network confirmation.</p>
-
-      <div className="funds__card">
-        <label className="funds__label">Select asset</label>
-        <div className="funds__chips">
-          {Object.keys(COINS).map((c) => (
-            <button key={c} type="button" className={`funds__chip ${c === coin ? 'is-on' : ''}`} onClick={() => setCoin(c)}>
-              {c}
+    <div className="dep__dd" ref={ref}>
+      <button type="button" className="dep__trigger" onClick={() => setOpen((o) => !o)} aria-haspopup="listbox" aria-expanded={open}>
+        {cur
+          ? <span className="dep__opt"><Icon sym={cur.icon} size={30} /><b>{cur.title}</b>{cur.sub && <small>{cur.sub}</small>}</span>
+          : <span className="dep__ph">{placeholder}</span>}
+        <Chev size={18} />
+      </button>
+      {open && (
+        <div className="dep__menu" role="listbox">
+          {items.map((i) => (
+            <button type="button" key={i.key} role="option" aria-selected={i.key === selected} className={`dep__opt ${i.key === selected ? 'is-on' : ''}`} onClick={() => { onPick(i.key); setOpen(false) }}>
+              <Icon sym={i.icon} size={30} /><b>{i.title}</b>{i.sub && <small>{i.sub}</small>}
             </button>
           ))}
         </div>
+      )}
+    </div>
+  )
+}
 
-        <label className="funds__label">Network</label>
-        <div className="funds__field funds__field--static">{info.network}</div>
+export default function Deposit() {
+  const { user, profile } = useAuth()
+  const balance = Number(profile?.balance || 0)
 
-        <label className="funds__label">Deposit address</label>
-        <div className="funds__address">
-          <code>{info.address}</code>
-          <button type="button" onClick={copy} aria-label="Copy address">
-            {copied ? <Check size={18} /> : <Copy size={18} />}
-          </button>
+  const [step, setStep] = useState(1)
+  const [amount, setAmount] = useState('')
+  const [coin, setCoin] = useState('')
+  const [net, setNet] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const [dep, setDep] = useState(null)
+  const [history, setHistory] = useState([])
+  const [now, setNow] = useState(Date.now())
+  const [copied, setCopied] = useState('')
+
+  useEffect(() => { const id = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(id) }, [])
+
+  useEffect(() => {
+    if (!user) return
+    supabase.from('deposits').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
+      .then(({ data }) => setHistory((data || []).map(fromRow)))
+  }, [user])
+
+  const copy = async (text, key) => {
+    try { await navigator.clipboard.writeText(String(text)); setCopied(key); setTimeout(() => setCopied(''), 1800) } catch { /* clipboard unavailable */ }
+  }
+
+  const coinInfo = COINS.find((c) => c.s === coin)
+  const coinItems = COINS.map((c) => ({ key: c.s, icon: c.s, title: c.s, sub: c.n }))
+  const netItems = (coinInfo?.nets || []).map((k) => ({ key: k, icon: NETS[k].icon, title: NETS[k].label }))
+
+  const pickCoin = (s) => {
+    setCoin(s)
+    const c = COINS.find((x) => x.s === s)
+    setNet(c.nets.length === 1 ? c.nets[0] : '')
+  }
+
+  const next = () => {
+    setErr('')
+    if (!(Number(amount) >= MIN)) return setErr(`Minimum deposit is $${MIN}.`)
+    setStep(2)
+  }
+
+  const generate = async () => {
+    setErr('')
+    const n = NETS[net]
+    if (!coinInfo || !n) return
+    setBusy(true)
+    let price = 1
+    if (!coinInfo.stable) {
+      try {
+        const r = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${coinInfo.s}USDT`)
+        if (!r.ok) throw new Error('price')
+        price = +(await r.json()).price
+      } catch { setBusy(false); return setErr('Price unavailable, try again.') }
+    }
+    const usd = Number(amount)
+    const coinAmt = Number((usd / price).toFixed(coinInfo.dec))
+    const expires = new Date(Date.now() + HOLD_MIN * 60000).toISOString()
+    const rec = { id: `local-${Date.now()}`, usd, symbol: coinInfo.s, network: net, address: n.address, amount: coinAmt, status: 'pending', expires, created: new Date().toISOString() }
+    if (user) {
+      const { data } = await supabase.from('deposits')
+        .insert({ user_id: user.id, usd_amount: usd, symbol: coinInfo.s, network: net, address: n.address, crypto_amount: coinAmt, status: 'pending', expires_at: expires })
+        .select().single()
+      if (data) { rec.id = data.id; rec.created = data.created_at || rec.created }
+    }
+    setBusy(false); setDep(rec); setHistory((h) => [rec, ...h]); setStep(3)
+  }
+
+  const reset = () => { setStep(1); setDep(null); setAmount(''); setCoin(''); setNet(''); setErr('') }
+
+  const statusOf = (d) => (d.status === 'pending' && new Date(d.expires).getTime() < now ? 'expired' : d.status)
+  const left = dep ? Math.max(0, Math.floor((new Date(dep.expires).getTime() - now) / 1000)) : 0
+
+  return (
+    <div className="dep">
+      <header className="dep__head">
+        <span className="dep__tile"><ArrowUpRight size={24} /></span>
+        <div>
+          <h1>Deposit Crypto</h1>
+          <p>Deposit cryptocurrency to fund your account</p>
         </div>
+      </header>
 
-        <div className="funds__warn">
-          <AlertTriangle size={18} />
-          <span>
-            Only send {coin} on the {info.network} network. Minimum deposit: {info.min} {coin}.
-            Sending other assets or using another network may result in permanent loss.
-          </span>
-        </div>
+      <div className="dep__cols">
+        {/* ---------- wizard ---------- */}
+        <section className="dep__card">
+          <h2 className="dep__h2"><Wallet size={22} /> {step === 3 ? 'Complete Payment' : 'New Deposit'}</h2>
+
+          <div className="dep__bal"><span>Current Balance</span><b>${balance.toFixed(2)}</b></div>
+
+          <div className="dep__steps">
+            {[1, 2, 3].map((n) => (
+              <Fragment key={n}>
+                {n > 1 && <i className={step >= n ? 'on' : ''} />}
+                <span className={step >= n ? 'on' : ''}>{n}</span>
+              </Fragment>
+            ))}
+          </div>
+
+          {step === 1 && (
+            <div className="dep__body">
+              <div className="dep__intro"><h3>Enter Amount</h3><p>How much do you want to deposit?</p></div>
+              <label className="dep__lbl" htmlFor="dep-amt">Amount (USD)</label>
+              <div className="dep__amt">
+                <span>$</span>
+                <input id="dep-amt" type="number" inputMode="decimal" min="0" placeholder="100.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
+              </div>
+              <small className="dep__hint">Minimum deposit: ${MIN}</small>
+              <div className="dep__chips">
+                {CHIPS.map((c) => <button key={c} type="button" onClick={() => setAmount(String(c))}>${c}</button>)}
+              </div>
+              {err && <p className="dep__err">{err}</p>}
+              <button className="dep__btn dep__btn--primary dep__btn--full" onClick={next}>Continue</button>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="dep__body">
+              <div className="dep__intro"><h3>Select Currency &amp; Network</h3><p>Depositing ${Number(amount).toFixed(2)}</p></div>
+              <label className="dep__lbl">Select Cryptocurrency</label>
+              <Dropdown selected={coin} placeholder="Select a cryptocurrency" items={coinItems} onPick={pickCoin} />
+              {coinInfo && (
+                <>
+                  <label className="dep__lbl dep__lbl--ic"><Network size={16} /> Select Network</label>
+                  <Dropdown key={coin} selected={net} placeholder="Select a network" items={netItems} onPick={setNet} />
+                </>
+              )}
+              {err && <p className="dep__err">{err}</p>}
+              <div className="dep__pair">
+                <button className="dep__btn dep__btn--ghost" onClick={() => { setErr(''); setStep(1) }}><ArrowLeft size={18} /> Back</button>
+                <button className="dep__btn dep__btn--primary" disabled={!coin || !net || busy} onClick={generate}>
+                  <QrCode size={18} /> {busy ? 'Generating…' : 'Generate Address'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && dep && (
+            <div className="dep__body">
+              <div className="dep__intro"><h3>Complete Payment</h3><p>Send crypto to the address below</p></div>
+
+              <div className="dep__pay">
+                <div className="dep__time"><span>Time Remaining</span><b>{left > 0 ? mmss(left) : 'Expired'}</b></div>
+
+                <span className="dep__sm">Send Exactly</span>
+                <div className="dep__box">
+                  <b className="dep__big">{dep.amount} {dep.symbol}</b>
+                  <button type="button" onClick={() => copy(dep.amount, 'amt')} aria-label="Copy amount">{copied === 'amt' ? <Check size={20} /> : <Copy size={20} />}</button>
+                </div>
+                <p className="dep__amber">Copy and send the exact amount or your deposit won't be processed</p>
+
+                <span className="dep__sm">To This Address</span>
+                <div className="dep__box">
+                  <code>{dep.address}</code>
+                  <button type="button" onClick={() => copy(dep.address, 'addr')} aria-label="Copy address">{copied === 'addr' ? <Check size={20} /> : <Copy size={20} />}</button>
+                </div>
+
+                <div className="dep__qr"><QRCodeSVG value={dep.address} size={190} /></div>
+              </div>
+
+              <div className="dep__imp">
+                <AlertCircle size={20} />
+                <div>
+                  <b>Important</b>
+                  <p>Send only {dep.symbol} on the {NETS[dep.network].label} network. Sending any other cryptocurrency may result in permanent loss.</p>
+                </div>
+              </div>
+
+              <button className="dep__btn dep__btn--ghost dep__btn--full" onClick={reset}>Start a new deposit</button>
+            </div>
+          )}
+        </section>
+
+        {/* ---------- history ---------- */}
+        <section className="dep__card">
+          <h2 className="dep__h2"><Clock size={22} /> Deposit History</h2>
+          {history.length === 0 && <p className="dep__empty">No deposits yet.</p>}
+          <div className="dep__list">
+            {history.map((d) => {
+              const [label, tone, Ic] = BADGE[statusOf(d)] || BADGE.pending
+              return (
+                <article className="dep__item" key={d.id}>
+                  <div className="dep__r1"><span><Icon sym={d.symbol} size={24} /> <b>{fmtUsd(d.usd)}</b></span><span className={`dep__badge ${tone}`}><Ic size={16} /> {label}</span></div>
+                  <div className="dep__r2">
+                    <span>{shortAddr(d.address)} <button type="button" onClick={() => copy(d.address, d.id)} aria-label="Copy address">{copied === d.id ? <Check size={14} /> : <Copy size={14} />}</button></span>
+                    <span>{fmtDate(d.created)}</span>
+                  </div>
+                  <div className="dep__r3">{d.amount} {d.symbol}</div>
+                </article>
+              )
+            })}
+          </div>
+        </section>
       </div>
     </div>
   )
