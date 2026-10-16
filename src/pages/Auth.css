@@ -133,18 +133,18 @@
 
 /* Larger sign in card */
 .auth__card--login {
-  width: min(460px, 100%);
-  gap: 20px;
-  padding: 40px 32px 28px;
-  border-radius: 18px;
+  width: min(540px, 100%);
+  gap: 24px;
+  padding: 52px 44px 36px;
+  border-radius: 20px;
 }
-.auth__card--login .auth__head h1 { font-size: 26px; }
-.auth__card--login .auth__head p { font-size: 14px; }
-.auth__card--login label { font-size: 13px; gap: 10px; }
-.auth__card--login input { height: 44px; font-size: 15px; border-radius: 8px; padding: 0 14px; }
-.auth__card--login .auth__submit { height: 46px; font-size: 15px; border-radius: 8px; }
-.auth__card--login .auth__msg { font-size: 14px; }
-.auth__card--login .auth__switch { font-size: 14px; }
+.auth__card--login .auth__head h1 { font-size: 30px; }
+.auth__card--login .auth__head p { font-size: 16px; }
+.auth__card--login label { font-size: 15px; gap: 12px; }
+.auth__card--login input { height: 52px; font-size: 17px; border-radius: 10px; padding: 0 16px; }
+.auth__card--login .auth__submit { height: 54px; font-size: 17px; border-radius: 10px; }
+.auth__card--login .auth__msg { font-size: 15px; }
+.auth__card--login .auth__switch { font-size: 15px; }
 
 @media (max-width: 380px) {
   .auth__row { grid-template-columns: 1fr; }
