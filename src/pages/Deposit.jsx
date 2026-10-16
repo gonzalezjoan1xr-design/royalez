@@ -29,10 +29,6 @@ const BADGE = {
   failed: ['Failed', 'red', XCircle],
 }
 
-// Placeholder addresses are only allowed on localhost so you can test the flow.
-// On a real domain they are blocked, so nobody sends funds to an address you don't own.
-const IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
-const isPlaceholder = (a = '') => !IS_LOCAL && a.startsWith('YOUR_')
 const shortAddr = (a = '') => (a.length > 20 ? `${a.slice(0, 18)}...` : a)
 const fmtDate = (iso) => new Date(iso).toLocaleDateString('en-US')
 const fmtUsd = (n) => `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -128,7 +124,6 @@ export default function Deposit() {
     const n = NETS[net]
     if (!coinInfo || !n) return
     if (coinInfo.s !== 'USDT' || net !== 'TRC20') return setErr('Only USDT on the Tron (TRC20) network is accepted.')
-    if (isPlaceholder(n.address)) return setErr('Deposits on this network are not available yet.')
     setBusy(true)
     let price = 1
     if (!coinInfo.stable) {
