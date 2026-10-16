@@ -1,6 +1,530 @@
 :root {
+:root {
   --nav-bg: #050505;
   --nav-surface: #111312;
+  --nav-border: #232625;
+  --nav-text: #a3a8a5;
+  --nav-text-strong: #f2f4f3;
+  --nav-green: #19e68c;
+  --nav-green-bg: rgba(25, 230, 140, 0.1);
+  --nav-green-border: rgba(25, 230, 140, 0.28);
+  --nav-red: #ff3b4e;
+  --nav-h: 56px;
+}
+
+/* header is fixed, so push page content down by its height */
+body {
+  padding-top: var(--nav-h);
+}
+
+/* ---------- Header ---------- */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 24px;
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--nav-border);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.nav__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 100px;
+  height: var(--nav-h);
+}
+.nav__logo img {
+  width: 100%;
+  height: 48px;
+  object-fit: contain;
+  display: block;
+}
+
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  color: var(--nav-text);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  outline: none;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.nav__link svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+.nav__link:hover {
+  color: var(--nav-text-strong);
+}
+.nav__link:focus-visible {
+  border-color: var(--nav-green-border);
+}
+.nav__link.is-active {
+  color: var(--nav-green);
+  background: var(--nav-green-bg);
+  border-color: var(--nav-green-border);
+}
+
+/* Search */
+.nav__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 1 255px;
+  min-width: 110px;
+  height: 36px;
+  padding: 0 14px;
+  margin-left: 8px;
+  background: var(--nav-surface);
+  border: 1px solid var(--nav-border);
+  border-radius: 8px;
+  color: var(--nav-text);
+  transition: border-color 0.15s;
+}
+.nav__search svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.nav__search:focus-within {
+  border-color: var(--nav-green-border);
+}
+.nav__search input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: var(--nav-text-strong);
+  font-size: 13px;
+}
+.nav__search input::placeholder {
+  color: var(--nav-text);
+}
+
+/* Right cluster */
+.nav__right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.nav__app,
+.nav__balance {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  background: var(--nav-surface);
+  border: 1px solid var(--nav-border);
+  border-radius: 8px;
+  color: var(--nav-text);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s;
+}
+.nav__app svg,
+.nav__balance svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.nav__app:hover,
+.nav__balance:hover {
+  color: var(--nav-text-strong);
+  border-color: #353a37;
+}
+
+.nav__balance {
+  color: var(--nav-text-strong);
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.nav__balance svg {
+  color: var(--nav-green);
+}
+
+.nav__icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--nav-text-strong);
+  cursor: pointer;
+  text-decoration: none;
+  outline: none;
+  transition: background 0.15s;
+}
+.nav__icon svg {
+  width: 18px;
+  height: 18px;
+}
+.nav__icon:hover,
+.nav__icon:focus-visible {
+  background: var(--nav-surface);
+}
+.nav__icon--green {
+  color: var(--nav-green);
+}
+.nav__icon--red {
+  color: var(--nav-red);
+}
+
+.nav__badge {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--nav-green);
+  color: #04130c;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.nav__burger {
+  display: none;
+}
+
+/* ---------- Drawer (hidden on desktop) ---------- */
+.drawer,
+.drawer__overlay {
+  display: none;
+}
+
+/* ---------- Step 1: slightly tighter on large laptops ---------- */
+@media (max-width: 1560px) {
+  .nav {
+    gap: 16px;
+    padding: 0 20px;
+  }
+  .nav__logo {
+    width: 90px;
+  }
+  .nav__link {
+    padding: 0 11px;
+  }
+  .nav__search {
+    flex-basis: 200px;
+  }
+}
+
+/* ---------- Step 2: standard laptops ---------- */
+@media (max-width: 1440px) {
+  .nav {
+    gap: 12px;
+    padding: 0 16px;
+  }
+  .nav__links {
+    gap: 4px;
+  }
+  .nav__link {
+    padding: 0 9px;
+    gap: 6px;
+  }
+  .nav__search {
+    flex-basis: 170px;
+    margin-left: 0;
+  }
+  .nav__right {
+    gap: 6px;
+  }
+  .nav__app,
+  .nav__balance {
+    padding: 0 12px;
+  }
+}
+
+/* ---------- Step 3: Get App becomes icon only ---------- */
+@media (max-width: 1300px) {
+  .nav__logo {
+    width: 80px;
+  }
+  .nav__link {
+    padding: 0 8px;
+  }
+  .nav__search {
+    flex-basis: 140px;
+  }
+  .nav__app {
+    font-size: 0;
+    gap: 0;
+    padding: 0;
+    width: 36px;
+    justify-content: center;
+  }
+}
+
+/* ---------- Mobile / tablet ---------- */
+@media (max-width: 1180px) {
+  :root {
+    --nav-h: 54px;
+  }
+
+  .nav {
+    padding: 0 12px;
+    gap: 6px;
+  }
+  .nav__logo {
+    width: auto;
+    height: auto;
+  }
+  .nav__logo img {
+    width: auto;
+    height: 32px;
+  }
+
+  .nav__links,
+  .nav__search,
+  .nav__app,
+  .nav__balance {
+    display: none;
+  }
+
+  .nav__right {
+    gap: 2px;
+  }
+  .nav__icon {
+    width: 34px;
+    height: 34px;
+  }
+  .nav__burger {
+    display: inline-flex;
+  }
+
+  .drawer__overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .drawer__overlay.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .drawer {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 210;
+    width: min(78vw, 300px);
+    padding: 18px 18px 24px;
+    background: #0b0c0b;
+    border-left: 1px solid var(--nav-border);
+    overflow-y: auto;
+    transform: translateX(100%);
+    visibility: hidden;
+    transition: transform 0.28s ease, visibility 0.28s;
+  }
+  .drawer.is-open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  .drawer__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .drawer__head h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--nav-text-strong);
+  }
+  .drawer__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    color: var(--nav-text);
+    cursor: pointer;
+  }
+  .drawer__close:hover {
+    color: var(--nav-text-strong);
+    background: var(--nav-surface);
+  }
+
+  .drawer__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .drawer__link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 42px;
+    padding: 0 14px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: var(--nav-text);
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.15s, background 0.15s;
+  }
+  .drawer__link:hover {
+    color: var(--nav-text-strong);
+  }
+  .drawer__link.is-active {
+    color: var(--nav-green);
+    background: var(--nav-green-bg);
+    border-color: var(--nav-green-border);
+  }
+  .drawer__link--accent {
+    color: var(--nav-green);
+  }
+
+  .drawer__divider {
+    height: 1px;
+    margin: 14px 0;
+    background: var(--nav-border);
+  }
+
+  .drawer__balance {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 44px;
+    padding: 0 14px;
+    margin-bottom: 10px;
+    background: var(--nav-surface);
+    border: 1px solid var(--nav-border);
+    border-radius: 10px;
+    color: var(--nav-text-strong);
+    font-size: 15px;
+    font-weight: 600;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    text-decoration: none;
+  }
+  .drawer__balance svg {
+    color: var(--nav-green);
+  }
+
+  .drawer__search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 44px;
+    padding: 0 14px;
+    margin-bottom: 10px;
+    background: var(--nav-surface);
+    border: 1px solid var(--nav-border);
+    border-radius: 10px;
+    color: var(--nav-text);
+  }
+  .drawer__search:focus-within {
+    border-color: var(--nav-green-border);
+  }
+  .drawer__search input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: var(--nav-text-strong);
+    font-size: 14px;
+  }
+  .drawer__search input::placeholder {
+    color: var(--nav-text);
+  }
+
+  .drawer__stores {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .drawer__store {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 48px;
+    padding: 0 14px;
+    background: #000;
+    border: 1px solid #3a3d3b;
+    border-radius: 10px;
+    color: var(--nav-text-strong);
+    text-align: left;
+    cursor: pointer;
+  }
+  .drawer__store span {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  .drawer__store small {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--nav-text);
+  }
+}
+
+@media (max-width: 380px) {
+  .nav__icon {
+    width: 32px;
+  }
+}  --nav-surface: #111312;
   --nav-border: #232625;
   --nav-text: #a3a8a5;
   --nav-text-strong: #f2f4f3;
