@@ -5,7 +5,7 @@ import {
   Search, Play, Wallet, ShieldCheck, Bell, User, LogOut,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import Logo from './Logo'
+import logo from '../assets/Screenshot.png'
 import './Navbar.css'
 
 const links = [
@@ -32,7 +32,7 @@ export default function Navbar() {
 
   return (
     <header className="nav">
-      <Link to="/dashboard" className="nav__logo"><Logo /></Link>
+      <Link to="/dashboard" className="nav__logo"><img src={logo} alt="Royal Markets" /></Link>
 
       <nav className="nav__links">
         {links.map(({ to, label, Icon }) => (
