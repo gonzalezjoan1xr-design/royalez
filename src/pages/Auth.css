@@ -146,6 +146,23 @@
 .auth__forgot:hover { text-decoration: underline; }
 .auth__forgot:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 4px; }
 
+/* Sign in card (slightly larger than sign up) */
+.auth__card--login {
+  width: min(448px, 100%);
+  gap: 20px;
+  padding: 28px 24px 24px;
+  border-radius: 12px;
+}
+.auth__card--login .auth__head { gap: 12px; margin-bottom: 6px; }
+.auth__card--login .auth__head h1 { font-size: 24px; }
+.auth__card--login .auth__head p { font-size: 14px; }
+.auth__card--login label { font-size: 14px; gap: 10px; }
+.auth__card--login input { height: 40px; font-size: 14px; border-radius: 6px; padding: 0 13px; }
+.auth__card--login .auth__forgot { font-size: 14px; margin-top: -4px; }
+.auth__card--login .auth__submit { height: 40px; font-size: 14px; border-radius: 6px; margin-top: 0; }
+.auth__card--login .auth__msg { font-size: 14px; }
+.auth__card--login .auth__switch { font-size: 14px; }
+
 @media (max-width: 380px) {
   .auth__row { grid-template-columns: 1fr; }
 }
