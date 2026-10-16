@@ -64,6 +64,16 @@ export default function Auth({ mode }) {
     nav('/dashboard')
   }
 
+  const forgot = async () => {
+    setError(''); setInfo('')
+    if (!form.email) return setError('Enter your email above, then click "Forgot password?".')
+    const { error: err } = await supabase.auth.resetPasswordForEmail(form.email, {
+      redirectTo: `${window.location.origin}/login`,
+    })
+    if (err) return setError(err.message)
+    setInfo('Password reset link sent. Check your email.')
+  }
+
   return (
     <div className="auth">
       <Link to="/" className="auth__back">
@@ -78,7 +88,7 @@ export default function Auth({ mode }) {
 
         <div className="auth__head">
           <h1>{isSignup ? 'Create an account' : 'Welcome back'}</h1>
-          <p>{isSignup ? 'Start trading crypto with Horizon Markets' : 'Sign in to continue trading'}</p>
+          <p>{isSignup ? 'Start trading crypto with Horizon Markets' : 'Sign in to your Horizon Markets account'}</p>
         </div>
 
         {isSignup && (
@@ -157,6 +167,12 @@ export default function Auth({ mode }) {
           </label>
         )}
 
+        {!isSignup && (
+          <button type="button" className="auth__forgot" onClick={forgot}>
+            Forgot password?
+          </button>
+        )}
+
         {error && <div className="auth__msg auth__msg--err" role="alert">{error}</div>}
         {info && <div className="auth__msg auth__msg--ok">{info}</div>}
 
@@ -167,7 +183,7 @@ export default function Auth({ mode }) {
         <div className="auth__switch">
           {isSignup
             ? <>Already have an account? <Link to="/login">Sign in</Link></>
-            : <>New here? <Link to="/signup">Create an account</Link></>}
+            : <>Don't have an account? <Link to="/signup">Sign up</Link></>}
         </div>
       </form>
     </div>
