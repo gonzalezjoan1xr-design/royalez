@@ -8,6 +8,8 @@ import Dashboard from './pages/Dashboard'
 import Markets from './pages/Markets'
 import Spot from './pages/Spot'
 import Bots from './pages/Bots'
+import Deposit from './pages/Deposit'
+import Withdraw from './pages/Withdraw'
 import './App.css'
 
 function Protected({ children }) {
@@ -32,6 +34,8 @@ export default function App() {
           <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
           <Route path="/markets" element={<Protected><Markets /></Protected>} />
           <Route path="/spot" element={<Protected><Spot /></Protected>} />
+          <Route path="/deposit" element={<Protected><Deposit /></Protected>} />
+          <Route path="/withdraw" element={<Protected><Withdraw /></Protected>} />
           <Route path="/bots" element={<Protected><Bots /></Protected>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
