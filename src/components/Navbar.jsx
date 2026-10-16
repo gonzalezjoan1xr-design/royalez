@@ -41,13 +41,13 @@ export default function Navbar() {
             to={to}
             className={({ isActive }) => `nav__link ${isActive ? 'is-active' : ''}`}
           >
-            <Icon size={18} strokeWidth={1.8} /> <span>{label}</span>
+            <Icon size={16} strokeWidth={1.8} /> <span>{label}</span>
           </NavLink>
         ))}
       </nav>
 
       <form className="nav__search" onSubmit={onSearch} role="search">
-        <Search size={20} strokeWidth={1.8} />
+        <Search size={18} strokeWidth={1.8} />
         <input
           type="text"
           placeholder="Search markets..."
@@ -59,29 +59,29 @@ export default function Navbar() {
 
       <div className="nav__right">
         <button className="nav__app" type="button">
-          <Play size={18} strokeWidth={1.8} /> Get App
+          <Play size={16} strokeWidth={1.8} /> Get App
         </button>
 
         <Link to="/deposit" className="nav__balance" aria-label="Balance">
-          <Wallet size={20} strokeWidth={1.8} />
+          <Wallet size={18} strokeWidth={1.8} />
           <span>${balance.toFixed(2)}</span>
         </Link>
 
         <button className="nav__icon nav__icon--green" aria-label="Security" type="button">
-          <ShieldCheck size={22} strokeWidth={1.8} />
+          <ShieldCheck size={20} strokeWidth={1.8} />
         </button>
 
         <button className="nav__icon nav__bell" aria-label="Notifications" type="button">
-          <Bell size={22} strokeWidth={1.8} />
+          <Bell size={20} strokeWidth={1.8} />
           {notifications > 0 && <span className="nav__badge">{notifications}</span>}
         </button>
 
         <button className="nav__icon" aria-label="Profile" type="button">
-          <User size={22} strokeWidth={1.8} />
+          <User size={20} strokeWidth={1.8} />
         </button>
 
         <button className="nav__icon nav__icon--red" onClick={signOut} aria-label="Sign out" type="button">
-          <LogOut size={22} strokeWidth={1.8} />
+          <LogOut size={20} strokeWidth={1.8} />
         </button>
       </div>
     </header>
