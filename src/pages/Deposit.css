@@ -1,6 +1,6 @@
 .dep {
   --d-green: #00ff88;
-  --d-btn: var(--green, #22e07a);
+  --d-btn: var(--d-green);
   --d-card: #101010;
   --d-line: #1c1c1c;
   --d-field: #151515;
@@ -51,16 +51,20 @@
 .dep__chips button:hover { border-color: #3a3a3a; }
 .dep__err { margin: 0 0 14px; color: #ff4d5e; font-size: 14px; }
 
-/* ---- buttons (colour comes from the existing app green) ---- */
+/* ---- buttons ---- */
 .dep__btn { display: inline-flex; align-items: center; justify-content: center; gap: 12px; height: 54px; padding: 0 22px; border-radius: 10px; font-size: 16px; font-weight: 600; }
 .dep__btn--full { width: 100%; }
 .dep__btn--primary { background: var(--d-btn); color: #04130a; border: 0; }
-.dep__btn--primary:disabled { opacity: .55; cursor: not-allowed; }
+.dep__btn--primary:disabled { background: #17352a; color: #5f8a75; cursor: not-allowed; opacity: 1; }
 .dep__btn--primary:not(:disabled):hover { filter: brightness(1.06); }
 .dep__btn--ghost { background: #050505; border: 1px solid #222; color: #fff; }
 .dep__btn--ghost:hover { border-color: #3a3a3a; }
 .dep__pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 34px; }
-.dep__pay + .dep__imp, .dep__imp + .dep__btn { margin-top: 18px; }
+.dep__pay + .dep__imp { margin-top: 18px; }
+.dep__imp + .dep__pair, .dep__note + .dep__pair { margin-top: 18px; }
+.dep__note { margin: 18px 0 0; text-align: center; color: var(--d-dim); font-size: 14px; }
+.dep__spin { animation: dep-spin 1s linear infinite; }
+@keyframes dep-spin { to { transform: rotate(360deg); } }
 
 /* ---- dropdowns ---- */
 .dep__dd { position: relative; }
