@@ -43,7 +43,10 @@ const BADGE = {
   failed: ['Failed', 'red', XCircle],
 }
 
-const isPlaceholder = (a = '') => a.startsWith('YOUR_')
+// Placeholder addresses are only allowed on localhost so you can test the flow.
+// On a real domain they are blocked, so nobody sends funds to an address you don't own.
+const IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+const isPlaceholder = (a = '') => !IS_LOCAL && a.startsWith('YOUR_')
 const shortAddr = (a = '') => (a.length > 20 ? `${a.slice(0, 18)}...` : a)
 const fmtDate = (iso) => new Date(iso).toLocaleDateString('en-US')
 const fmtUsd = (n) => `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -262,9 +265,15 @@ export default function Deposit() {
               <div className="dep__pay">
                 <div className="dep__time"><span>Time Remaining</span><b>{left > 0 ? mmss(left) : 'Expired'}</b></div>
 
-                {depLive && (
-                  <div className="dep__wait"><Loader2 size={16} className="dep__spin" /> Waiting for payment</div>
-                )}
+                {(() => {
+                  const [label, tone, Ic, spin] = BADGE[depStatus] || BADGE.pending
+                  return (
+                    <div className="dep__time dep__time--status">
+                      <span>Status</span>
+                      <span className={`dep__badge ${tone}`}><Ic size={16} className={spin ? 'dep__spin' : ''} /> {depLive ? 'Waiting for payment' : label}</span>
+                    </div>
+                  )
+                })()}
 
                 {depStatus === 'completed' && (
                   <p className="dep__done"><CheckCircle2 size={18} /> Payment received</p>
