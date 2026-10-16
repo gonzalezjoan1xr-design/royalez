@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import {
   LayoutGrid, TrendingUp, BarChart3, ArrowUpRight, ArrowDownLeft, Bot,
-  Search, Download, Wallet, ShieldCheck, Bell, User, LogOut,
+  Search, Play, Wallet, ShieldCheck, Bell, User, LogOut,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import Logo from './Logo'
@@ -59,7 +59,7 @@ export default function Navbar() {
 
       <div className="nav__right">
         <button className="nav__app" type="button">
-          <Download size={18} strokeWidth={1.8} /> Get App
+          <Play size={18} strokeWidth={1.8} /> Get App
         </button>
 
         <Link to="/deposit" className="nav__balance" aria-label="Balance">
