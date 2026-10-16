@@ -40,7 +40,7 @@ body {
   flex-shrink: 0;
 }
 .nav__logo img {
-  height: 36px;
+  height: 46px;
   width: auto;
   display: block;
 }
@@ -91,7 +91,6 @@ body {
   align-items: center;
   gap: 8px;
   flex: 1 1 140px;
-  max-width: 240px;
   min-width: 110px;
   height: 36px;
   padding: 0 12px;
@@ -240,9 +239,6 @@ body {
     padding: 0 8px;
     gap: 5px;
   }
-  .nav__search {
-    max-width: 180px;
-  }
   .nav__app {
     padding: 0 10px;
   }
@@ -256,9 +252,6 @@ body {
     padding: 0;
     width: 36px;
     justify-content: center;
-  }
-  .nav__search {
-    max-width: 150px;
   }
 }
 
