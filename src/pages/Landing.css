@@ -163,3 +163,22 @@
   .closing__stats { grid-template-columns: repeat(2, 1fr); padding: 40px 20px; row-gap: 36px; }
   .closing__cta { padding: 56px 20px 70px; }
 }
+
+/* ---------- seventh block: legal notices ---------- */
+.legal { background: radial-gradient(600px 300px at 100% 100%, rgba(0, 196, 122, 0.06), transparent 70%); border-top: 1px solid #0c0c0c; }
+.legal__inner { max-width: 800px; margin: 0 auto; padding: 56px 20px 70px; }
+.legal__inner p { margin: 0 0 22px; font-size: 13px; line-height: 1.65; color: #777; }
+.legal__inner strong { color: #bdbdbd; font-weight: 600; }
+.legal__risk { color: #e8a317 !important; }
+.legal__risk strong { color: #f5b73a; }
+
+/* ---------- footer ---------- */
+.foot { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding: 40px 96px; border-top: 1px solid #141414; background: #000; }
+.foot__nav { display: flex; gap: 30px; }
+.foot__nav a { font-size: 14px; color: #9aa3a8; transition: color 0.15s; }
+.foot__nav a:hover { color: var(--lp-green-bright); }
+.foot__copy { font-size: 14px; color: #9aa3a8; }
+@media (max-width: 900px) {
+  .foot { flex-direction: column; padding: 32px 20px; text-align: center; }
+  .foot__nav { flex-wrap: wrap; justify-content: center; gap: 18px 24px; }
+}
