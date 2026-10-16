@@ -167,7 +167,7 @@
 .auth__card--login {
   width: min(800px, 100%);
   gap: 28px;
-  padding: 48px 64px 38px;
+  padding: 48px 28px 38px;
   border-radius: 16px;
 }
 .auth__card--login .auth__head { gap: 16px; margin-bottom: 10px; }
