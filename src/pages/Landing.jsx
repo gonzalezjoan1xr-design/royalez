@@ -34,6 +34,17 @@ const reasons = [
     i: <><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 018 0v4" /></> },
 ]
 
+const market = [
+  { k: 'BTC', n: 'Bitcoin', c: '#f7931a', g: '₿', p: '$64,210.55', ch: '+2.41%', h: '$64,880.00', l: '$62,540.10', up: true },
+  { k: 'ETH', n: 'Ethereum', c: '#627eea', g: 'Ξ', p: '$2,458.70', ch: '+1.18%', h: '$2,491.30', l: '$2,376.45', up: true },
+  { k: 'BNB', n: 'BNB', c: '#f3ba2f', g: 'B', p: '$731.24', ch: '+0.64%', h: '$738.90', l: '$719.15', up: true },
+  { k: 'SOL', n: 'Solana', c: '#9945ff', g: 'S', p: '$106.41', ch: '-0.92%', h: '$109.20', l: '$103.85', up: false },
+  { k: 'XRP', n: 'Ripple', c: '#2b3036', g: 'X', p: '$1.3414', ch: '+0.49%', h: '$1.3620', l: '$1.2990', up: true },
+  { k: 'DOGE', n: 'Dogecoin', c: '#c2a633', g: 'Ð', p: '$0.082300', ch: '+0.37%', h: '$0.084100', l: '$0.079800', up: true },
+  { k: 'ADA', n: 'Cardano', c: '#1ec8c0', g: 'A', p: '$0.231000', ch: '-0.31%', h: '$0.236400', l: '$0.224900', up: false },
+  { k: 'TRX', n: 'TRON', c: '#2a2a2a', g: 'T', p: '$0.336000', ch: '+0.12%', h: '$0.338700', l: '$0.331200', up: true },
+]
+
 export default function Landing() {
   return (
     <div className="landing">
@@ -204,6 +215,45 @@ export default function Landing() {
             </svg>
             <span>Image placeholder</span>
           </div>
+        </div>
+      </section>
+      <section className="prices">
+        <div className="prices__head">
+          <span className="prices__eyebrow">Market Pulse</span>
+          <h2>Live Crypto Rates</h2>
+        </div>
+
+        <div className="prices__scroll">
+          <table className="prices__table">
+            <thead>
+              <tr>
+                <th>Coin</th>
+                <th>Last price</th>
+                <th>Change (24h)</th>
+                <th>Peak (24h)</th>
+                <th>Floor (24h)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {market.map((m) => (
+                <tr key={m.k}>
+                  <td>
+                    <div className="prices__asset">
+                      <span className="prices__coin" style={{ background: m.c }} aria-hidden="true">{m.g}</span>
+                      <div>
+                        <strong>{m.k}</strong>
+                        <small>{m.n}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="prices__num prices__num--main">{m.p}</td>
+                  <td className={`prices__chg ${m.up ? 'up' : 'down'}`}>{m.ch}</td>
+                  <td className="prices__num">{m.h}</td>
+                  <td className="prices__num">{m.l}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
     </div>
