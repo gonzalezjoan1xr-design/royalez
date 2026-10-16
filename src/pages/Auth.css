@@ -147,21 +147,32 @@
 .auth__forgot:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 4px; }
 
 /* Sign in card (slightly larger than sign up) */
-.auth__card--login {
+.auth__card--lg {
   width: min(448px, 100%);
   gap: 20px;
   padding: 28px 24px 24px;
   border-radius: 12px;
 }
-.auth__card--login .auth__head { gap: 12px; margin-bottom: 6px; }
-.auth__card--login .auth__head h1 { font-size: 24px; }
-.auth__card--login .auth__head p { font-size: 14px; }
-.auth__card--login label { font-size: 14px; gap: 10px; }
-.auth__card--login input { height: 40px; font-size: 14px; border-radius: 6px; padding: 0 13px; }
-.auth__card--login .auth__forgot { font-size: 14px; margin-top: -4px; }
-.auth__card--login .auth__submit { height: 40px; font-size: 14px; border-radius: 6px; margin-top: 0; }
-.auth__card--login .auth__msg { font-size: 14px; }
-.auth__card--login .auth__switch { font-size: 14px; }
+.auth__card--lg .auth__head { gap: 12px; margin-bottom: 6px; }
+.auth__card--lg .auth__head h1 { font-size: 24px; }
+.auth__card--lg .auth__head p { font-size: 14px; }
+.auth__card--lg label { font-size: 14px; gap: 10px; }
+.auth__card--lg input { height: 40px; font-size: 14px; border-radius: 6px; padding: 0 13px; }
+.auth__card--lg .auth__forgot { font-size: 14px; margin-top: -4px; }
+.auth__card--lg .auth__submit { height: 40px; font-size: 14px; border-radius: 6px; margin-top: 0; }
+.auth__card--lg .auth__msg { font-size: 14px; }
+.auth__card--lg .auth__switch { font-size: 14px; }
+
+/* Signup-only elements at the larger size */
+.auth__card--lg .auth__row { gap: 14px; }
+.auth__card--lg .auth__field { gap: 10px; }
+.auth__card--lg .auth__label { font-size: 14px; }
+.auth__card--lg .auth__phone { grid-template-columns: 64px 1fr; gap: 8px; }
+.auth__card--lg .auth__country select { height: 40px; font-size: 14px; padding: 0 20px 0 12px; }
+.auth__card--lg .auth__country svg { right: 9px; }
+.auth__card--lg .auth__dial { height: 40px; padding-left: 13px; }
+.auth__card--lg .auth__dial span { font-size: 14px; padding-right: 12px; margin-right: 12px; line-height: 16px; }
+.auth__card--lg .auth__dial input { height: 100%; padding: 0; font-size: 14px; }
 
 @media (max-width: 380px) {
   .auth__row { grid-template-columns: 1fr; }
