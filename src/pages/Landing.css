@@ -105,3 +105,21 @@
   .perks { padding: 30px 20px 60px; }
   .perks__grid { grid-template-columns: 1fr; margin-top: 36px; }
 }
+
+/* ---------- fourth block: advantages list + image ---------- */
+.why { display: grid; grid-template-columns: 1.1fr 1fr; gap: 56px; align-items: center; max-width: 1500px; margin: 0 auto; padding: 40px 52px 100px; background: radial-gradient(520px 380px at 80% 50%, rgba(0, 196, 122, 0.08), transparent 70%); }
+.why__eyebrow { display: block; margin-bottom: 10px; color: var(--lp-green-bright); font-size: 16px; font-weight: 600; }
+.why__list h2 { font-size: clamp(32px, 4.2vw, 52px); line-height: 1.1; letter-spacing: -0.03em; font-weight: 700; color: #fff; }
+.why__list ul { list-style: none; margin: 32px 0 0; padding: 0; display: grid; gap: 18px; max-width: 600px; }
+.why__item { display: flex; gap: 16px; align-items: flex-start; }
+.why__icon { flex: none; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 10px; background: #062014; color: var(--lp-green-bright); transition: background 0.2s; }
+.why__item h3 { font-size: 16px; font-weight: 700; color: #fff; transition: color 0.2s; }
+.why__item p { margin-top: 4px; font-size: 14px; line-height: 1.55; color: #8a8a8a; }
+.why__item:hover h3, .why__item--lit h3 { color: var(--lp-green-bright); }
+.why__item:hover .why__icon, .why__item--lit .why__icon { background: #07381f; }
+
+.why__art { display: flex; justify-content: center; }
+.why__phone { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; width: min(100%, 340px); aspect-ratio: 9 / 18; border: 1px dashed #2a3a32; border-radius: 36px; background: rgba(0, 0, 0, 0.45); color: #5c7066; font-size: 14px; font-weight: 500; }
+@media (max-width: 900px) {
+  .why { grid-template-columns: 1fr; padding: 30px 20px 60px; gap: 36px; }
+}
