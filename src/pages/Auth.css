@@ -163,6 +163,23 @@
 .auth__card--lg .auth__msg { font-size: 15px; }
 .auth__card--lg .auth__switch { font-size: 15px; }
 
+/* Sign in only: even larger than the shared size */
+.auth__card--login {
+  width: min(600px, 100%);
+  gap: 28px;
+  padding: 48px 44px 38px;
+  border-radius: 16px;
+}
+.auth__card--login .auth__head { gap: 16px; margin-bottom: 10px; }
+.auth__card--login .auth__head h1 { font-size: 32px; }
+.auth__card--login .auth__head p { font-size: 17px; }
+.auth__card--login label { font-size: 16px; gap: 14px; }
+.auth__card--login input { height: 56px; font-size: 17px; border-radius: 10px; padding: 0 18px; }
+.auth__card--login .auth__forgot { font-size: 16px; margin-top: -8px; }
+.auth__card--login .auth__submit { height: 56px; font-size: 17px; border-radius: 10px; }
+.auth__card--login .auth__msg { font-size: 16px; }
+.auth__card--login .auth__switch { font-size: 16px; }
+
 /* Signup-only elements at the larger size */
 .auth__card--lg .auth__row { gap: 16px; }
 .auth__card--lg .auth__field { gap: 12px; }
