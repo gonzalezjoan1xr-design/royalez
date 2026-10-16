@@ -148,9 +148,9 @@
 
 /* Sign in card (slightly larger than sign up) */
 .auth__card--lg {
-  width: min(520px, 100%);
+  width: min(800px, 100%);
   gap: 24px;
-  padding: 36px 32px 30px;
+  padding: 36px 28px 30px;
   border-radius: 14px;
 }
 .auth__card--lg .auth__head { gap: 14px; margin-bottom: 8px; }
