@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Search, Star, TrendingUp, TrendingDown, Wallet } from 'lucide-react'
+import { Search, Star, TrendingUp, TrendingDown, Wallet, List, Clock, Activity } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import useTickers, { COINS, coinIcon } from '../hooks/useTickers'
@@ -32,6 +32,12 @@ function genCandles(price) {
   })
 }
 
+const BOTTOM_TABS = [
+  ['orders', 'Orders', List],
+  ['history', 'History', Clock],
+  ['positions', 'Positions', Activity],
+]
+
 export default function Spot() {
   const { user, profile, refreshProfile } = useAuth()
   const { tickers } = useTickers()
@@ -54,6 +60,8 @@ export default function Spot() {
   const [holdings, setHoldings] = useState([])
   const [msg, setMsg] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [btab, setBtab] = useState('orders')
+  const [history, setHistory] = useState([])
 
   // top-100 USDT pairs: your live tickers first, topped up from Binance by 24h volume
   const [extra, setExtra] = useState([])
@@ -191,6 +199,7 @@ export default function Spot() {
     const { error } = await supabase.from('profiles').update({ balance: newBal }).eq('id', user.id)
     setBusy(false)
     if (error) return setMsg({ t: 'err', m: error.message })
+    setHistory((h) => [{ id: Date.now(), time: new Date().toLocaleTimeString('en-GB'), side, symbol, price: live, amount: amt, total: cost }, ...h].slice(0, 50))
     setAmount('')
     loadHoldings(); refreshProfile()
     setMsg({ t: 'ok', m: `${side === 'buy' ? 'Bought' : 'Sold'} ${amt} ${symbol} at $${num(live)}` })
@@ -330,6 +339,62 @@ export default function Spot() {
 
             {msg && <p className={`spot__msg ${msg.t}`}>{msg.m}</p>}
             <button className={`spot__submit ${side}`} disabled={busy} onClick={submit}>{busy ? 'Processing…' : `${side === 'buy' ? 'Buy' : 'Sell'} ${symbol}`}</button>
+          </div>
+        </div>
+
+        {/* ---------- bottom tabs: orders / history / positions ---------- */}
+        <div className="spot__bottom">
+          <div className="spot__tabs" role="tablist">
+            {BOTTOM_TABS.map(([k, label, Icon]) => (
+              <button key={k} role="tab" aria-selected={btab === k} className={btab === k ? 'is-on' : ''} onClick={() => setBtab(k)}>
+                <Icon size={16} /> {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="spot__panel">
+            {btab === 'orders' && <div className="spot__empty">No open orders</div>}
+
+            {btab === 'history' && (history.length === 0
+              ? <div className="spot__empty">No trade history</div>
+              : (
+                <table className="spot__table">
+                  <thead><tr><th>Time</th><th>Pair</th><th>Side</th><th>Price</th><th>Amount</th><th>Total (USDT)</th></tr></thead>
+                  <tbody>
+                    {history.map((h) => (
+                      <tr key={h.id}>
+                        <td>{h.time}</td>
+                        <td>{h.symbol}/USDT</td>
+                        <td className={h.side === 'buy' ? 'up' : 'down'}>{h.side === 'buy' ? 'Buy' : 'Sell'}</td>
+                        <td>{num(h.price)}</td>
+                        <td>{h.amount}</td>
+                        <td>{num(h.total, 2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ))}
+
+            {btab === 'positions' && (holdings.length === 0
+              ? <div className="spot__empty">No open positions</div>
+              : (
+                <table className="spot__table">
+                  <thead><tr><th>Asset</th><th>Amount</th><th>Price</th><th>Value (USDT)</th></tr></thead>
+                  <tbody>
+                    {holdings.map((h) => {
+                      const p = bySym[h.symbol]?.price
+                      return (
+                        <tr key={h.id || h.symbol} className="is-link" onClick={() => setSymbol(h.symbol)}>
+                          <td>{h.symbol}</td>
+                          <td>{Number(h.amount)}</td>
+                          <td>{p ? num(p) : '—'}</td>
+                          <td>{p ? num(p * Number(h.amount), 2) : '—'}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              ))}
           </div>
         </div>
       </section>
