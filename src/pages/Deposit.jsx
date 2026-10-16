@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import { ArrowUpRight, Wallet, Clock, ChevronDown, ChevronUp, Network, ArrowLeft, QrCode, Copy, Check, XCircle, CheckCircle2, AlertCircle } from 'lucide-react'
+import { ArrowUpRight, Wallet, Clock, ChevronDown, ChevronUp, Network, ArrowLeft, QrCode, Copy, Check, XCircle, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { coinIcon } from '../hooks/useTickers'
@@ -100,6 +100,8 @@ export default function Deposit() {
   const [history, setHistory] = useState([])
   const [now, setNow] = useState(Date.now())
   const [copied, setCopied] = useState('')
+  const [checking, setChecking] = useState(false)
+  const [note, setNote] = useState('')
 
   useEffect(() => { const id = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(id) }, [])
 
@@ -155,10 +157,31 @@ export default function Deposit() {
     setBusy(false); setDep(rec); setHistory((h) => [rec, ...h]); setStep(3)
   }
 
-  const reset = () => { setStep(1); setDep(null); setAmount(''); setCoin(''); setNet(''); setErr('') }
+  const reset = () => { setStep(1); setDep(null); setAmount(''); setCoin(''); setNet(''); setErr(''); setNote('') }
 
   const statusOf = (d) => (d.status === 'pending' && new Date(d.expires).getTime() < now ? 'expired' : d.status)
   const left = dep ? Math.max(0, Math.floor((new Date(dep.expires).getTime() - now) / 1000)) : 0
+
+  const checkStatus = async () => {
+    if (!dep) return
+    setChecking(true); setNote('')
+    let status = dep.status
+    if (user && !String(dep.id).startsWith('local-')) {
+      const { data } = await supabase.from('deposits').select('status').eq('id', dep.id).single()
+      if (data?.status) status = data.status
+    }
+    const updated = { ...dep, status }
+    setDep(updated)
+    setHistory((h) => h.map((x) => (x.id === dep.id ? { ...x, status } : x)))
+    setChecking(false)
+    const s = statusOf(updated)
+    setNote(
+      s === 'completed' ? 'Payment received. Your deposit is complete.'
+      : s === 'expired' ? 'This deposit has expired. Start a new deposit.'
+      : s === 'failed' ? 'This deposit failed. Start a new deposit.'
+      : 'No payment detected yet. Confirmations can take a few minutes.'
+    )
+  }
 
   return (
     <div className="dep">
@@ -255,7 +278,14 @@ export default function Deposit() {
                 </div>
               </div>
 
-              <button className="dep__btn dep__btn--ghost dep__btn--full" onClick={reset}>Start a new deposit</button>
+              {note && <p className="dep__note">{note}</p>}
+
+              <div className="dep__pair">
+                <button className="dep__btn dep__btn--ghost" onClick={reset}>New Deposit</button>
+                <button className="dep__btn dep__btn--primary" disabled={checking} onClick={checkStatus}>
+                  <RefreshCw size={18} className={checking ? 'dep__spin' : ''} /> {checking ? 'Checking…' : 'Check Status'}
+                </button>
+              </div>
             </div>
           )}
         </section>
