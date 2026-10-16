@@ -131,6 +131,21 @@
 .auth__switch { text-align: center; color: var(--muted); font-size: 12px; }
 .auth__switch a { color: var(--green); font-weight: 600; }
 
+/* Larger sign in card */
+.auth__card--login {
+  width: min(460px, 100%);
+  gap: 20px;
+  padding: 40px 32px 28px;
+  border-radius: 18px;
+}
+.auth__card--login .auth__head h1 { font-size: 26px; }
+.auth__card--login .auth__head p { font-size: 14px; }
+.auth__card--login label { font-size: 13px; gap: 10px; }
+.auth__card--login input { height: 44px; font-size: 15px; border-radius: 8px; padding: 0 14px; }
+.auth__card--login .auth__submit { height: 46px; font-size: 15px; border-radius: 8px; }
+.auth__card--login .auth__msg { font-size: 14px; }
+.auth__card--login .auth__switch { font-size: 14px; }
+
 @media (max-width: 380px) {
   .auth__row { grid-template-columns: 1fr; }
 }
