@@ -55,13 +55,38 @@ export default function Spot() {
   const [msg, setMsg] = useState(null)
   const [busy, setBusy] = useState(false)
 
-  const bySym = useMemo(() => Object.fromEntries(tickers.map((t) => [t.symbol, t])), [tickers])
+  // top-100 USDT pairs: your live tickers first, topped up from Binance by 24h volume
+  const [extra, setExtra] = useState([])
+  useEffect(() => {
+    let off = false
+    const STABLE = /^(USDC|FDUSD|TUSD|USDP|BUSD|DAI|AEUR|EUR|USDE|XUSD|UST)$/
+    const load = () => fetch('https://api.binance.com/api/v3/ticker/24hr')
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((all) => {
+        if (off) return
+        setExtra(all
+          .filter((x) => x.symbol.endsWith('USDT') && !/(UP|DOWN|BULL|BEAR)USDT$/.test(x.symbol))
+          .map((x) => ({ symbol: x.symbol.slice(0, -4), price: +x.lastPrice, change: +x.priceChangePercent, volume: +x.quoteVolume }))
+          .filter((x) => !STABLE.test(x.symbol) && x.price > 0)
+          .sort((a, b) => b.volume - a.volume)
+          .slice(0, 100))
+      })
+      .catch(() => {})
+    load()
+    const id = setInterval(load, 30000)
+    return () => { off = true; clearInterval(id) }
+  }, [])
+  const markets = useMemo(() => {
+    const have = new Set(tickers.map((x) => x.symbol))
+    return [...tickers, ...extra.filter((x) => !have.has(x.symbol))].slice(0, 100)
+  }, [tickers, extra])
+  const bySym = useMemo(() => Object.fromEntries(markets.map((x) => [x.symbol, x])), [markets])
   const t = bySym[symbol]
   const live = t?.price
   const priceRef = useRef(0)
   priceRef.current = live || 0
 
-  useEffect(() => { if (tickers.length && !bySym[symbol]) setSymbol(tickers[0].symbol) }, [tickers]) // eslint-disable-line
+  useEffect(() => { if (markets.length && !bySym[symbol]) setSymbol(markets[0].symbol) }, [markets]) // eslint-disable-line
 
   const loadHoldings = () => {
     if (!user) return
@@ -171,7 +196,7 @@ export default function Spot() {
     setMsg({ t: 'ok', m: `${side === 'buy' ? 'Bought' : 'Sold'} ${amt} ${symbol} at $${num(live)}` })
   }
 
-  const list = tickers.filter((x) => `${x.symbol} ${COINS[x.symbol] || ''}`.toLowerCase().includes(q.toLowerCase()))
+  const list = markets.filter((x) => `${x.symbol} ${COINS[x.symbol] || ''}`.toLowerCase().includes(q.toLowerCase()))
   const change = t?.change ?? 0
   const up = change >= 0
   const sHigh = stats?.high ?? (vis.length ? hi : null)
@@ -181,7 +206,7 @@ export default function Spot() {
     <div className="spot">
       {/* ---------- markets list ---------- */}
       <aside className="spot__markets">
-        <h2>Markets</h2>
+        <h2>Markets <small>{markets.length}</small></h2>
         <label className="spot__search"><Search size={16} /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search..." /></label>
         <div className="spot__mhead"><span>Pair</span><span>Price</span><span>24h</span></div>
         <div className="spot__mlist">
