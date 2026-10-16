@@ -1,0 +1,3 @@
+.app-main { max-width: 1480px; margin: 0 auto; padding: 24px 32px 80px; }
+.app-loading { display: grid; place-items: center; min-height: 100vh; color: var(--muted); }
+@media (max-width: 700px) { .app-main { padding: 16px 14px 80px; } }

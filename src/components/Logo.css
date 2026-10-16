@@ -1,0 +1,6 @@
+.logo { display: inline-flex; align-items: center; gap: 12px; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+.logo__mark {
+  width: 40px; height: 40px; display: grid; place-items: center; border-radius: 10px;
+  background: #000; color: var(--gold); font-size: 22px; border: 1px solid var(--border);
+}
+.logo--accent .logo__text { color: var(--green); font-size: 28px; }
