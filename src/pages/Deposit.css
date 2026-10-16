@@ -54,14 +54,14 @@
 .dep__err { margin: 0 0 14px; color: #ff4d5e; font-size: 14px; }
 
 /* ---- buttons ---- */
-.dep__btn { display: inline-flex; align-items: center; justify-content: center; gap: 12px; height: 54px; padding: 0 22px; border-radius: 10px; font-size: 16px; font-weight: 600; }
-.dep__btn--full { width: 100%; }
-.dep__btn--primary { background: var(--d-btn); color: #04130a; border: 0; }
+.dep .dep__btn { display: inline-flex; align-items: center; justify-content: center; gap: 12px; height: 54px; padding: 0 22px; border-radius: 10px; font-size: 16px; font-weight: 600; }
+.dep .dep__btn--full { width: 100%; }
+.dep .dep__btn--primary { background: var(--d-btn); color: #04130a; border: 0; }
 /* grey when disabled so green always means "you can click this" */
-.dep__btn--primary:disabled { background: #1d1d1d; color: #6b706d; cursor: not-allowed; opacity: 1; }
-.dep__btn--primary:not(:disabled):hover { filter: brightness(1.06); }
-.dep__btn--ghost { background: #050505; border: 1px solid #222; color: #fff; }
-.dep__btn--ghost:hover { border-color: #3a3a3a; }
+.dep .dep__btn--primary:disabled { background: #1d1d1d; color: #6b706d; cursor: not-allowed; opacity: 1; }
+.dep .dep__btn--primary:not(:disabled):hover { filter: brightness(1.06); }
+.dep .dep__btn--ghost { background: #050505; border: 1px solid #222; color: #fff; }
+.dep .dep__btn--ghost:hover { border-color: #3a3a3a; }
 .dep__pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 34px; }
 .dep__pay + .dep__imp { margin-top: 18px; }
 .dep__imp + .dep__pair, .dep__note + .dep__pair, .dep__pay + .dep__pair { margin-top: 18px; }
@@ -72,7 +72,7 @@
 
 /* ---- dropdowns ---- */
 .dep__dd { position: relative; }
-.dep__trigger { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 54px; padding: 0 18px; border-radius: 12px; border: 1px solid #222; background: var(--d-field); text-align: left; }
+.dep .dep__trigger { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 54px; padding: 0 18px; border-radius: 12px; border: 1px solid #222; background: var(--d-field); text-align: left; }
 .dep__trigger > svg { color: #fff; flex: none; }
 .dep__ph { color: var(--d-dim); font-size: 16px; }
 .dep__opt { display: flex; align-items: center; gap: 14px; }
