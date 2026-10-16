@@ -33,7 +33,7 @@
 .spot__mch { font-family: var(--mono); font-size: 12px; text-align: right; }
 
 /* ---- main ---- */
-.spot__main { display: grid; grid-template-rows: auto minmax(0, 1fr); min-width: 0; min-height: 0; }
+.spot__main { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-width: 0; min-height: 0; }
 .spot__top { display: flex; align-items: center; gap: 14px; padding: 12px 20px; border-bottom: 1px solid #1c1c1c; flex-wrap: wrap; }
 .spot__ticon { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
 .spot__tname { display: grid; } .spot__tname strong { font-size: 17px; } .spot__tname small { color: #a3a8a6; font-size: 12px; }
@@ -106,6 +106,20 @@
 .spot__submit { height: 44px; margin-top: 4px; border-radius: 9px; font-weight: 700; font-size: 15px; }
 .spot__submit.buy { background: var(--g); color: #04130a; } .spot__submit.sell { background: var(--r); color: #fff; }
 .spot__submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ---- bottom tabs: orders / history / positions ---- */
+.spot__bottom { border-top: 1px solid #1c1c1c; background: #0a0a0a; min-width: 0; }
+.spot__tabs { display: flex; align-items: center; gap: 6px; padding: 10px 12px; border-bottom: 1px solid #1c1c1c; }
+.spot__tabs button { display: inline-flex; align-items: center; gap: 9px; height: 42px; padding: 0 18px; border-radius: 8px; font-size: 15px; font-weight: 600; color: #a3a8a6; }
+.spot__tabs button:hover { color: #fff; }
+.spot__tabs button.is-on { background: #000; color: #fff; }
+.spot__panel { background: #000; min-height: 100px; max-height: 240px; overflow: auto; }
+.spot__empty { display: grid; place-items: center; min-height: 100px; padding: 24px 16px; color: #a3a8a6; font-size: 16px; }
+.spot__table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.spot__table th { position: sticky; top: 0; background: #0a0a0a; text-align: left; padding: 10px 16px; color: #a3a8a6; font-size: 12px; font-weight: 500; border-bottom: 1px solid #1c1c1c; white-space: nowrap; }
+.spot__table td { padding: 10px 16px; font-family: var(--mono); font-size: 12px; border-bottom: 1px solid #0f0f0f; white-space: nowrap; }
+.spot__table tbody tr:hover { background: #0c0c0c; }
+.spot__table tr.is-link { cursor: pointer; }
 
 @media (max-width: 1350px) { .spot__body { grid-template-columns: minmax(0, 1fr) 250px 280px; } .spot__tstats { gap: 16px; } }
 @media (max-width: 1150px) {
