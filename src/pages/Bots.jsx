@@ -1,124 +1,257 @@
-.bots {
-  --b-green: #00ff88;
-  --b-red: #f4525f;
-  --b-card: #111;
-  --b-field: #141414;
-  --b-line: #222;
-  --b-dim: #a0a0a0;
-  max-width: 1344px; margin: 0 auto; display: flex; flex-direction: column; gap: 38px; color: #fff;
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Upload, Cpu, Key, Activity, Settings, Bot, Play, Square, Trash2, ChevronDown } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
+import './Bots.css'
+
+const EXT = /\.(py|js|ts|json|zip)$/i
+const MAX_MB = 5
+const INTERVALS = ['1 minute', '5 minutes', '15 minutes', '1 hour', '4 hours', '1 day']
+const PAIRS = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'USD/CHF', 'NZD/USD', 'EUR/GBP', 'EUR/JPY', 'GBP/JPY']
+const FLAG = { EUR: 'eu', USD: 'us', GBP: 'gb', JPY: 'jp', AUD: 'au', CAD: 'ca', CHF: 'ch', NZD: 'nz' }
+const RISK_BADGE = { Low: ['conservative', 'green'], Medium: ['balanced', 'blue'], High: ['aggressive', 'red'] }
+
+// TODO: swap this for a real check against your backend (e.g. a passkeys table or edge function)
+const verifyPasskey = async (key) => key.trim().length > 0
+
+// "Pro Trading Bot v2.1" -> ['Pro Trading Bot', 'v2.1']
+const splitVersion = (n = '') => {
+  const m = n.match(/^(.*?)\s+v(\d+(?:\.\d+)*)$/i)
+  return m ? [m[1], `v${m[2]}`] : [n, null]
 }
-.bots button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
-.bots input, .bots select { font: inherit; color: inherit; }
+const prettyName = (file) => file.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim() || 'Trading Bot'
 
-.bots__note { margin: 0; padding: 14px 20px; border-radius: 12px; font-size: 17px; border: 1px solid; }
-.bots__note.err { color: var(--b-red); background: color-mix(in srgb, var(--b-red) 10%, #000); border-color: color-mix(in srgb, var(--b-red) 40%, #000); }
-.bots__note.ok { color: var(--b-green); background: color-mix(in srgb, var(--b-green) 10%, #000); border-color: color-mix(in srgb, var(--b-green) 40%, #000); }
-
-/* ---- cards ---- */
-.bots__card { background: var(--b-card); border: 1px solid var(--b-line); border-radius: 22px; overflow: hidden; }
-.bots__pad { padding: 36px; overflow: visible; }
-.bots__chead { display: flex; align-items: center; justify-content: center; gap: 18px; height: 116px; border-bottom: 1px solid var(--b-line); font-size: 30px; font-weight: 700; letter-spacing: -0.04em; text-transform: uppercase; }
-.bots__chead svg { width: 32px; height: 32px; color: var(--b-green); }
-.bots__cbody { padding: 36px; }
-.bots__h2 { display: flex; align-items: center; gap: 14px; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.03em; }
-.bots__h2 svg { width: 28px; height: 28px; color: var(--b-green); }
-.bots__sub { margin: 10px 0 30px; color: var(--b-dim); font-size: 21px; }
-
-/* ---- upload ---- */
-.bots__drop { display: grid; justify-items: center; align-content: center; gap: 8px; min-height: 311px; padding: 30px; text-align: center; border: 2px dashed #383838; border-radius: 22px; background: transparent; cursor: pointer; transition: border-color .15s, background .15s; }
-.bots__drop:hover, .bots__drop:focus-visible, .bots__drop.is-drag { border-color: var(--b-green); background: color-mix(in srgb, var(--b-green) 4%, transparent); outline: 0; }
-.bots__drop-ic { display: grid; place-items: center; width: 84px; height: 84px; margin-bottom: 18px; border-radius: 50%; background: #222; color: #d6d6d6; }
-.bots__drop-ic svg { width: 40px; height: 40px; }
-.bots__drop strong { font-size: 24px; font-weight: 500; word-break: break-all; }
-.bots__drop span:not(.bots__drop-ic) { color: var(--b-dim); font-size: 21px; }
-.bots__drop small { margin-top: 14px; color: var(--b-dim); font-size: 17px; }
-.bots__cta { display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%; height: 72px; margin-top: 25px; border-radius: 8px; background: var(--b-green); color: #04130a; font-size: 21px; font-weight: 600; }
-.bots__cta svg { width: 24px; height: 24px; }
-.bots__cta:hover { filter: brightness(1.06); }
-.bots__cta:disabled { opacity: .6; cursor: not-allowed; }
-
-.bots__or { display: flex; align-items: center; gap: 48px; margin: -4px 0; color: var(--b-dim); font-size: 24px; }
-.bots__or::before, .bots__or::after { content: ''; flex: 1; height: 2px; background: #2e2e2e; }
-
-/* ---- passkey ---- */
-.bots__pass { text-align: center; }
-.bots__pass p { margin: 4px 0 0; color: var(--b-dim); font-size: 24px; }
-.bots__pass small { display: block; margin-top: 24px; color: var(--b-dim); font-size: 17px; }
-.bots__prow { display: flex; gap: 18px; margin-top: 28px; text-align: left; }
-.bots__pin { flex: 1; min-width: 0; display: flex; align-items: center; gap: 16px; height: 72px; padding: 0 20px; border-radius: 10px; border: 1px solid #262626; background: var(--b-field); color: var(--b-dim); }
-.bots__pin svg { width: 26px; height: 26px; }
-.bots__pin:focus-within { border-color: color-mix(in srgb, var(--b-green) 50%, #262626); }
-.bots__pin input { flex: 1; min-width: 0; height: 100%; background: none; border: 0; outline: 0; font-size: 21px; color: #fff; }
-.bots__pin input::placeholder { color: var(--b-dim); }
-.bots__psubmit { display: inline-flex; align-items: center; justify-content: center; gap: 16px; width: 308px; height: 72px; border-radius: 8px; background: var(--b-green); color: #04130a; font-size: 21px; font-weight: 600; }
-.bots__psubmit svg { width: 24px; height: 24px; }
-.bots__psubmit:disabled { opacity: .6; cursor: not-allowed; }
-.bots__psubmit:not(:disabled):hover { filter: brightness(1.06); }
-
-/* ---- settings ---- */
-.bots__fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
-.bots__field { display: grid; gap: 16px; align-content: start; }
-.bots__field > label { color: var(--b-dim); font-size: 21px; }
-.bots__ctl { width: 100%; height: 66px; padding: 0 18px; border-radius: 10px; border: 1px solid #262626; background: var(--b-field); outline: 0; font-size: 21px; color: #fff; }
-.bots__ctl:focus { border-color: color-mix(in srgb, var(--b-green) 50%, #262626); }
-.bots__sel { position: relative; }
-.bots__sel select { appearance: none; -webkit-appearance: none; padding-right: 54px; cursor: pointer; }
-.bots__sel select option { background: #151515; color: #fff; }
-.bots__sel svg, .bots__ctl > svg { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; color: var(--b-dim); pointer-events: none; }
-.bots__pick { position: relative; }
-.bots__pick .bots__ctl { display: flex; align-items: center; justify-content: space-between; text-align: left; cursor: pointer; }
-.bots__pick .bots__ctl > svg { position: static; transform: none; }
-.bots__ctl-val { display: inline-flex; align-items: center; gap: 16px; }
-.bots__menu { position: absolute; z-index: 30; top: calc(100% + 8px); left: 0; right: 0; max-height: 320px; overflow-y: auto; padding: 8px; border-radius: 12px; border: 1px solid #2a2a2a; background: #151515; box-shadow: 0 14px 34px rgba(0, 0, 0, .6); }
-.bots__menu button { display: flex; align-items: center; gap: 16px; width: 100%; height: 52px; padding: 0 12px; border-radius: 8px; font-size: 19px; text-align: left; }
-.bots__menu button:hover { background: #1d1d1d; }
-.bots__menu button.is-on { color: var(--b-green); }
-.bots__flags { display: inline-flex; align-items: center; flex: none; }
-.bots__flags img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #222; border: 3px solid var(--b-field); }
-.bots__flags img + img { margin-left: -12px; }
-
-/* ---- my bots ---- */
-.bots__empty { margin: 26px 0 0; padding: 36px; text-align: center; color: var(--b-dim); font-size: 19px; border: 2px dashed #2a2a2a; border-radius: 16px; }
-.bots__list { display: grid; gap: 18px; margin-top: 28px; }
-.bots__item { display: grid; grid-template-columns: 62px minmax(0, 1fr) auto; column-gap: 18px; row-gap: 22px; align-items: start; padding: 24px; border: 1px solid #262626; border-radius: 16px; background: #121212; }
-.bots__ico { display: grid; place-items: center; width: 62px; height: 62px; border-radius: 12px; border: 1px solid #242424; background: #1b1b1b; color: #d0d0d0; }
-.bots__ico svg { width: 30px; height: 30px; }
-.bots__info { min-width: 0; align-self: center; }
-.bots__info h3 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.03em; }
-.bots__info h3 small { margin-left: 8px; color: var(--b-dim); font-size: 18px; font-weight: 400; letter-spacing: 0; }
-.bots__info p { margin: 6px 0 0; color: var(--b-dim); font-size: 22px; }
-.bots__badges { display: flex; gap: 12px; }
-.bots__badge { padding: 6px 14px; border-radius: 6px; border: 1px solid; font-size: 19px; white-space: nowrap; }
-.bots__badge.blue { color: #60a5fa; background: rgba(59, 130, 246, .14); border-color: rgba(59, 130, 246, .55); }
-.bots__badge.amber { color: #eab308; background: rgba(234, 179, 8, .12); border-color: rgba(234, 179, 8, .55); }
-.bots__badge.green { color: var(--b-green); background: color-mix(in srgb, var(--b-green) 12%, #000); border-color: color-mix(in srgb, var(--b-green) 55%, #000); }
-.bots__badge.red { color: var(--b-red); background: color-mix(in srgb, var(--b-red) 12%, #000); border-color: color-mix(in srgb, var(--b-red) 55%, #000); }
-.bots__acts { grid-column: 1 / -1; display: flex; gap: 12px; }
-.bots__btn { display: inline-flex; align-items: center; justify-content: center; gap: 12px; height: 48px; padding: 0 24px; border-radius: 8px; border: 1px solid transparent; font-size: 20px; font-weight: 500; }
-.bots__btn svg { width: 22px; height: 22px; }
-.bots__btn.start { background: var(--b-green); color: #04130a; min-width: 121px; }
-.bots__btn.start:hover { filter: brightness(1.06); }
-.bots__btn.stop { color: var(--b-red); background: color-mix(in srgb, var(--b-red) 12%, #000); border-color: color-mix(in srgb, var(--b-red) 45%, #000); }
-.bots__btn.del { color: #d4d4d4; background: #141414; border-color: #2a2a2a; }
-.bots__btn.del:hover { border-color: color-mix(in srgb, var(--b-red) 50%, #2a2a2a); color: var(--b-red); }
-
-/* scale down on smaller screens so it still fits */
-@media (max-width: 1100px) {
-  .bots { gap: 28px; }
-  .bots__chead { height: 88px; font-size: 22px; } .bots__chead svg { width: 24px; height: 24px; }
-  .bots__cbody, .bots__pad { padding: 24px; }
-  .bots__h2 { font-size: 22px; } .bots__sub { font-size: 17px; }
-  .bots__drop { min-height: 240px; } .bots__drop strong { font-size: 19px; } .bots__drop span:not(.bots__drop-ic) { font-size: 16px; }
-  .bots__cta, .bots__psubmit, .bots__pin { height: 56px; font-size: 17px; }
-  .bots__pass p { font-size: 18px; }
-  .bots__field > label { font-size: 16px; } .bots__ctl { height: 54px; font-size: 17px; }
-  .bots__info h3 { font-size: 20px; } .bots__info p { font-size: 16px; } .bots__badge { font-size: 14px; }
-  .bots__btn { height: 42px; font-size: 16px; }
+function Flags({ pair }) {
+  return (
+    <span className="bots__flags">
+      {pair.split('/').map((c) => (
+        <img key={c} src={`https://flagcdn.com/w40/${FLAG[c]}.png`} alt="" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
+      ))}
+    </span>
+  )
 }
-@media (max-width: 800px) {
-  .bots__fields { grid-template-columns: 1fr; }
-  .bots__prow { flex-direction: column; }
-  .bots__psubmit { width: 100%; }
-  .bots__item { grid-template-columns: 56px minmax(0, 1fr); }
-  .bots__badges { grid-column: 1 / -1; }
+
+function AssetPicker({ value, onChange }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  useEffect(() => {
+    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [])
+  return (
+    <div className="bots__pick" ref={ref}>
+      <button type="button" className="bots__ctl" onClick={() => setOpen((o) => !o)} aria-haspopup="listbox" aria-expanded={open}>
+        <span className="bots__ctl-val"><Flags pair={value} /> {value}</span>
+        <ChevronDown size={16} />
+      </button>
+      {open && (
+        <div className="bots__menu" role="listbox">
+          {PAIRS.map((p) => (
+            <button type="button" key={p} role="option" aria-selected={p === value} className={p === value ? 'is-on' : ''} onClick={() => { onChange(p); setOpen(false) }}>
+              <Flags pair={p} /> {p}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default function Bots() {
+  const { user, profile } = useAuth()
+  const balance = Number(profile?.balance || 0)
+
+  const [bots, setBots] = useState([])
+  const [note, setNote] = useState(null)
+  const [busy, setBusy] = useState('')
+
+  const [file, setFile] = useState(null)
+  const [drag, setDrag] = useState(false)
+  const inputRef = useRef(null)
+
+  const [passkey, setPasskey] = useState('')
+
+  const [amount, setAmount] = useState('10')
+  const [interval, setIntervalV] = useState('1 minute')
+  const [asset, setAsset] = useState('EUR/USD')
+
+  const say = (t, m) => setNote({ t, m })
+
+  const load = useCallback(async () => {
+    if (!user) return
+    const { data } = await supabase.from('bots').select('*').eq('user_id', user.id).order('id')
+    setBots(data || [])
+  }, [user])
+  useEffect(() => { load() }, [load])
+
+  /* ---------- upload ---------- */
+  const pick = (f) => {
+    if (!f) return
+    if (!EXT.test(f.name)) return say('err', 'Unsupported file type. Use .py, .js, .ts, .json or .zip.')
+    if (f.size > MAX_MB * 1024 * 1024) return say('err', `File is too large (max ${MAX_MB} MB).`)
+    setNote(null); setFile(f)
+  }
+  const onDrop = (e) => { e.preventDefault(); setDrag(false); pick(e.dataTransfer.files?.[0]) }
+
+  const upload = async () => {
+    if (!file) return inputRef.current?.click()
+    setBusy('upload')
+    const { error } = await supabase.from('bots').insert({
+      name: prettyName(file.name), description: `Uploaded from ${file.name}`, schedule: interval, risk: 'Medium', user_id: user.id,
+    })
+    setBusy('')
+    if (error) return say('err', error.message)
+    setFile(null); if (inputRef.current) inputRef.current.value = ''
+    say('ok', 'Bot added to My Bots.'); load()
+  }
+
+  /* ---------- passkey ---------- */
+  const activate = async (e) => {
+    e.preventDefault()
+    if (!passkey.trim()) return
+    setBusy('pass')
+    if (!(await verifyPasskey(passkey))) { setBusy(''); return say('err', 'Invalid passkey.') }
+    const { error } = await supabase.from('bots').insert({
+      name: 'Pro Trading Bot v2.1', description: 'Professional algorithmic trading bot with advanced market analysis', schedule: interval, risk: 'Medium', user_id: user.id,
+    })
+    setBusy('')
+    if (error) return say('err', error.message)
+    setPasskey(''); say('ok', 'Bot activated. You can find it under My Bots.'); load()
+  }
+
+  /* ---------- start / stop / delete ---------- */
+  const toggle = async (b) => {
+    if (b.status === 'Active') {
+      await supabase.from('bots').update({ status: 'Paused' }).eq('id', b.id)
+      setNote(null); return load()
+    }
+    const amt = Number(amount)
+    if (balance <= 0) return say('err', 'Deposit funds to unlock your bots.')
+    if (!(amt > 0)) return say('err', 'Enter a valid trade amount.')
+    if (amt > balance) return say('err', 'Trade amount is higher than your available balance.')
+    await supabase.from('bots').update({ status: 'Active', schedule: interval, allocated: amt }).eq('id', b.id)
+    say('ok', `${splitVersion(b.name)[0]} started on ${asset}, $${amt} every ${interval}.`); load()
+  }
+  const remove = async (b) => {
+    await supabase.from('bots').delete().eq('id', b.id)
+    load()
+  }
+
+  return (
+    <div className="bots">
+      {note && <p className={`bots__note ${note.t}`}>{note.m}</p>}
+
+      {/* ---------- upload ---------- */}
+      <section className="bots__card">
+        <header className="bots__chead"><Upload size={22} /> Upload Trading Bot</header>
+        <div className="bots__cbody">
+          <div
+            className={`bots__drop ${drag ? 'is-drag' : ''}`}
+            role="button" tabIndex={0}
+            onClick={() => inputRef.current?.click()}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inputRef.current?.click() } }}
+            onDragOver={(e) => { e.preventDefault(); setDrag(true) }}
+            onDragLeave={() => setDrag(false)}
+            onDrop={onDrop}
+          >
+            <span className="bots__drop-ic"><Upload size={28} /></span>
+            {file ? (
+              <>
+                <strong>{file.name}</strong>
+                <span>{(file.size / 1024).toFixed(1)} KB, click to choose a different file</span>
+              </>
+            ) : (
+              <>
+                <strong>Drag &amp; drop your bot file here</strong>
+                <span>or click to browse</span>
+              </>
+            )}
+            <small>Supports .py, .js, .ts, .json, .zip files</small>
+            <input ref={inputRef} type="file" accept=".py,.js,.ts,.json,.zip" hidden onChange={(e) => pick(e.target.files?.[0])} />
+          </div>
+          <button className="bots__cta" onClick={upload} disabled={busy === 'upload'}>
+            <Cpu size={18} /> {busy === 'upload' ? 'Uploading…' : 'Upload Trading Bot'}
+          </button>
+        </div>
+      </section>
+
+      <div className="bots__or"><span>OR</span></div>
+
+      {/* ---------- passkey ---------- */}
+      <section className="bots__card">
+        <header className="bots__chead"><Key size={22} /> Activate with Passkey</header>
+        <form className="bots__cbody bots__pass" onSubmit={activate}>
+          <p>Already have a trading bot passkey? Enter it below to activate your bot instantly.</p>
+          <div className="bots__prow">
+            <label className="bots__pin">
+              <Key size={18} />
+              <input value={passkey} onChange={(e) => setPasskey(e.target.value)} placeholder="Enter your trading bot passkey" autoComplete="off" />
+            </label>
+            <button className="bots__psubmit" disabled={!passkey.trim() || busy === 'pass'}>
+              <Activity size={18} /> {busy === 'pass' ? 'Checking…' : 'Submit Passkey'}
+            </button>
+          </div>
+          <small>Passkeys are provided by authorized bot developers. Contact support if you need assistance.</small>
+        </form>
+      </section>
+
+      {/* ---------- settings ---------- */}
+      <section className="bots__card bots__pad">
+        <h2 className="bots__h2"><Settings size={20} /> Bot Settings</h2>
+        <p className="bots__sub">Configure your bot before starting</p>
+        <div className="bots__fields">
+          <div className="bots__field">
+            <label htmlFor="bot-amt">Trade Amount ($)</label>
+            <input id="bot-amt" className="bots__ctl" type="number" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          </div>
+          <div className="bots__field">
+            <label htmlFor="bot-int">Trade Interval</label>
+            <div className="bots__sel">
+              <select id="bot-int" className="bots__ctl" value={interval} onChange={(e) => setIntervalV(e.target.value)}>
+                {INTERVALS.map((i) => <option key={i}>{i}</option>)}
+              </select>
+              <ChevronDown size={16} />
+            </div>
+          </div>
+          <div className="bots__field">
+            <label>Trading Asset</label>
+            <AssetPicker value={asset} onChange={setAsset} />
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- my bots ---------- */}
+      <section className="bots__card bots__pad">
+        <h2 className="bots__h2"><Bot size={20} /> My Bots ({bots.length})</h2>
+        {bots.length === 0 && <p className="bots__empty">No bots yet. Upload one or activate with a passkey.</p>}
+        <div className="bots__list">
+          {bots.map((b) => {
+            const [name, ver] = splitVersion(b.name)
+            const [riskLabel, riskTone] = RISK_BADGE[b.risk] || [String(b.risk || '').toLowerCase(), 'blue']
+            const on = b.status === 'Active'
+            return (
+              <article className="bots__item" key={b.id}>
+                <span className="bots__ico"><Bot size={22} /></span>
+                <div className="bots__info">
+                  <h3>{name} {ver && <small>{ver}</small>}</h3>
+                  <p>{b.description}</p>
+                </div>
+                <div className="bots__badges">
+                  <span className={`bots__badge ${riskTone}`}>{riskLabel}</span>
+                  <span className={`bots__badge ${on ? 'green' : 'amber'}`}>{on ? 'running' : 'stopped'}</span>
+                </div>
+                <div className="bots__acts">
+                  <button className={`bots__btn ${on ? 'stop' : 'start'}`} onClick={() => toggle(b)}>
+                    {on ? <Square size={15} /> : <Play size={15} />} {on ? 'Stop' : 'Start'}
+                  </button>
+                  <button className="bots__btn del" onClick={() => remove(b)}><Trash2 size={15} /> Delete</button>
+                </div>
+              </article>
+            )
+          })}
+        </div>
+      </section>
+    </div>
+  )
 }
