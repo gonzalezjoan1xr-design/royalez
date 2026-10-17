@@ -1,6 +1,10 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Logo from '../components/Logo'
 import './Landing.css'
+
+// Use the SAME image file your Navbar uses for its logo.
+const LOGO_SRC = '/logo.png'
 
 const ticker = [
   { s: 'BTC/USDT', p: '64,210.55', c: '+1.12%', up: true },
@@ -57,10 +61,19 @@ const figures = [
 ]
 
 export default function Landing() {
+  // The navbar stylesheet adds padding-top to <body> for its fixed header.
+  // The landing page has its own fixed header, so remove that extra space here.
+  useEffect(() => {
+    document.body.classList.add('is-landing')
+    return () => document.body.classList.remove('is-landing')
+  }, [])
+
   return (
     <div className="landing">
       <header className="landing__bar">
-        <Logo accent />
+        <Link to="/" className="landing__logo" aria-label="Royal Markets home">
+          <img src={LOGO_SRC} alt="Royal Markets" />
+        </Link>
         <div className="landing__bar-actions">
           <Link to="/login" className="landing__signin">Sign in</Link>
           <Link to="/signup" className="btn btn--sm landing__start">Get started</Link>
