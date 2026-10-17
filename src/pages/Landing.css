@@ -47,11 +47,11 @@ body.is-landing { padding-top: 0; }
 .landing__signin { font-size: 14px; font-weight: 600; color: #fff; text-decoration: none; }
 .landing__signin:hover { color: var(--lp-green); }
 
-/* buttons */
-.btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 26px; border-radius: 6px; font-family: inherit; font-weight: 600; font-size: 15px; text-decoration: none; transition: filter 0.15s, border-color 0.15s, background 0.15s; }
-.btn--primary { background: var(--lp-green); color: #04130a; }
+/* buttons (every button has a 1px border so primary and ghost are the same height) */
+.btn { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 12px 26px; border: 1px solid transparent; border-radius: 6px; font-family: inherit; font-weight: 600; font-size: 15px; line-height: 1.2; text-decoration: none; white-space: nowrap; transition: filter 0.15s, border-color 0.15s, background 0.15s; }
+.btn--primary { background: var(--lp-green); border-color: var(--lp-green); color: #04130a; }
 .btn--primary:hover { filter: brightness(1.1); }
-.btn--ghost { background: #060606; border: 1px solid #1c1c1c; color: #fff; }
+.btn--ghost { background: #060606; border-color: #1c1c1c; color: #fff; }
 .btn--ghost:hover { border-color: var(--lp-green); }
 
 .landing__start { padding: 9px 22px; font-size: 15px; font-weight: 500; border-radius: 7px; background: var(--lp-green); border: 1px solid var(--lp-green); color: #04130a; }
@@ -175,6 +175,8 @@ body.is-landing { padding-top: 0; }
 
 /* ---------- footer ---------- */
 .foot { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding: 40px 96px; border-top: 1px solid #141414; background: #000; }
+.foot__logo { display: flex; align-items: center; flex-shrink: 0; }
+.foot__logo img { display: block; height: 44px; width: auto; max-width: 160px; object-fit: contain; }
 .foot__nav { display: flex; gap: 30px; }
 .foot__nav a { font-size: 14px; color: #9aa3a8; text-decoration: none; transition: color 0.15s; }
 .foot__nav a:hover { color: var(--lp-green); }
@@ -221,8 +223,10 @@ body.is-landing { padding-top: 0; }
   .landing__eyebrow { font-size: 15px; margin-bottom: 14px; }
   .landing__copy h1 { font-size: 38px; }
   .landing__copy p { font-size: 16px; margin-top: 16px; }
-  .landing__cta { margin-top: 26px; }
-  .landing__cta .btn { flex: 1 1 140px; }
+
+  /* hero buttons: two equal, same-height buttons side by side */
+  .landing__cta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 26px; }
+  .landing__cta .btn { width: 100%; min-height: 50px; padding: 0 12px; font-size: 15px; }
 
   .about__copy > p, .perks__head p, .closing__cta p { font-size: 16px; }
   .about__row { padding: 14px 12px; gap: 10px; }
@@ -246,5 +250,6 @@ body.is-landing { padding-top: 0; }
 
   .legal__inner { padding: 40px 20px 50px; }
 
+  .foot__logo img { height: 40px; }
   .foot__nav { gap: 14px 20px; }
 }
