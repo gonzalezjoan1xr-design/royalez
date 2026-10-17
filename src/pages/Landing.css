@@ -99,7 +99,7 @@ body.is-landing { padding-top: 0; }
 .about__panel-title svg { color: var(--lp-green); }
 .about__rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
 .about__row { display: flex; align-items: center; gap: 14px; padding: 18px 16px; border-radius: 10px; background: #0c120e; }
-.about__coin { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; color: #fff; font-size: 15px; font-weight: 700; }
+.about__coin { flex: none; display: block; width: 32px; height: 32px; border-radius: 50%; }
 .about__pair { font-weight: 600; color: #fff; }
 .about__quote { margin-left: auto; display: grid; text-align: right; font-size: 14px; }
 .about__quote b { font-weight: 600; color: #fff; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 15px; }
@@ -147,7 +147,7 @@ body.is-landing { padding-top: 0; }
 .prices__asset { display: flex; align-items: center; gap: 14px; }
 .prices__asset strong { display: block; font-size: 16px; font-weight: 700; color: #fff; }
 .prices__asset small { display: block; margin-top: 2px; font-size: 13px; color: #8a8a8a; }
-.prices__coin { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; color: #fff; font-size: 14px; font-weight: 700; }
+.prices__coin { flex: none; display: block; width: 32px; height: 32px; border-radius: 50%; }
 .prices__num { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #8f9aa0; }
 .prices__num--main { color: #fff; font-weight: 700; }
 .prices__chg { font-weight: 600; }
