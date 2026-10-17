@@ -13,7 +13,7 @@ body.is-landing { padding-top: 0; }
   --lp-green-line: rgba(34, 197, 94, 0.2);
   --lp-up: #22c55e;
   --lp-down: #f4525f;
-  --lp-bar-h: 66px;
+  --lp-bar-h: 56px;
   min-height: 100vh;
   padding-top: var(--lp-bar-h);
   overflow-x: hidden;
@@ -41,10 +41,10 @@ body.is-landing { padding-top: 0; }
   background: #050505;
   border-bottom: 1px solid #232625;
 }
-.landing__logo { display: flex; align-items: center; justify-content: flex-start; flex-shrink: 0; width: auto; height: var(--lp-bar-h); }
-/* --lp-logo-nudge pulls the logo left to cancel empty space built into the PNG.
-   Set it to 0 once the PNG is trimmed. */
-.landing__logo img { display: block; width: auto; height: 60px; max-width: 220px; margin-left: var(--lp-logo-nudge, 0px); object-fit: contain; object-position: left center; mix-blend-mode: lighten; }
+.landing__logo { display: flex; align-items: center; justify-content: flex-start; flex-shrink: 0; height: var(--lp-bar-h); }
+/* logo: height stays 52px (same as the original header); width is set separately.
+   object-fit: fill stretches the image to the width below. */
+.landing__logo img { display: block; width: var(--lp-logo-w, 84px); height: 52px; object-fit: fill; mix-blend-mode: lighten; }
 .landing__bar-actions { display: flex; align-items: center; gap: 22px; }
 .landing__signin { font-size: 14px; font-weight: 600; color: #fff; text-decoration: none; }
 .landing__signin:hover { color: var(--lp-green); }
@@ -186,10 +186,10 @@ body.is-landing { padding-top: 0; }
 
 /* =====================  TABLET / PHONE  ===================== */
 @media (max-width: 900px) {
-  .landing { --lp-bar-h: 58px; }
+  .landing { --lp-bar-h: 54px; }
   .landing__bar { padding: 0 14px 0 6px; }
   .landing__logo { width: auto; }
-  .landing__logo img { width: auto; height: 46px; max-width: 170px; margin-left: var(--lp-logo-nudge, 0px); }
+  .landing__logo img { width: var(--lp-logo-w-m, 54px); height: 32px; }
   .landing__bar-actions { gap: 16px; }
 
   .landing__tape-item { padding: 11px 20px; font-size: 13px; }
