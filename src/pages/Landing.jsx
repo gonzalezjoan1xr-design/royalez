@@ -3,6 +3,15 @@ import { Link } from 'react-router-dom'
 import Logo from '../components/Logo'
 import './Landing.css'
 
+import btc from 'cryptocurrency-icons/svg/color/btc.svg'
+import eth from 'cryptocurrency-icons/svg/color/eth.svg'
+import bnb from 'cryptocurrency-icons/svg/color/bnb.svg'
+import sol from 'cryptocurrency-icons/svg/color/sol.svg'
+import xrp from 'cryptocurrency-icons/svg/color/xrp.svg'
+import doge from 'cryptocurrency-icons/svg/color/doge.svg'
+import ada from 'cryptocurrency-icons/svg/color/ada.svg'
+import trx from 'cryptocurrency-icons/svg/color/trx.svg'
+
 // Use the SAME image file your Navbar uses for its logo.
 const LOGO_SRC = '/logo.png'
 
@@ -16,11 +25,11 @@ const ticker = [
 ]
 
 const snapshot = [
-  { s: 'BTC/USDT', c: '#f7931a', t: '₿', p: '$64,210.55', ch: '+4.18%', up: true },
-  { s: 'ETH/USDT', c: '#627eea', t: 'Ξ', p: '$2,458.70', ch: '+2.07%', up: true },
-  { s: 'BNB/USDT', c: '#f3ba2f', t: 'B', p: '$731.24', ch: '+1.35%', up: true },
-  { s: 'SOL/USDT', c: '#14f195', t: 'S', p: '$106.41', ch: '-0.92%', up: false },
-  { s: 'XRP/USDT', c: '#2b3036', t: 'X', p: '$1.34', ch: '+0.49%', up: true },
+  { s: 'BTC/USDT', icon: btc, p: '$64,210.55', ch: '+4.18%', up: true },
+  { s: 'ETH/USDT', icon: eth, p: '$2,458.70', ch: '+2.07%', up: true },
+  { s: 'BNB/USDT', icon: bnb, p: '$731.24', ch: '+1.35%', up: true },
+  { s: 'SOL/USDT', icon: sol, p: '$106.41', ch: '-0.92%', up: false },
+  { s: 'XRP/USDT', icon: xrp, p: '$1.34', ch: '+0.49%', up: true },
 ]
 
 const reasons = [
@@ -39,14 +48,14 @@ const reasons = [
 ]
 
 const market = [
-  { k: 'BTC', n: 'Bitcoin', c: '#f7931a', g: '₿', p: '$64,210.55', ch: '+2.41%', h: '$64,880.00', l: '$62,540.10', up: true },
-  { k: 'ETH', n: 'Ethereum', c: '#627eea', g: 'Ξ', p: '$2,458.70', ch: '+1.18%', h: '$2,491.30', l: '$2,376.45', up: true },
-  { k: 'BNB', n: 'BNB', c: '#f3ba2f', g: 'B', p: '$731.24', ch: '+0.64%', h: '$738.90', l: '$719.15', up: true },
-  { k: 'SOL', n: 'Solana', c: '#9945ff', g: 'S', p: '$106.41', ch: '-0.92%', h: '$109.20', l: '$103.85', up: false },
-  { k: 'XRP', n: 'Ripple', c: '#2b3036', g: 'X', p: '$1.3414', ch: '+0.49%', h: '$1.3620', l: '$1.2990', up: true },
-  { k: 'DOGE', n: 'Dogecoin', c: '#c2a633', g: 'Ð', p: '$0.082300', ch: '+0.37%', h: '$0.084100', l: '$0.079800', up: true },
-  { k: 'ADA', n: 'Cardano', c: '#1ec8c0', g: 'A', p: '$0.231000', ch: '-0.31%', h: '$0.236400', l: '$0.224900', up: false },
-  { k: 'TRX', n: 'TRON', c: '#2a2a2a', g: 'T', p: '$0.336000', ch: '+0.12%', h: '$0.338700', l: '$0.331200', up: true },
+  { k: 'BTC', n: 'Bitcoin', icon: btc, p: '$64,210.55', ch: '+2.41%', h: '$64,880.00', l: '$62,540.10', up: true },
+  { k: 'ETH', n: 'Ethereum', icon: eth, p: '$2,458.70', ch: '+1.18%', h: '$2,491.30', l: '$2,376.45', up: true },
+  { k: 'BNB', n: 'BNB', icon: bnb, p: '$731.24', ch: '+0.64%', h: '$738.90', l: '$719.15', up: true },
+  { k: 'SOL', n: 'Solana', icon: sol, p: '$106.41', ch: '-0.92%', h: '$109.20', l: '$103.85', up: false },
+  { k: 'XRP', n: 'Ripple', icon: xrp, p: '$1.3414', ch: '+0.49%', h: '$1.3620', l: '$1.2990', up: true },
+  { k: 'DOGE', n: 'Dogecoin', icon: doge, p: '$0.082300', ch: '+0.37%', h: '$0.084100', l: '$0.079800', up: true },
+  { k: 'ADA', n: 'Cardano', icon: ada, p: '$0.231000', ch: '-0.31%', h: '$0.236400', l: '$0.224900', up: false },
+  { k: 'TRX', n: 'TRON', icon: trx, p: '$0.336000', ch: '+0.12%', h: '$0.338700', l: '$0.331200', up: true },
 ]
 
 const figures = [
@@ -164,7 +173,7 @@ export default function Landing() {
           <ul className="about__rows">
             {snapshot.map((r) => (
               <li key={r.s} className="about__row">
-                <span className="about__coin" style={{ background: r.c }} aria-hidden="true">{r.t}</span>
+                <img className="about__coin" src={r.icon} alt="" width="32" height="32" />
                 <span className="about__pair">{r.s}</span>
                 <span className="about__quote">
                   <b>{r.p}</b>
@@ -263,7 +272,7 @@ export default function Landing() {
                 <tr key={m.k}>
                   <td>
                     <div className="prices__asset">
-                      <span className="prices__coin" style={{ background: m.c }} aria-hidden="true">{m.g}</span>
+                      <img className="prices__coin" src={m.icon} alt="" width="32" height="32" />
                       <div>
                         <strong>{m.k}</strong>
                         <small>{m.n}</small>
