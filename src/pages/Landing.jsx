@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import logoImg from '../assets/Royal-logo.png'
+import logoImg from '../Assets/Royal-logo.png'
 import './Landing.css'
 
 // Coin logos (inline SVG, 32x32)
