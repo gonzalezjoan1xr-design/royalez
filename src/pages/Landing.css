@@ -44,7 +44,7 @@ body.is-landing { padding-top: 0; }
 .landing__logo { display: flex; align-items: center; justify-content: flex-start; flex-shrink: 0; width: auto; height: var(--lp-bar-h); }
 /* --lp-logo-nudge pulls the logo left to cancel empty space built into the PNG.
    Set it to 0 once the PNG is trimmed. */
-.landing__logo img { display: block; width: auto; height: 60px; max-width: 220px; margin-left: var(--lp-logo-nudge, -48px); object-fit: contain; object-position: left center; mix-blend-mode: lighten; }
+.landing__logo img { display: block; width: auto; height: 60px; max-width: 220px; margin-left: var(--lp-logo-nudge, 0px); object-fit: contain; object-position: left center; mix-blend-mode: lighten; }
 .landing__bar-actions { display: flex; align-items: center; gap: 22px; }
 .landing__signin { font-size: 14px; font-weight: 600; color: #fff; text-decoration: none; }
 .landing__signin:hover { color: var(--lp-green); }
@@ -189,7 +189,7 @@ body.is-landing { padding-top: 0; }
   .landing { --lp-bar-h: 58px; }
   .landing__bar { padding: 0 14px 0 6px; }
   .landing__logo { width: auto; }
-  .landing__logo img { width: auto; height: 46px; max-width: 170px; margin-left: var(--lp-logo-nudge, -36px); }
+  .landing__logo img { width: auto; height: 46px; max-width: 170px; margin-left: var(--lp-logo-nudge, 0px); }
   .landing__bar-actions { gap: 16px; }
 
   .landing__tape-item { padding: 11px 20px; font-size: 13px; }
