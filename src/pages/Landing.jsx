@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import Logo from '../components/Logo'
+import logoImg from '../assets/Royal-logo.png'
 import './Landing.css'
 
 // Coin logos (inline SVG, 32x32)
@@ -22,9 +22,6 @@ function CoinIcon({ k, className }) {
     </svg>
   )
 }
-
-// Use the SAME image file your Navbar uses for its logo.
-const LOGO_SRC = '/logo.png'
 
 const ticker = [
   { s: 'BTC/USDT', p: '64,210.55', c: '+1.12%', up: true },
@@ -92,7 +89,7 @@ export default function Landing() {
     <div className="landing">
       <header className="landing__bar">
         <Link to="/" className="landing__logo" aria-label="Royal Markets home">
-          <img src={LOGO_SRC} alt="Royal Markets" />
+          <img src={logoImg} alt="Royal Markets" />
         </Link>
         <div className="landing__bar-actions">
           <Link to="/login" className="landing__signin">Sign in</Link>
@@ -364,7 +361,9 @@ export default function Landing() {
       </section>
 
       <footer className="foot">
-        <Logo accent />
+        <Link to="/" className="foot__logo" aria-label="Royal Markets home">
+          <img src={logoImg} alt="Royal Markets" />
+        </Link>
         <nav className="foot__nav" aria-label="Footer">
           <Link to="/markets">Markets</Link>
           <Link to="/trade">Spot trading</Link>
