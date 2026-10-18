@@ -11,8 +11,8 @@
   --nav-red: #ff3b4e;
   --nav-h: 56px;
   /* logo height (width follows the image's own proportions) */
-  --nav-logo-h: 36px;
-  --nav-logo-h-m: 30px;
+  --nav-logo-h: 44px;
+  --nav-logo-h-m: 38px;
 }
 
 /* header is fixed, so push page content down by its height */
@@ -55,10 +55,8 @@ body {
   display: block;
   height: var(--nav-logo-h);
   width: auto;
-  aspect-ratio: 304 / 69;
-  object-fit: cover;
-  object-view-box: inset(44.78% 23.47% 44.78% 31.09%);
-  mix-blend-mode: lighten;
+  max-width: 100%;
+  mix-blend-mode: lighten; /* hides the logo's black background */
 }
 
 .nav__links {
@@ -519,6 +517,6 @@ body {
     width: 32px;
   }
   .nav__logo img {
-    height: 26px;
+    height: 34px;
   }
 }
