@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import logoImg from '../Assets/Royal-logo.png'
+import heroImg from '../Assets/hero.jpg'
 import './Landing.css'
 
 // Coin logos (inline SVG, 32x32)
@@ -108,7 +109,8 @@ export default function Landing() {
         </div>
       </div>
 
-      <section className="landing__hero">
+      {/* hero.jpg is the section background (styled in Landing.css via --hero-img) */}
+      <section className="landing__hero" style={{ '--hero-img': `url(${heroImg})` }}>
         <div className="landing__copy">
           <span className="landing__eyebrow">Your doorway to digital assets</span>
           <h1>Trade Smarter, Build Lasting Value</h1>
@@ -122,18 +124,8 @@ export default function Landing() {
             <Link to="/login" className="btn btn--ghost">Log in</Link>
           </div>
         </div>
-
-        <div className="landing__art">
-          <div className="landing__placeholder" role="img" aria-label="Image placeholder">
-            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <rect x="3" y="4" width="18" height="16" rx="2" />
-              <circle cx="9" cy="10" r="1.6" />
-              <path d="M21 16l-5-5-8 9" />
-            </svg>
-            <span>Image placeholder</span>
-          </div>
-        </div>
       </section>
+
       <section className="about">
         <div className="about__copy">
           <span className="about__eyebrow">Why Royal Markets</span>
@@ -192,6 +184,7 @@ export default function Landing() {
           </ul>
         </div>
       </section>
+
       <section className="perks">
         <div className="perks__head">
           <span className="perks__eyebrow">Built For Traders</span>
@@ -228,6 +221,7 @@ export default function Landing() {
           </article>
         </div>
       </section>
+
       <section className="why">
         <div className="why__list">
           <span className="why__eyebrow">Our Advantages</span>
@@ -258,6 +252,7 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
       <section className="prices">
         <div className="prices__head">
           <span className="prices__eyebrow">Market Pulse</span>
@@ -297,6 +292,7 @@ export default function Landing() {
           </table>
         </div>
       </section>
+
       <section className="closing">
         <div className="closing__stats">
           {figures.map((f) => (
@@ -321,6 +317,7 @@ export default function Landing() {
           <small>Free to join. No hidden setup costs.</small>
         </div>
       </section>
+
       <section className="legal">
         <div className="legal__inner">
           <p>
