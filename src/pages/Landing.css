@@ -25,7 +25,7 @@ body.is-landing { padding-top: 0; }
     #000;
 }
 
-/* top bar (fixed, same look as the navbar) */
+/* top bar (fixed, same look as the navbar) - partition line removed, it now lives on the navbar */
 .landing__bar {
   position: fixed;
   top: 0;
@@ -39,7 +39,7 @@ body.is-landing { padding-top: 0; }
   justify-content: space-between;
   padding: 0 24px 0 12px;
   background: #050505;
-  border-bottom: 1px solid #232625;
+  border-bottom: 0;
 }
 .landing__logo { display: flex; align-items: center; justify-content: flex-start; flex-shrink: 0; height: var(--lp-bar-h); }
 /* logo: height stays 52px (same as the original header); width is set separately.
