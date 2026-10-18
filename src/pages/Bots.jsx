@@ -76,6 +76,13 @@ export default function Bots() {
   const [interval, setIntervalV] = useState('1 minute')
   const [asset, setAsset] = useState('EUR/USD')
 
+  // Match the navbar background on this page only; restore on leave
+  useEffect(() => {
+    const prev = document.body.style.background
+    document.body.style.background = 'var(--nav-bg, #050505)'
+    return () => { document.body.style.background = prev }
+  }, [])
+
   const say = (t, m) => setNote({ t, m })
 
   const load = useCallback(async () => {
