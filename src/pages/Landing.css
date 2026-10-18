@@ -14,6 +14,9 @@ body.is-landing { padding-top: 0; }
   --lp-up: #22c55e;
   --lp-down: #f4525f;
   --lp-bar-h: 56px;
+  /* logo height (width follows the image's own proportions) */
+  --lp-logo-h: 40px;
+  --lp-logo-h-m: 32px;
   min-height: 100vh;
   padding-top: var(--lp-bar-h);
   overflow-x: hidden;
@@ -42,9 +45,8 @@ body.is-landing { padding-top: 0; }
   border-bottom: 0;
 }
 .landing__logo { display: flex; align-items: center; justify-content: flex-start; flex-shrink: 0; height: var(--lp-bar-h); }
-/* logo: height stays 52px (same as the original header); width is set separately.
-   object-fit: fill stretches the image to the width below. */
-.landing__logo img { display: block; width: var(--lp-logo-w, 84px); height: 52px; object-fit: fill; mix-blend-mode: lighten; }
+/* logo: fixed height, width follows the image so it is never stretched */
+.landing__logo img { display: block; height: var(--lp-logo-h); width: auto; }
 .landing__bar-actions { display: flex; align-items: center; gap: 22px; }
 .landing__signin { font-size: 14px; font-weight: 600; color: #fff; text-decoration: none; }
 .landing__signin:hover { color: var(--lp-green); }
@@ -195,7 +197,7 @@ body.is-landing { padding-top: 0; }
 /* ---------- footer ---------- */
 .foot { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding: 40px 96px; border-top: 1px solid #141414; background: #000; }
 .foot__logo { display: flex; align-items: center; flex-shrink: 0; }
-.foot__logo img { display: block; height: 44px; width: auto; max-width: 160px; object-fit: contain; }
+.foot__logo img { display: block; height: 64px; width: auto; max-width: 100%; }
 .foot__nav { display: flex; gap: 30px; }
 .foot__nav a { font-size: 14px; color: #9aa3a8; text-decoration: none; transition: color 0.15s; }
 .foot__nav a:hover { color: var(--lp-green); }
@@ -206,7 +208,7 @@ body.is-landing { padding-top: 0; }
   .landing { --lp-bar-h: 54px; }
   .landing__bar { padding: 0 14px 0 6px; }
   .landing__logo { width: auto; }
-  .landing__logo img { width: var(--lp-logo-w-m, 54px); height: 32px; }
+  .landing__logo img { height: var(--lp-logo-h-m); width: auto; }
   .landing__bar-actions { gap: 16px; }
 
   .landing__tape-item { padding: 11px 20px; font-size: 13px; }
@@ -276,6 +278,6 @@ body.is-landing { padding-top: 0; }
 
   .legal__inner { padding: 40px 20px 50px; }
 
-  .foot__logo img { height: 40px; }
+  .foot__logo img { height: 52px; }
   .foot__nav { gap: 14px 20px; }
 }
