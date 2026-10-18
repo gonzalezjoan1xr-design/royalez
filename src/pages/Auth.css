@@ -1,135 +1,175 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 .auth {
+  --a-page: #000000;
+  --a-card: #111111;
+  --a-card-border: #1f1f1f;
+  --a-input: #1a1a1a;
+  --a-input-border: #262626;
+  --a-text: #ffffff;
+  --a-sub: #b3b3b3;
+  --a-muted: #8c8c8c;
+
   min-height: 100vh;
   display: grid;
   place-content: center;
   justify-items: center;
-  padding: 40px 16px;
+  padding: 16px;
   position: relative;
+  background: var(--a-page);
+  color: var(--a-text);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Back link, top-left of the page */
 .auth__back {
   position: absolute;
   top: 16px;
-  left: 16px;
+  left: 20px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--muted);
+  gap: 12px;
+  font-size: 20px;
+  color: var(--a-sub);
+  z-index: 1;
 }
-.auth__back:hover { color: var(--text); }
+.auth__back:hover { color: var(--a-text); }
 .auth__back:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 4px; }
 
+/* Card */
 .auth__card {
-  width: min(360px, 100%);
+  width: min(670px, 100%);
   display: grid;
-  gap: 16px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 28px 18px 20px;
+  gap: 28px;
+  background: var(--a-card);
+  border: 1px solid var(--a-card-border);
+  border-radius: 16px;
+  padding: 40px 37px;
 }
 
 .auth__logo { justify-self: center; display: block; }
+.auth__logo img {
+  display: block;
+  height: 110px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
 
-.auth__head { text-align: center; display: grid; gap: 8px; margin-bottom: 4px; }
-.auth__head h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; color: var(--text); }
-.auth__head p { font-size: 12px; color: var(--muted); }
+.auth__head { text-align: center; display: grid; gap: 14px; margin: 8px 0 4px; }
+.auth__head h1 {
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  color: var(--a-text);
+  margin: 0;
+}
+.auth__head p { font-size: 20px; color: var(--a-sub); margin: 0; }
 
 /* Labels + inputs */
 .auth__card label,
 .auth__label {
   display: grid;
-  gap: 8px;
-  font-size: 11px;
+  gap: 12px;
+  font-size: 20px;
   font-weight: 600;
-  color: var(--text);
+  line-height: 1.2;
+  color: var(--a-text);
 }
 
 .auth__card input,
 .auth__card select {
   width: 100%;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 0 11px;
-  height: 32px;
-  color: var(--text);
-  font-size: 12px;
+  height: 60px;
+  padding: 0 19px;
+  background: var(--a-input);
+  border: 1px solid var(--a-input-border);
+  border-radius: 8px;
+  color: var(--a-text);
+  font-size: 20px;
   font-weight: 400;
   font-family: inherit;
 }
-.auth__card input::placeholder { color: var(--muted); }
+.auth__card input::placeholder { color: var(--a-muted); }
 .auth__card input:focus,
 .auth__card select:focus { border-color: var(--green); outline: none; }
 
-.auth__row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.auth__row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 
 /* Phone: country select + dial code + number */
-.auth__field { display: grid; gap: 8px; }
-.auth__phone { display: grid; grid-template-columns: 48px 1fr; gap: 6px; }
+.auth__field { display: grid; gap: 12px; }
+.auth__phone { display: grid; grid-template-columns: 86px 1fr; gap: 13px; }
 
 .auth__country { position: relative; }
 .auth__country select {
   appearance: none;
   -webkit-appearance: none;
-  padding: 0 14px 0 8px;
+  padding: 0 30px 0 19px;
   font-weight: 700;
   cursor: pointer;
 }
+.auth__country select option { background: var(--a-input); color: var(--a-text); }
 .auth__country svg {
   position: absolute;
-  right: 6px;
+  right: 15px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--muted);
+  color: var(--a-sub);
   pointer-events: none;
 }
 
 .auth__dial {
   display: flex;
   align-items: center;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  height: 32px;
-  padding-left: 11px;
+  height: 60px;
+  padding-left: 19px;
+  background: var(--a-input);
+  border: 1px solid var(--a-input-border);
+  border-radius: 8px;
 }
 .auth__dial:focus-within { border-color: var(--green); }
 .auth__dial span {
-  font-size: 12px;
-  color: var(--muted);
-  padding-right: 10px;
-  margin-right: 10px;
-  border-right: 1px solid var(--border);
-  line-height: 14px;
+  font-size: 20px;
+  color: var(--a-sub);
+  padding-right: 18px;
+  margin-right: 18px;
+  border-right: 1px solid var(--a-input-border);
+  line-height: 24px;
 }
-.auth__dial input { border: 0; background: transparent; height: 100%; padding: 0; border-radius: 0; }
+.auth__dial input {
+  border: 0;
+  background: transparent;
+  height: 100%;
+  padding: 0;
+  border-radius: 0;
+}
 .auth__dial input:focus { border: 0; }
 
 /* Submit */
 .auth__submit {
   background: var(--green);
   color: #04130a;
-  font-weight: 600;
-  font-size: 12px;
-  height: 32px;
-  border-radius: 6px;
-  margin-top: 6px;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 20px;
+  height: 60px;
+  border: 0;
+  border-radius: 8px;
+  margin-top: 8px;
   cursor: pointer;
 }
 .auth__submit:hover { filter: brightness(1.05); }
-.auth__submit:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+.auth__submit:focus-visible { outline: 2px solid var(--a-text); outline-offset: 2px; }
 .auth__submit:disabled { opacity: 0.6; cursor: wait; }
 
 /* Messages */
-.auth__msg { padding: 8px 10px; border-radius: 6px; font-size: 12px; }
+.auth__msg { padding: 14px 16px; border-radius: 8px; font-size: 17px; }
 .auth__msg--err { background: var(--red-soft); color: var(--red); }
 .auth__msg--ok { background: var(--green-soft); color: var(--green); }
 
-.auth__switch { text-align: center; color: var(--muted); font-size: 12px; }
-.auth__switch a { color: var(--green); font-weight: 600; }
+.auth__switch { text-align: center; color: var(--a-sub); font-size: 20px; }
+.auth__switch a { color: var(--green); font-weight: 500; }
 
 /* Forgot password link (sign in only) */
 .auth__forgot {
@@ -137,8 +177,9 @@
   background: none;
   border: 0;
   padding: 0;
-  margin-top: 2px;
-  font-size: 12px;
+  margin-top: -10px;
+  font-family: inherit;
+  font-size: 18px;
   font-weight: 600;
   color: var(--green);
   cursor: pointer;
@@ -146,34 +187,24 @@
 .auth__forgot:hover { text-decoration: underline; }
 .auth__forgot:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 4px; }
 
-/* Sign in card (slightly larger than sign up) */
-.auth__card--lg {
-  width: min(800px, 100%);
-  gap: 24px;
-  padding: 36px 28px 30px;
-  border-radius: 14px;
+/* Tablet / phone */
+@media (max-width: 640px) {
+  .auth { padding: 64px 12px 24px; align-content: start; }
+  .auth__back { font-size: 16px; left: 16px; gap: 8px; }
+  .auth__card { gap: 22px; padding: 28px 20px; }
+  .auth__logo img { height: 84px; }
+  .auth__head h1 { font-size: 28px; }
+  .auth__head p { font-size: 16px; }
+  .auth__card label, .auth__label { font-size: 16px; gap: 10px; }
+  .auth__card input, .auth__card select, .auth__dial { height: 52px; font-size: 16px; }
+  .auth__dial span { font-size: 16px; padding-right: 12px; margin-right: 12px; }
+  .auth__phone { grid-template-columns: 72px 1fr; gap: 10px; }
+  .auth__submit { height: 52px; font-size: 16px; }
+  .auth__switch { font-size: 16px; }
+  .auth__forgot { font-size: 15px; }
+  .auth__msg { font-size: 15px; }
 }
-.auth__card--lg .auth__head { gap: 14px; margin-bottom: 8px; }
-.auth__card--lg .auth__head h1 { font-size: 28px; }
-.auth__card--lg .auth__head p { font-size: 16px; }
-.auth__card--lg label { font-size: 15px; gap: 12px; }
-.auth__card--lg input { height: 48px; font-size: 16px; border-radius: 8px; padding: 0 16px; }
-.auth__card--lg .auth__forgot { font-size: 15px; margin-top: -6px; }
-.auth__card--lg .auth__submit { height: 48px; font-size: 16px; border-radius: 8px; margin-top: 0; }
-.auth__card--lg .auth__msg { font-size: 15px; }
-.auth__card--lg .auth__switch { font-size: 15px; }
 
-/* Signup-only elements at the larger size */
-.auth__card--lg .auth__row { gap: 16px; }
-.auth__card--lg .auth__field { gap: 12px; }
-.auth__card--lg .auth__label { font-size: 15px; }
-.auth__card--lg .auth__phone { grid-template-columns: 76px 1fr; gap: 10px; }
-.auth__card--lg .auth__country select { height: 48px; font-size: 16px; padding: 0 24px 0 14px; }
-.auth__card--lg .auth__country svg { right: 11px; }
-.auth__card--lg .auth__dial { height: 48px; padding-left: 16px; }
-.auth__card--lg .auth__dial span { font-size: 16px; padding-right: 14px; margin-right: 14px; line-height: 18px; }
-.auth__card--lg .auth__dial input { height: 100%; padding: 0; font-size: 16px; }
-
-@media (max-width: 380px) {
+@media (max-width: 420px) {
   .auth__row { grid-template-columns: 1fr; }
 }
