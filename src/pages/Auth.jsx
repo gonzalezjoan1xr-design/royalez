@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import Logo from '../components/Logo'
+import logo from '../Assets/Royal-logo.png'
 import './Auth.css'
 
 const COUNTRIES = [
@@ -77,18 +77,20 @@ export default function Auth({ mode }) {
   return (
     <div className="auth">
       <Link to="/" className="auth__back">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
         Back
       </Link>
 
-      <form className="auth__card auth__card--lg" onSubmit={submit}>
-        <Link to="/" className="auth__logo"><Logo /></Link>
+      <form className="auth__card" onSubmit={submit}>
+        <Link to="/" className="auth__logo">
+          <img src={logo} alt="Royal Markets" />
+        </Link>
 
         <div className="auth__head">
           <h1>{isSignup ? 'Create an account' : 'Welcome back'}</h1>
-          <p>{isSignup ? 'Start trading crypto with Horizon Markets' : 'Sign in to your Horizon Markets account'}</p>
+          <p>{isSignup ? 'Start trading crypto with Royal Markets' : 'Sign in to your Royal Markets account'}</p>
         </div>
 
         {isSignup && (
@@ -119,7 +121,7 @@ export default function Auth({ mode }) {
                     <option key={c.code} value={c.code}>{c.code}</option>
                   ))}
                 </select>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M6 9l6 6 6-6" />
                 </svg>
               </div>
