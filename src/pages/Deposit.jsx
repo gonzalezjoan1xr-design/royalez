@@ -90,6 +90,13 @@ export default function Deposit() {
   const [checking, setChecking] = useState(false)
   const [note, setNote] = useState('')
 
+  // Match the navbar background on this page only; restore on leave
+  useEffect(() => {
+    const prev = document.body.style.background
+    document.body.style.background = 'var(--nav-bg, #050505)'
+    return () => { document.body.style.background = prev }
+  }, [])
+
   useEffect(() => { const id = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(id) }, [])
 
   useEffect(() => {
