@@ -108,6 +108,22 @@ export default function Withdraw() {
   const [toast, setToast] = useState(null) // { type: 'ok' | 'err', title, text }
   const [history, setHistory] = useState([])
 
+  // remove the layout's top/bottom spacing around this page (restored when you leave)
+  const rootRef = useRef(null)
+  useEffect(() => {
+    const saved = []
+    let el = rootRef.current?.parentElement
+    while (el && el !== document.body && el !== document.documentElement) {
+      const props = ['padding-top', 'padding-bottom', 'margin-top', 'margin-bottom']
+      saved.push([el, props.map((p) => [p, el.style.getPropertyValue(p), el.style.getPropertyPriority(p)])])
+      props.forEach((p) => el.style.setProperty(p, '0', 'important'))
+      el = el.parentElement
+    }
+    return () => {
+      saved.forEach(([node, list]) => list.forEach(([p, v, pr]) => (v ? node.style.setProperty(p, v, pr) : node.style.removeProperty(p))))
+    }
+  }, [])
+
   const networkList = coin ? NETWORKS[coin] : []
   const activeNetwork = networkList.find((n) => n.id === network)
   const fee = activeNetwork ? activeNetwork.fee : 0
@@ -166,7 +182,7 @@ export default function Withdraw() {
   }
 
   return (
-    <div className="wd">
+    <div className="wd" ref={rootRef}>
       <header className="wd__head">
         <span className="wd__head-icon"><ArrowDownLeft /></span>
         <div>
