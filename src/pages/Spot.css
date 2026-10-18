@@ -9,7 +9,7 @@ body:has(.spot) { overflow-x: hidden; }
   /* full-bleed: break out of the layout's side padding / max-width */
   width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
   height: auto; min-height: 640px; align-items: stretch;
-  background: #000; color: #fff; border: 1px solid #1c1c1c; border-left: 0; border-right: 0; border-radius: 0; overflow: hidden;
+  background: #000; color: #fff; border: 0; border-radius: 0; overflow: hidden;
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 14px;
 }
 .spot *, .spot *::before, .spot *::after { box-sizing: border-box; }
