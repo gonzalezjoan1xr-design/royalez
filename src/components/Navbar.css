@@ -10,9 +10,9 @@
   --nav-green-border: rgba(34, 197, 94, 0.28);
   --nav-red: #ff3b4e;
   --nav-h: 56px;
-  /* logo size, same as the landing page header */
-  --nav-logo-w: 84px;
-  --nav-logo-w-m: 54px;
+  /* logo height (width follows the image's own proportions) */
+  --nav-logo-h: 40px;
+  --nav-logo-h-m: 32px;
 }
 
 /* header is fixed, so push page content down by its height */
@@ -43,8 +43,7 @@ body {
   box-sizing: border-box;
 }
 
-/* logo: same layout as the landing page header.
-   height stays 52px, width is set separately, object-fit: fill stretches the image to that width. */
+/* logo: fixed height, width follows the image so it is never stretched */
 .nav__logo {
   display: flex;
   align-items: center;
@@ -54,10 +53,8 @@ body {
 }
 .nav__logo img {
   display: block;
-  width: var(--nav-logo-w);
-  height: 52px;
-  object-fit: fill;
-  mix-blend-mode: lighten;
+  height: var(--nav-logo-h);
+  width: auto;
 }
 
 .nav__links {
@@ -305,8 +302,8 @@ body {
     gap: 6px;
   }
   .nav__logo img {
-    width: var(--nav-logo-w-m);
-    height: 32px;
+    height: var(--nav-logo-h-m);
+    width: auto;
   }
 
   .nav__links,
