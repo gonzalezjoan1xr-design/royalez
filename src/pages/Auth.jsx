@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import logo from '../Assets/Royal-logo.png'
+import logo from '../Assets/logo-R.png'
 import './Auth.css'
 
 const COUNTRIES = [
