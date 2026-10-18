@@ -42,6 +42,8 @@ body:has(.spot) { overflow-x: hidden; }
 .spot__main { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-width: 0; min-height: 0; }
 .spot__top { display: flex; align-items: center; gap: 14px; padding: 12px 20px; border-bottom: 1px solid #1c1c1c; flex-wrap: wrap; }
 .spot__ticon { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+.spot .spot__pair { display: flex; align-items: center; gap: 14px; min-width: 0; text-align: left; cursor: default; pointer-events: none; }
+.spot__chev, .spot__mclose { display: none; }
 .spot__tname { display: grid; } .spot__tname strong { font-size: 17px; } .spot__tname small { color: #a3a8a6; font-size: 12px; }
 .spot__tprice { font-family: var(--mono); font-size: 24px; font-weight: 700; margin-left: 8px; }
 .spot__tch { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 14px; }
@@ -75,7 +77,7 @@ body:has(.spot) { overflow-x: hidden; }
 .spot__area { fill: color-mix(in srgb, var(--g) 14%, transparent); }
 
 /* ---- order book ---- */
-.spot__book { display: flex; flex-direction: column; background: #050505; }
+.spot__bookcol { display: flex; flex-direction: column; background: #050505; }
 .spot__bhead { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; }
 .spot__bhead h3 { font-size: 15px; }
 .spot__bhead--sub { border-top: 1px solid #1c1c1c; }
@@ -132,87 +134,110 @@ body:has(.spot) { overflow-x: hidden; }
    ===================================================================== */
 @media (max-width: 1350px) { .spot__body { grid-template-columns: minmax(0, 1fr) 250px 280px; } .spot__tstats { gap: 16px; } }
 
-/* ---- tablet + phone: single column, trading-first order ---- */
+/* ---- tablet + phone: stacked cards, markets in a sheet ---- */
 @media (max-width: 1150px) {
-  .spot { grid-template-columns: 1fr; min-height: 0; }
-  .spot__markets { max-height: 280px; border-right: 0; border-bottom: 1px solid #1c1c1c; }
-  .spot__mlist { flex: none; max-height: 200px; }
+  .spot { grid-template-columns: minmax(0, 1fr); min-height: 0; }
 
-  .spot__body { grid-template-columns: 1fr; }
-  .spot__body > div { border-right: 0; border-bottom: 1px solid #1c1c1c; }
-  .spot__body > div:last-child { border-bottom: 0; }
-  /* chart first, then the order form, then the order book */
-  .spot__chart { order: 1; }
-  .spot__form { order: 2; overflow: visible; }
-  .spot__book { order: 3; }
+  /* markets list: hidden, opened as a full-screen sheet from the pair selector */
+  .spot__markets { display: none; border-right: 0; }
+  .spot__markets.is-open { display: flex; position: fixed; z-index: 900; top: var(--nav-h, 54px); left: 0; right: 0; bottom: 0; background: #050505; }
+  .spot__mclose { display: grid; place-items: center; margin-left: auto; width: 34px; height: 34px; border-radius: 8px; color: #a3a8a6; }
+  .spot__mclose:hover { background: #101010; color: #fff; }
 
-  .spot__plot { min-height: 340px; }
-  .spot__tstats { margin-left: 0; width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  /* pair selector (icon + pair + chevron) */
+  .spot .spot__pair { pointer-events: auto; cursor: pointer; }
+  .spot__chev { display: block; flex: none; color: #a3a8a6; }
+
+  /* body: stacked, rounded cards with a gap between them */
+  .spot__body { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 12px; }
+  .spot__body > div { border-right: 0; }
+  .spot__bookcol { display: contents; }
+  .spot .spot__body .spot__chart,
+  .spot .spot__body .spot__book,
+  .spot .spot__body .spot__trades,
+  .spot .spot__body .spot__form { background: #0a0a0a; border: 1px solid #202020; border-radius: 14px; overflow: hidden; min-width: 0; }
+  /* chart, order book, recent trades, order form */
+  .spot__chart { order: 1; } .spot__book { order: 2; } .spot__trades { order: 3; } .spot__form { order: 4; }
+
+  /* chart card: title + timeframes on row 1, chart type on row 2 */
+  .spot__ctrl { display: grid; grid-template-columns: 1fr auto; gap: 10px 12px; padding: 14px; border-bottom: 0; }
+  .spot__ctrl strong { font-size: 17px; margin: 0; align-self: center; }
+  .spot__ctrl .spot__seg:not(.spot__seg--flat) { grid-column: 1 / -1; justify-self: start; padding: 4px; border-radius: 10px; background: #0f0f0f; border: 1px solid #1f1f1f; }
+  .spot__seg--flat button { padding: 6px 9px; font-size: 12px; }
+  .spot__plot { min-height: 240px; }
+
+  /* order book + recent trades cards */
+  .spot__bhead { padding: 12px 14px 10px; }
+  .spot__bhead h3 { font-size: 14px; }
+  .spot__bhead .spot__seg button { padding: 4px 8px; font-size: 11px; }
+  .spot .spot__trades .spot__bhead--sub { border-top: 0; }
+  .spot__cols { font-size: 11px; }
+  .spot__cols span:nth-child(-n+2) { color: #d4a72c; }
+  .spot__book .spot__rows { max-height: 320px; overflow-y: auto; }
+  .spot__trades .spot__rows { max-height: 200px; overflow-y: auto; padding-bottom: 0; }
+
+  /* order form card */
+  .spot__form { padding: 14px; gap: 10px; }
+  .spot__sides { padding: 4px; gap: 4px; background: #111; border: 1px solid #1f1f1f; border-radius: 12px; }
+  .spot__sides button { height: 42px; border-radius: 9px; }
+  .spot__seg--wide { background: #111; }
+  .spot__seg--wide button:not(.is-on) { color: #c4a27a; }
+  .spot__lbl { color: #d4a72c; }
+  .spot__form label:nth-of-type(3) { color: #e6e9e7; }
+  /* 16px inputs stop iOS zooming in on focus */
+  .spot__inp { height: 44px; font-size: 16px; background: #171717; border-color: #232323; border-radius: 10px; }
+  .spot__pcts button { height: 38px; background: #121212; border-color: #232323; border-radius: 9px; }
+  .spot__line2:has(+ .spot__line2), .spot__line2:has(+ .spot__line2) b { color: #d4a72c; }
+  .spot__submit { height: 48px; border-radius: 10px; }
+
+  /* bottom tabs */
+  .spot__tabs { padding: 8px 10px; gap: 4px; overflow-x: auto; }
+  .spot__tabs button { height: 34px; padding: 0 12px; font-size: 12px; gap: 6px; }
+  .spot__tabs button svg { width: 14px; height: 14px; }
+  .spot__empty { font-size: 14px; min-height: 90px; }
 }
 
-/* ---- tablet: form and order book side by side under the chart ---- */
+/* ---- tablet: order book + trades on the left, order form on the right ---- */
 @media (min-width: 640px) and (max-width: 1150px) {
-  .spot__body { grid-template-columns: 1fr 1fr; }
-  .spot__body > .spot__chart { grid-column: 1 / -1; }
-  .spot__body > .spot__form { border-right: 1px solid #1c1c1c; border-bottom: 0; }
-  .spot__body > .spot__book { border-bottom: 0; }
+  .spot__body { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "chart chart" "book form" "trades form"; }
+  .spot__chart { grid-area: chart; } .spot__book { grid-area: book; } .spot__trades { grid-area: trades; } .spot__form { grid-area: form; }
 }
 
 /* ---- phone ---- */
 @media (max-width: 639px) {
   .spot { font-size: 13px; }
 
-  /* markets list */
-  .spot__markets { max-height: 260px; }
-  .spot__markets h2 { padding: 14px 12px 8px; }
-  .spot__search { margin: 0 12px 10px; }
-  .spot__search input { font-size: 16px; }
-  .spot__mhead { padding: 8px 12px; }
-  .spot__mlist { max-height: 180px; }
-  .spot__mrow { padding: 10px 12px; grid-template-columns: 18px 28px minmax(0, 1fr) auto 62px; }
+  /* one-line pair bar: icon, pair v, price, change */
+  .spot__top { flex-wrap: nowrap; gap: 10px; padding: 12px 14px; }
+  .spot .spot__pair { gap: 8px; }
+  .spot__ticon { width: 30px; height: 30px; }
+  .spot__tname strong { font-size: 15px; white-space: nowrap; }
+  .spot__tname small { display: none; }
+  .spot__tprice { font-size: 17px; margin-left: auto; white-space: nowrap; }
+  .spot__tch { font-size: 12px; white-space: nowrap; }
+  .spot__tch svg { width: 14px; height: 14px; }
+  .spot__tstats { display: none; }
 
-  /* pair header */
-  .spot__top { padding: 12px 14px; gap: 10px 12px; }
-  .spot__ticon { width: 32px; height: 32px; }
-  .spot__tname strong { font-size: 15px; }
-  .spot__tprice { font-size: 20px; margin-left: 0; }
-  .spot__tch { font-size: 13px; }
-  .spot__tstats b { font-size: 12px; }
-
-  /* chart */
-  .spot__ctrl { padding: 10px 12px; gap: 10px; }
-  .spot__ctrl strong { display: none; }
-  .spot__seg--flat { max-width: 100%; overflow-x: auto; }
-  .spot__seg button { padding: 7px 10px; }
-  .spot__plot { min-height: 280px; padding: 10px 50px 10px 6px; }
+  .spot__plot { min-height: 220px; padding: 4px 54px 12px 6px; }
   .spot__ylab { right: 4px; font-size: 10px; }
 
-  /* order form: 16px inputs stop iOS zooming in on focus, bigger tap targets */
-  .spot__form { padding: 14px 14px 18px; }
-  .spot__inp { height: 44px; font-size: 16px; }
-  .spot__sides button { height: 44px; }
-  .spot__pcts button { height: 36px; }
-  .spot__submit { height: 48px; }
+  /* markets sheet */
+  .spot__markets h2 { padding: 14px 14px 8px; }
+  .spot__search { margin: 0 14px 10px; }
+  .spot__search input { font-size: 16px; }
+  .spot__mhead { padding: 8px 14px; }
+  .spot__mrow { padding: 10px 14px; grid-template-columns: 18px 28px minmax(0, 1fr) auto 62px; }
 
-  /* order book */
-  .spot__bhead, .spot__cols, .spot__orow { padding-left: 12px; padding-right: 12px; }
-
-  /* bottom tabs + tables */
-  .spot__tabs { padding: 8px; gap: 4px; overflow-x: auto; }
-  .spot__tabs button { flex: 1; justify-content: center; height: 40px; padding: 0 10px; font-size: 14px; }
-  .spot__panel { max-height: 260px; }
-  .spot__empty { font-size: 14px; min-height: 90px; }
   .spot__table th, .spot__table td { padding: 9px 12px; }
 }
 
 /* ---- small phones ---- */
 @media (max-width: 380px) {
-  .spot__tstats { gap: 8px; }
-  .spot__tstats small { font-size: 10px; }
-  .spot__tstats b { font-size: 11px; }
-  .spot__tprice { font-size: 18px; }
-  .spot__plot { padding-right: 46px; }
-  .spot__mrow { gap: 6px; grid-template-columns: 16px 26px minmax(0, 1fr) auto 56px; }
+  .spot__top { gap: 8px; padding: 12px 10px; }
+  .spot__tname strong { font-size: 14px; }
+  .spot__tprice { font-size: 15px; }
+  .spot__tch { font-size: 11px; }
+  .spot__plot { padding-right: 48px; }
+  .spot__mrow { gap: 6px; padding: 10px; grid-template-columns: 16px 26px minmax(0, 1fr) auto 56px; }
   .spot__mpx, .spot__mch { font-size: 11px; }
-  .spot__tabs button { gap: 6px; padding: 0 6px; font-size: 13px; }
 }
