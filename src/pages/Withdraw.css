@@ -9,9 +9,10 @@
   --wd-field: #000000;
   --wd-line: #1c1c1c;
 
-  min-height: 100vh;
+  /* fills exactly the space under the fixed navbar, so the page never scrolls for no reason */
+  min-height: calc(100vh - var(--nav-h, 56px));
   box-sizing: border-box;
-  padding: 40px 24px 70px;
+  padding: 0 24px;
   background: #000;
   /* extend the black background to the full width of the screen */
   box-shadow: 0 0 0 100vmax #000;
@@ -176,7 +177,8 @@
   .wd__grid { grid-template-columns: 1fr; gap: 20px; }
 }
 @media (max-width: 560px) {
-  .wd { padding: 28px 14px 60px; }
+  .wd { padding: 0 14px; }
+  .wd__head { margin-bottom: 20px; }
   .wd__title { font-size: 24px; }
   .wd__sub { font-size: 14px; }
   .wd__head-icon { width: 42px; height: 42px; }
