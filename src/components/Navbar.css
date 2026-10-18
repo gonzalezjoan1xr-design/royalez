@@ -4,11 +4,15 @@
   --nav-border: #232625;
   --nav-text: #a3a8a5;
   --nav-text-strong: #f2f4f3;
-  --nav-green: #19e68c;
-  --nav-green-bg: rgba(25, 230, 140, 0.1);
-  --nav-green-border: rgba(25, 230, 140, 0.28);
+  /* same green as the landing page ("Get started" green) */
+  --nav-green: #22c55e;
+  --nav-green-bg: rgba(34, 197, 94, 0.12);
+  --nav-green-border: rgba(34, 197, 94, 0.28);
   --nav-red: #ff3b4e;
   --nav-h: 56px;
+  /* logo size, same as the landing page header */
+  --nav-logo-w: 84px;
+  --nav-logo-w-m: 54px;
 }
 
 /* header is fixed, so push page content down by its height */
@@ -27,30 +31,33 @@ body {
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 0 24px;
+  padding: 0 24px 0 12px;
   background: #050505 !important;
   background-color: #050505 !important;
   opacity: 1 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  border-bottom: 0;
+  /* partition line (moved here from the landing page header) */
+  border-bottom: 1px solid var(--nav-border);
   overflow: hidden;
   box-sizing: border-box;
 }
 
+/* logo: same layout as the landing page header.
+   height stays 52px, width is set separately, object-fit: fill stretches the image to that width. */
 .nav__logo {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   flex-shrink: 0;
-  width: 130px;
   height: var(--nav-h);
 }
 .nav__logo img {
-  width: 100%;
-  height: 52px;
-  object-fit: contain;
   display: block;
+  width: var(--nav-logo-w);
+  height: 52px;
+  object-fit: fill;
+  mix-blend-mode: lighten;
 }
 
 .nav__links {
@@ -220,7 +227,7 @@ body {
   align-items: center;
   justify-content: center;
   background: var(--nav-green);
-  color: #04130c;
+  color: #04130a;
   border-radius: 999px;
   font-size: 10px;
   font-weight: 700;
@@ -241,10 +248,7 @@ body {
 @media (max-width: 1560px) {
   .nav {
     gap: 16px;
-    padding: 0 20px;
-  }
-  .nav__logo {
-    width: 120px;
+    padding: 0 20px 0 12px;
   }
   .nav__link {
     padding: 0 11px;
@@ -255,10 +259,7 @@ body {
 @media (max-width: 1440px) {
   .nav {
     gap: 12px;
-    padding: 0 16px;
-  }
-  .nav__logo {
-    width: 110px;
+    padding: 0 16px 0 12px;
   }
   .nav__links {
     gap: 4px;
@@ -281,9 +282,6 @@ body {
 
 /* ---------- Step 3: Get App becomes icon only ---------- */
 @media (max-width: 1300px) {
-  .nav__logo {
-    width: 96px;
-  }
   .nav__link {
     padding: 0 8px;
   }
@@ -303,15 +301,11 @@ body {
   }
 
   .nav {
-    padding: 0 12px;
+    padding: 0 12px 0 6px;
     gap: 6px;
   }
-  .nav__logo {
-    width: auto;
-    height: auto;
-  }
   .nav__logo img {
-    width: auto;
+    width: var(--nav-logo-w-m);
     height: 32px;
   }
 
