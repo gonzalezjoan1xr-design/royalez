@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import logoImg from '../Assets/Royal-logo.png'
+import logoImg from '../Assets/logo-R.png'
 import heroImg from '../Assets/hero.jpg'
 import './Landing.css'
 
