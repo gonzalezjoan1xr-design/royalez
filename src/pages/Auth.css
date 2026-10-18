@@ -57,13 +57,11 @@
 .auth__logo { justify-self: center; display: block; }
 .auth__logo img {
   display: block;
-  height: 120px;
+  height: 90px;
   width: auto;
   max-width: 100%;
-  aspect-ratio: 355 / 215;
-  object-fit: cover;
-  object-view-box: inset(34.04% 23.32% 33.43% 23.62%);
-  mix-blend-mode: lighten;
+  object-fit: contain;
+  mix-blend-mode: lighten; /* hides the logo's black background on the dark card */
 }
 
 .auth__head { text-align: center; display: grid; gap: 8px; margin: 8px 0 6px; }
@@ -202,7 +200,7 @@
 /* Small screens: keep the card clear of the Back link */
 @media (max-width: 560px) {
   .auth { padding: 52px 12px 16px; }
-  .auth__logo img { height: 100px; }
+  .auth__logo img { height: 80px; }
 }
 @media (max-width: 380px) {
   .auth__row { grid-template-columns: 1fr; }
