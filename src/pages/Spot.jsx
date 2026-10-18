@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Search, Star, TrendingUp, TrendingDown, Wallet, List, Clock, Activity } from 'lucide-react'
+import { Search, Star, TrendingUp, TrendingDown, Wallet, List, Clock, Activity, ChevronDown, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import useTickers, { COINS, coinIcon } from '../hooks/useTickers'
@@ -46,6 +46,7 @@ export default function Spot() {
   const [symbol, setSymbol] = useState('BTC')
   const [q, setQ] = useState('')
   const [favs, setFavs] = useState(() => new Set(['BTC', 'ETH']))
+  const [mOpen, setMOpen] = useState(false) // markets sheet (tablet / phone)
   const [tf, setTf] = useState('1D')
   const [ctype, setCtype] = useState('Candle')
   const [candles, setCandles] = useState(null)
@@ -62,6 +63,14 @@ export default function Spot() {
   const [busy, setBusy] = useState(false)
   const [btab, setBtab] = useState('orders')
   const [history, setHistory] = useState([])
+
+  // lock page scroll while the markets sheet is open
+  useEffect(() => {
+    if (!mOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [mOpen])
 
   // top-100 USDT pairs: your live tickers first, topped up from Binance by 24h volume
   const [extra, setExtra] = useState([])
@@ -213,14 +222,17 @@ export default function Spot() {
 
   return (
     <div className="spot">
-      {/* ---------- markets list ---------- */}
-      <aside className="spot__markets">
-        <h2>Markets <small>{markets.length}</small></h2>
+      {/* ---------- markets list (sidebar on desktop, sheet on tablet / phone) ---------- */}
+      <aside className={`spot__markets ${mOpen ? 'is-open' : ''}`}>
+        <h2>
+          Markets <small>{markets.length}</small>
+          <button type="button" className="spot__mclose" aria-label="Close markets" onClick={() => setMOpen(false)}><X size={18} /></button>
+        </h2>
         <label className="spot__search"><Search size={16} /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search..." /></label>
         <div className="spot__mhead"><span>Pair</span><span>Price</span><span>24h</span></div>
         <div className="spot__mlist">
           {list.map((x) => (
-            <div key={x.symbol} className={`spot__mrow ${x.symbol === symbol ? 'is-on' : ''}`} onClick={() => setSymbol(x.symbol)}>
+            <div key={x.symbol} className={`spot__mrow ${x.symbol === symbol ? 'is-on' : ''}`} onClick={() => { setSymbol(x.symbol); setMOpen(false) }}>
               <button className={`spot__star ${favs.has(x.symbol) ? 'is-fav' : ''}`} aria-label="Favourite"
                 onClick={(e) => { e.stopPropagation(); setFavs((f) => { const n = new Set(f); n.has(x.symbol) ? n.delete(x.symbol) : n.add(x.symbol); return n }) }}>
                 <Star size={16} />
@@ -237,8 +249,11 @@ export default function Spot() {
       <section className="spot__main">
         {/* ---------- pair header ---------- */}
         <header className="spot__top">
-          <img className="spot__ticon" src={coinIcon(symbol)} alt="" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
-          <div className="spot__tname"><strong>{symbol}/USDT</strong><small>{COINS[symbol]}</small></div>
+          <button type="button" className="spot__pair" aria-label="Choose market" onClick={() => setMOpen(true)}>
+            <img className="spot__ticon" src={coinIcon(symbol)} alt="" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
+            <span className="spot__tname"><strong>{symbol}/USDT</strong><small>{COINS[symbol]}</small></span>
+            <ChevronDown size={16} className="spot__chev" />
+          </button>
           <div className="spot__tprice">${num(live)}</div>
           <div className={`spot__tch ${up ? 'up' : 'down'}`}>{up ? <TrendingUp size={16} /> : <TrendingDown size={16} />} {up ? '+' : ''}{change.toFixed(2)}%</div>
           <div className="spot__tstats">
@@ -282,30 +297,35 @@ export default function Spot() {
             </div>
           </div>
 
-          {/* ---------- order book + trades ---------- */}
-          <div className="spot__book">
-            <div className="spot__bhead">
-              <h3>Order Book</h3>
-              <div className="spot__seg">
-                {[['both', 'Both'], ['bids', 'Bids'], ['asks', 'Asks']].map(([k, l]) => <button key={k} className={obView === k ? 'is-on' : ''} onClick={() => setObView(k)}>{l}</button>)}
+          {/* ---------- order book + trades (one column on desktop, two cards on phone) ---------- */}
+          <div className="spot__bookcol">
+            <div className="spot__book">
+              <div className="spot__bhead">
+                <h3>Order Book</h3>
+                <div className="spot__seg">
+                  {[['both', 'Both'], ['bids', 'Bids'], ['asks', 'Asks']].map(([k, l]) => <button key={k} className={obView === k ? 'is-on' : ''} onClick={() => setObView(k)}>{l}</button>)}
+                </div>
+              </div>
+              <div className="spot__cols"><span>Price</span><span>Amount</span><span>Total</span></div>
+              <div className="spot__rows">
+                {obView !== 'bids' && book.asks.map((r, i) => (
+                  <div key={`a${i}`} className="spot__orow ask" style={{ '--w': `${(r.a / book.max) * 100}%` }}><span>{num(r.p)}</span><span>{r.a.toFixed(4)}</span><span>{num(r.tot, 2)}</span></div>
+                ))}
+                <div className="spot__midp">{num(live)}</div>
+                {obView !== 'asks' && book.bids.map((r, i) => (
+                  <div key={`b${i}`} className="spot__orow bid" style={{ '--w': `${(r.a / book.max) * 100}%` }}><span>{num(r.p)}</span><span>{r.a.toFixed(4)}</span><span>{num(r.tot, 2)}</span></div>
+                ))}
               </div>
             </div>
-            <div className="spot__cols"><span>Price</span><span>Amount</span><span>Total</span></div>
-            <div className="spot__rows">
-              {obView !== 'bids' && book.asks.map((r, i) => (
-                <div key={`a${i}`} className="spot__orow ask" style={{ '--w': `${(r.a / book.max) * 100}%` }}><span>{num(r.p)}</span><span>{r.a.toFixed(4)}</span><span>{num(r.tot, 2)}</span></div>
-              ))}
-              <div className="spot__midp">{num(live)}</div>
-              {obView !== 'asks' && book.bids.map((r, i) => (
-                <div key={`b${i}`} className="spot__orow bid" style={{ '--w': `${(r.a / book.max) * 100}%` }}><span>{num(r.p)}</span><span>{r.a.toFixed(4)}</span><span>{num(r.tot, 2)}</span></div>
-              ))}
-            </div>
-            <div className="spot__bhead spot__bhead--sub"><h3>Recent Trades</h3></div>
-            <div className="spot__cols"><span>Price</span><span>Amount</span><span>Time</span></div>
-            <div className="spot__rows spot__rows--trades">
-              {trades.map((r) => (
-                <div key={r.id} className={`spot__orow ${r.buy ? 'bidtxt' : 'asktxt'}`}><span>{num(r.price)}</span><span>{r.amount.toFixed(4)}</span><span>{r.time}</span></div>
-              ))}
+
+            <div className="spot__trades">
+              <div className="spot__bhead spot__bhead--sub"><h3>Recent Trades</h3></div>
+              <div className="spot__cols"><span>Price</span><span>Amount</span><span>Time</span></div>
+              <div className="spot__rows spot__rows--trades">
+                {trades.map((r) => (
+                  <div key={r.id} className={`spot__orow ${r.buy ? 'bidtxt' : 'asktxt'}`}><span>{num(r.price)}</span><span>{r.amount.toFixed(4)}</span><span>{r.time}</span></div>
+                ))}
+              </div>
             </div>
           </div>
 
