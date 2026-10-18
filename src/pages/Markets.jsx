@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Search, Star, TrendingUp, TrendingDown, Flame, Zap, ArrowUpDown } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -38,6 +38,22 @@ export default function Markets() {
   const [q, setQ] = useState('')
   const [stars, setStars] = useState(new Set())
   const [sort, setSort] = useState({ key: 'cap', dir: 'desc' })
+
+  // remove the layout's top/bottom spacing around this page (restored when you leave)
+  const rootRef = useRef(null)
+  useEffect(() => {
+    const saved = []
+    let el = rootRef.current?.parentElement
+    while (el && el !== document.body && el !== document.documentElement) {
+      const props = ['padding-top', 'padding-bottom', 'margin-top', 'margin-bottom']
+      saved.push([el, props.map((p) => [p, el.style.getPropertyValue(p), el.style.getPropertyPriority(p)])])
+      props.forEach((p) => el.style.setProperty(p, '0', 'important'))
+      el = el.parentElement
+    }
+    return () => {
+      saved.forEach(([node, list]) => list.forEach(([p, v, pr]) => (v ? node.style.setProperty(p, v, pr) : node.style.removeProperty(p))))
+    }
+  }, [])
 
   // top 100 USDT pairs by 24h volume (live tickers win where we have them)
   const [extra, setExtra] = useState([])
@@ -118,7 +134,7 @@ export default function Markets() {
   const sortBy = (key) => setSort((s) => (s.key === key ? { key, dir: s.dir === 'desc' ? 'asc' : 'desc' } : { key, dir: key === 'name' ? 'asc' : 'desc' }))
 
   return (
-    <div className="mk">
+    <div className="mk" ref={rootRef}>
       <div className="mk__top">
         <Mini list={byChange.slice(0, 3)} kind="gain" />
         <Mini list={byChange.slice(-3).reverse()} kind="lose" />
