@@ -64,6 +64,22 @@ export default function Spot() {
   const [btab, setBtab] = useState('orders')
   const [history, setHistory] = useState([])
 
+  // remove the layout's top/bottom spacing around this page (restored when you leave)
+  const rootRef = useRef(null)
+  useEffect(() => {
+    const saved = []
+    let el = rootRef.current?.parentElement
+    while (el && el !== document.body && el !== document.documentElement) {
+      const props = ['padding-top', 'padding-bottom', 'margin-top', 'margin-bottom']
+      saved.push([el, props.map((p) => [p, el.style.getPropertyValue(p), el.style.getPropertyPriority(p)])])
+      props.forEach((p) => el.style.setProperty(p, '0', 'important'))
+      el = el.parentElement
+    }
+    return () => {
+      saved.forEach(([node, list]) => list.forEach(([p, v, pr]) => (v ? node.style.setProperty(p, v, pr) : node.style.removeProperty(p))))
+    }
+  }, [])
+
   // lock page scroll while the markets sheet is open
   useEffect(() => {
     if (!mOpen) return
@@ -221,7 +237,7 @@ export default function Spot() {
   const sLow = stats?.low ?? (vis.length ? lo : null)
 
   return (
-    <div className="spot">
+    <div className="spot" ref={rootRef}>
       {/* ---------- markets list (sidebar on desktop, sheet on tablet / phone) ---------- */}
       <aside className={`spot__markets ${mOpen ? 'is-open' : ''}`}>
         <h2>
