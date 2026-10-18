@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BarChart3, Zap, Wallet, Activity, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -33,6 +33,22 @@ export default function Dashboard() {
   const { tickers } = useTickers()
   const [holdings, setHoldings] = useState([])
 
+  // remove the layout's top/bottom spacing around this page (restored when you leave)
+  const rootRef = useRef(null)
+  useEffect(() => {
+    const saved = []
+    let el = rootRef.current?.parentElement
+    while (el && el !== document.body && el !== document.documentElement) {
+      const props = ['padding-top', 'padding-bottom', 'margin-top', 'margin-bottom']
+      saved.push([el, props.map((p) => [p, el.style.getPropertyValue(p), el.style.getPropertyPriority(p)])])
+      props.forEach((p) => el.style.setProperty(p, '0', 'important'))
+      el = el.parentElement
+    }
+    return () => {
+      saved.forEach(([node, list]) => list.forEach(([p, v, pr]) => (v ? node.style.setProperty(p, v, pr) : node.style.removeProperty(p))))
+    }
+  }, [])
+
   useEffect(() => {
     if (!user) return
     supabase.from('holdings').select('*').eq('user_id', user.id).then(({ data }) => setHoldings(data || []))
@@ -51,7 +67,7 @@ export default function Dashboard() {
   const trending = [...tickers].sort((a, b) => Math.abs(b.change) - Math.abs(a.change)).slice(0, 6)
 
   return (
-    <div className="dash">
+    <div className="dash" ref={rootRef}>
       <section className="dash__hero">
         <div className="dash__hero-top">
           <div>
