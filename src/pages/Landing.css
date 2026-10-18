@@ -16,7 +16,7 @@ body.is-landing { padding-top: 0; }
   --lp-bar-h: 56px;
   /* logo height (width follows the image's own proportions) */
   --lp-logo-h: 40px;
-  --lp-logo-h-m: 32px;
+  --lp-logo-h-m: 30px;
   min-height: 100vh;
   padding-top: var(--lp-bar-h);
   overflow-x: hidden;
@@ -46,7 +46,15 @@ body.is-landing { padding-top: 0; }
 }
 .landing__logo { display: flex; align-items: center; justify-content: flex-start; flex-shrink: 0; height: var(--lp-bar-h); }
 /* logo: fixed height, width follows the image so it is never stretched */
-.landing__logo img { display: block; height: var(--lp-logo-h); width: auto; }
+.landing__logo img {
+  display: block;
+  height: var(--lp-logo-h);
+  width: auto;
+  aspect-ratio: 304 / 69;
+  object-fit: cover;
+  object-view-box: inset(44.78% 23.47% 44.78% 31.09%);
+  mix-blend-mode: lighten;
+}
 .landing__bar-actions { display: flex; align-items: center; gap: 22px; }
 .landing__signin { font-size: 14px; font-weight: 600; color: #fff; text-decoration: none; }
 .landing__signin:hover { color: var(--lp-green); }
@@ -197,7 +205,15 @@ body.is-landing { padding-top: 0; }
 /* ---------- footer ---------- */
 .foot { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding: 40px 96px; border-top: 1px solid #141414; background: #000; }
 .foot__logo { display: flex; align-items: center; flex-shrink: 0; }
-.foot__logo img { display: block; height: 64px; width: auto; max-width: 100%; }
+.foot__logo img {
+  display: block;
+  height: 84px;
+  width: auto;
+  aspect-ratio: 355 / 215;
+  object-fit: cover;
+  object-view-box: inset(34.04% 23.32% 33.43% 23.62%);
+  mix-blend-mode: lighten;
+}
 .foot__nav { display: flex; gap: 30px; }
 .foot__nav a { font-size: 14px; color: #9aa3a8; text-decoration: none; transition: color 0.15s; }
 .foot__nav a:hover { color: var(--lp-green); }
@@ -278,6 +294,12 @@ body.is-landing { padding-top: 0; }
 
   .legal__inner { padding: 40px 20px 50px; }
 
-  .foot__logo img { height: 52px; }
+  .foot__logo img { height: 72px; }
   .foot__nav { gap: 14px 20px; }
+}
+
+/* very small phones: keep logo + buttons on one line */
+@media (max-width: 380px) {
+  .landing__logo img { height: 26px; }
+  .landing__bar-actions { gap: 10px; }
 }
