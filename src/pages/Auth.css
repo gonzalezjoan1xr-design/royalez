@@ -57,11 +57,10 @@
 .auth__logo { justify-self: center; display: block; }
 .auth__logo img {
   display: block;
-  height: 80px;
+  height: 96px;
   width: auto;
   max-width: 100%;
   object-fit: contain;
-  mix-blend-mode: lighten; /* lets the logo's black background blend into the card */
 }
 
 .auth__head { text-align: center; display: grid; gap: 8px; margin: 8px 0 6px; }
