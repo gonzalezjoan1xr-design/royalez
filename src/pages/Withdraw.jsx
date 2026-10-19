@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { needsVerification, isVerified, clearVerified } from '../lib/withdrawGate'
 import { supabase } from '../lib/supabase' // adjust if your client lives elsewhere
 import './Withdraw.css'
 
