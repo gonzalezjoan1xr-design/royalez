@@ -63,21 +63,21 @@
 .kyc__actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 24px; }
 
 /* ---- intro list ---- */
-.kyc__list { list-style: none; margin-top: 28px; width: 100%; display: grid; gap: 14px; }
+.kyc__list { list-style: none; margin-top: 32px; width: 100%; display: grid; gap: 16px; }
 .kyc__item {
-  display: flex; align-items: center; gap: 16px; padding: 18px 22px;
+  display: flex; align-items: center; gap: 18px; padding: 20px 24px;
   background: var(--v-card); border: 1px solid var(--v-line); border-radius: 8px;
 }
-.kyc__item h2 { font-size: 16px; font-weight: 600; line-height: 1.2; }
-.kyc__item p { margin-top: 3px; color: var(--v-sub); font-size: 13.5px; line-height: 1.4; }
-.kyc__emoji { flex: none; width: 24px; font-size: 22px; line-height: 1; text-align: center; }
+.kyc__item h2 { font-size: 16px; font-weight: 600; line-height: 22px; }
+.kyc__item p { margin-top: 4px; color: var(--v-sub); font-size: 14px; line-height: 20px; }
+.kyc__emoji { flex: none; width: 28px; font-size: 24px; line-height: 1; text-align: center; }
 
 .kyc__privacy {
-  display: flex; align-items: flex-start; gap: 16px; width: 100%; margin-top: 28px; padding: 18px 22px;
+  display: flex; align-items: flex-start; gap: 18px; width: 100%; margin-top: 32px; padding: 20px 24px;
   background: #0a0c0b; border: 1px solid #1f1f1f; border-radius: 8px;
 }
-.kyc__privacy .kyc__emoji { margin-top: 0; }
-.kyc__privacy p { color: var(--v-sub); font-size: 14.5px; line-height: 1.55; }
+.kyc__privacy .kyc__emoji { margin-top: 0; font-size: 22px; line-height: 24px; }
+.kyc__privacy p { color: var(--v-sub); font-size: 14px; line-height: 24px; }
 
 /* ---- banners ---- */
 .kyc__banner {
@@ -179,13 +179,17 @@ img.kyc__face-media { transform: none; }
 }
 .kyc-btn:hover:not(:disabled) { filter: brightness(1.05); }
 .kyc-btn:focus-visible { outline: 2px solid var(--v-text); outline-offset: 2px; }
-.kyc-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.kyc-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .kyc-btn--ghost { background: transparent; border-color: #333; color: var(--v-text); }
 .kyc-btn--ghost:hover:not(:disabled) { background: #1a1a1a; filter: none; }
-.kyc-btn--block { width: 100%; height: 48px; margin-top: 28px; border: 0; font-size: 15px; }
+.kyc-btn--block { width: 100%; height: 48px; margin-top: 32px; border: 0; font-size: 15px; }
+.kyc-btn--cap { height: 38px; margin-top: 24px; font-size: 14px; }
 
 /* ---- choose document type (second screen) ---- */
-.kyc__main--choose { padding-top: 131px; }
+.kyc__main--center {
+  min-height: calc(100vh - 45px); min-height: calc(100dvh - 45px);
+  align-content: center; padding-block: 24px;
+}
 .kyc__title--choose { font-size: 21px; }
 .kyc__sub--tight { margin-top: 7px; }
 .kyc__docs { list-style: none; width: 100%; margin-top: 22px; display: grid; gap: 12px; }
@@ -200,9 +204,25 @@ img.kyc__face-media { transform: none; }
 .kyc__doc-label { flex: 1; }
 .kyc__doc svg { flex: none; }
 
+/* ---- capture the ID (front / back) ---- */
+.kyc__cap {
+  width: 100%; max-width: 384px; margin-top: 22px; aspect-ratio: 16 / 9;
+  display: grid; place-items: center; padding: 0; overflow: hidden;
+  background: transparent; border: 2px dashed var(--v-line); border-radius: 16px;
+  color: var(--v-sub); cursor: pointer;
+}
+.kyc__cap:hover { border-color: #3a3a3a; }
+.kyc__cap:focus-visible { outline: 2px solid var(--v-green); outline-offset: 2px; }
+.kyc__cap.has-img { border-style: solid; }
+.kyc__cap img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.kyc__cap-empty { display: grid; justify-items: center; gap: 10px; padding: 0 12px; }
+.kyc__cap-empty b { font-size: 14px; font-weight: 600; line-height: 21px; }
+.kyc__cap-empty small { font-size: 12px; line-height: 18px; }
+.kyc__retake { margin-top: 12px; }
+
 @media (max-width: 520px) {
   .kyc__main { padding: 28px 16px 40px; }
-  .kyc__main--choose { padding-top: 48px; }
+  .kyc__main--center { padding-block: 24px; }
   .kyc__card { padding: 16px; }
   .kyc__steps li { padding: 8px; font-size: 12px; gap: 6px; }
   .kyc__drops { grid-template-columns: 1fr; }
