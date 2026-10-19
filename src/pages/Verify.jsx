@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
-  ShieldCheck, Camera, Upload, Check, Clock, AlertTriangle, ArrowLeft,
+  ShieldCheck, Camera, Upload, Check, Clock, AlertTriangle, RotateCcw, ArrowLeft,
   ChevronRight,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -49,6 +49,30 @@ function Shell({ onBack, mainClass = '', children }) {
         <span className="kyc__bar-title">Identity Verification</span>
       </header>
       <main className={`kyc__main ${mainClass}`}>{children}</main>
+    </div>
+  )
+}
+
+/* Dashed capture box; once a photo is taken it shows the photo with a round "retake" button */
+function CaptureBox({ preview, alt, hint, onOpen, onReset, thin = false }) {
+  return (
+    <div className="kyc__cap-wrap">
+      <button type="button" className={`kyc__cap ${thin ? 'kyc__cap--thin' : ''} ${preview ? 'has-img' : ''}`} onClick={onOpen}>
+        {preview ? (
+          <img src={preview} alt={alt} />
+        ) : (
+          <span className="kyc__cap-empty">
+            <Camera size={41} strokeWidth={1.8} />
+            <b>Tap to open camera</b>
+            <small>{hint}</small>
+          </span>
+        )}
+      </button>
+      {preview && (
+        <button type="button" className="kyc__cap-reset" onClick={onReset} aria-label="Retake photo">
+          <RotateCcw size={16} strokeWidth={1.8} />
+        </button>
+      )}
     </div>
   )
 }
@@ -318,25 +342,15 @@ export default function Verify() {
             : `Place your ${typeInfo.label} on a flat surface in good lighting`}
         </p>
 
-        <button
-          type="button"
-          className={`kyc__cap ${preview ? 'has-img' : ''}`}
-          onClick={() => idInputRef.current?.click()}
-        >
-          {preview ? (
-            <img src={preview} alt={title} />
-          ) : (
-            <span className="kyc__cap-empty">
-              <Camera size={41} strokeWidth={1.8} />
-              <b>Tap to open camera</b>
-              <small>
-                {isBack
-                  ? 'Make sure the barcode or magnetic stripe is clearly visible'
-                  : 'Ensure all four corners are visible and text is clear'}
-              </small>
-            </span>
-          )}
-        </button>
+        <CaptureBox
+          preview={preview}
+          alt={title}
+          hint={isBack
+            ? 'Make sure the barcode or magnetic stripe is clearly visible'
+            : 'Ensure all four corners are visible and text is clear'}
+          onOpen={() => idInputRef.current?.click()}
+          onReset={() => setFile(null)}
+        />
         <input
           ref={idInputRef}
           type="file"
@@ -350,11 +364,6 @@ export default function Verify() {
           }}
         />
 
-        {preview && (
-          <button type="button" className="kyc-link kyc__retake" onClick={() => idInputRef.current?.click()}>
-            Retake photo
-          </button>
-        )}
         {error && <div className="kyc__banner kyc__banner--err">{error}</div>}
 
         <button type="button" className="kyc-btn kyc-btn--block kyc-btn--cap" onClick={next} disabled={!file}>
@@ -378,21 +387,14 @@ export default function Verify() {
           <li><span aria-hidden="true">✓</span>Use good lighting — avoid strong backlighting</li>
         </ul>
 
-        <button
-          type="button"
-          className={`kyc__cap kyc__cap--after-list ${selfiePreview ? 'has-img' : ''}`}
-          onClick={() => selfieInputRef.current?.click()}
-        >
-          {selfiePreview ? (
-            <img src={selfiePreview} alt="Your face" />
-          ) : (
-            <span className="kyc__cap-empty">
-              <Camera size={41} strokeWidth={1.8} />
-              <b>Tap to open camera</b>
-              <small>Front-facing camera will open automatically</small>
-            </span>
-          )}
-        </button>
+        <CaptureBox
+          preview={selfiePreview}
+          alt="Your face"
+          hint="Front-facing camera will open automatically"
+          thin
+          onOpen={() => selfieInputRef.current?.click()}
+          onReset={() => setSelfie(null)}
+        />
         <input
           ref={selfieInputRef}
           type="file"
@@ -406,11 +408,6 @@ export default function Verify() {
           }}
         />
 
-        {selfiePreview && (
-          <button type="button" className="kyc-link kyc__retake" onClick={() => selfieInputRef.current?.click()}>
-            Retake photo
-          </button>
-        )}
         {error && <div className="kyc__banner kyc__banner--err">{error}</div>}
 
         <button
