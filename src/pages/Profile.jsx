@@ -3,11 +3,19 @@ import { Link } from 'react-router-dom'
 import { Mail, Phone, User, Wallet, ShieldCheck, Lock, LogOut, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
-import { WITHDRAW_AUTH_THRESHOLD } from '../lib/withdrawGate'
+import { useKyc, KYC_WITHDRAW_THRESHOLD } from '../lib/kyc'
 import './Profile.css'
+
+const KYC_TEXT = {
+  none: `Withdrawals of $${KYC_WITHDRAW_THRESHOLD} or more need ID and face verification. Verify now`,
+  pending: 'Your ID and face verification is under review.',
+  approved: 'Identity verified. You can withdraw any amount.',
+  rejected: 'Your verification was rejected. Tap to submit it again.',
+}
 
 export default function Profile() {
   const { user, profile, signOut } = useAuth()
+  const { status: kycStatus } = useKyc()
   const email = user?.email || ''
   const displayName = profile?.username || email.split('@')[0] || 'User'
   const balance = Number(profile?.balance || 0)
@@ -111,10 +119,10 @@ export default function Profile() {
 
       <section className="profile__card">
         <h2>Security</h2>
-        <p className="profile__hint">
+        <Link to="/verify" className="profile__hint" style={{ textDecoration: 'none' }}>
           <ShieldCheck size={16} strokeWidth={1.8} />
-          Withdrawals of ${WITHDRAW_AUTH_THRESHOLD} or more need a one-time code sent to your email.
-        </p>
+          {KYC_TEXT[kycStatus] || KYC_TEXT.none}
+        </Link>
         <form className="profile__form" onSubmit={onPassword}>
           <label>
             New password
