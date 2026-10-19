@@ -1,21 +1,13 @@
 import { Component, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Mail, Phone, User, Shield, ShieldCheck, Lock, LogOut, Save, Pencil, Calendar, X } from 'lucide-react'
+import { Mail, Phone, User, Shield, ShieldCheck, Save, Pencil, Calendar, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import * as kycLib from '../lib/kyc'
 import './Profile.css'
 
 // Safe against a missing export in ../lib/kyc (a missing named import blanks the whole app in Vite)
-const KYC_WITHDRAW_THRESHOLD = kycLib.KYC_WITHDRAW_THRESHOLD ?? 100
 const useKyc = kycLib.useKyc || (() => ({ status: 'none' }))
-
-const KYC_TEXT = {
-  none: `Withdrawals of $${KYC_WITHDRAW_THRESHOLD} or more need ID and face verification. Verify now`,
-  pending: 'Your ID and face verification is under review.',
-  approved: 'Identity verified. You can withdraw any amount.',
-  rejected: 'Your verification was rejected. Tap to submit it again.',
-}
 
 // [label, badge class]
 const KYC_BADGE = {
@@ -67,7 +59,7 @@ class ProfileBoundary extends Component {
 
 function ProfileInner() {
   const auth = useAuth() || {}
-  const { user, profile, signOut } = auth
+  const { user, profile } = auth
   const kyc = useKyc() || {}
   const kycStatus = kyc.status || 'none'
   const email = user?.email || ''
@@ -81,10 +73,6 @@ function ProfileInner() {
   const [msg, setMsg] = useState(null)
   const [local, setLocal] = useState(null) // shows saved values immediately, before auth refetches
 
-  const [password, setPassword] = useState('')
-  const [confirm, setConfirm] = useState('')
-  const [pwBusy, setPwBusy] = useState(false)
-  const [pwMsg, setPwMsg] = useState(null)
 
   useEffect(() => {
     const [f, l] = splitName(profile?.full_name)
@@ -120,19 +108,6 @@ function ProfileInner() {
     setEditing(false)
   }
 
-  const onPassword = async (e) => {
-    e.preventDefault()
-    setPwMsg(null)
-    if (password.length < 8) return setPwMsg({ type: 'err', text: 'Use at least 8 characters.' })
-    if (password !== confirm) return setPwMsg({ type: 'err', text: 'Passwords do not match.' })
-    setPwBusy(true)
-    const { error } = await supabase.auth.updateUser({ password })
-    setPwBusy(false)
-    if (error) return setPwMsg({ type: 'err', text: error.message })
-    setPassword('')
-    setConfirm('')
-    setPwMsg({ type: 'ok', text: 'Password changed.' })
-  }
 
   const [kycLabel, kycClass] = KYC_BADGE[kycStatus] || KYC_BADGE.none
   const val = (v) =>
@@ -230,46 +205,7 @@ function ProfileInner() {
         </div>
       </section>
 
-      {/* ---------- security ---------- */}
-      <section className="profile__card">
-        <div className="profile__chead">
-          <span className="profile__ico profile__ico--amber"><Lock strokeWidth={1.8} /></span>
-          <div className="profile__ctext">
-            <h2>Security</h2>
-            <p>Verification and password</p>
-          </div>
-        </div>
 
-        <Link to="/verify" className="profile__hint">
-          <ShieldCheck size={16} strokeWidth={1.8} />
-          {KYC_TEXT[kycStatus] || KYC_TEXT.none}
-        </Link>
-
-        <form className="profile__form" onSubmit={onPassword}>
-          <label>
-            New password
-            <div className="profile__input">
-              <Lock strokeWidth={1.8} />
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" autoComplete="new-password" />
-            </div>
-          </label>
-          <label>
-            Confirm new password
-            <div className="profile__input">
-              <Lock strokeWidth={1.8} />
-              <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Repeat the password" autoComplete="new-password" />
-            </div>
-          </label>
-          {pwMsg && <div className={`profile__msg profile__msg--${pwMsg.type}`} style={{ marginTop: 0 }}>{pwMsg.text}</div>}
-          <button className="profile__btn" type="submit" disabled={pwBusy || !password}>
-            <Lock size={16} strokeWidth={1.8} /> {pwBusy ? 'Updating…' : 'Change password'}
-          </button>
-        </form>
-      </section>
-
-      <button className="profile__signout" type="button" onClick={() => signOut?.()}>
-        <LogOut size={16} strokeWidth={1.8} /> Sign out
-      </button>
     </div>
   )
 }
