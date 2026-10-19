@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Upload, ChevronRight } from 'lucide-react'
 import * as kycLib from '../lib/kyc'
@@ -26,6 +27,25 @@ export default function Verify({ onStart }) {
   const nav = useNavigate()
   const { status } = useKyc() || {}
   const locked = status === 'pending' || status === 'approved'
+
+  // Force a pure black page behind everything (overscroll, parent layouts, etc.)
+  useEffect(() => {
+    const html = document.documentElement
+    const body = document.body
+    const prev = {
+      htmlBg: html.style.background,
+      bodyBg: body.style.background,
+      scheme: html.style.colorScheme,
+    }
+    html.style.background = '#000'
+    body.style.background = '#000'
+    html.style.colorScheme = 'dark'
+    return () => {
+      html.style.background = prev.htmlBg
+      body.style.background = prev.bodyBg
+      html.style.colorScheme = prev.scheme
+    }
+  }, [])
 
   const start = () => (onStart ? onStart() : nav('/verify/start'))
 
