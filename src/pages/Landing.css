@@ -14,9 +14,10 @@ body.is-landing { padding-top: 0; }
   --lp-up: #22c55e;
   --lp-down: #f4525f;
   --lp-bar-h: 56px;
-  /* logo height (width follows the image's own proportions) */
-  --lp-logo-h: 44px;
-  --lp-logo-h-m: 38px;
+  /* logo height (width follows the image's own proportions).
+     Matches the footer logo; it overflows the bar evenly instead of enlarging it. */
+  --lp-logo-h: 72px;
+  --lp-logo-h-m: 72px;
   min-height: 100vh;
   padding-top: var(--lp-bar-h);
   overflow-x: hidden;
@@ -44,13 +45,15 @@ body.is-landing { padding-top: 0; }
   background: #050505;
   border-bottom: 0;
 }
-.landing__logo { display: flex; align-items: center; justify-content: flex-start; flex-shrink: 0; height: var(--lp-bar-h); }
-/* logo: fixed height, width follows the image so it is never stretched */
+.landing__logo { display: flex; align-items: center; justify-content: flex-start; flex-shrink: 0; height: var(--lp-bar-h); overflow: visible; }
+/* logo: fixed height, width follows the image so it is never stretched.
+   The box above stays bar-height, so a taller logo overflows evenly and the bar never grows. */
 .landing__logo img {
   display: block;
   height: var(--lp-logo-h);
   width: auto;
   max-width: 100%;
+  flex-shrink: 0;
   mix-blend-mode: lighten; /* hides the logo's black background */
 }
 .landing__bar-actions { display: flex; align-items: center; gap: 22px; }
@@ -256,6 +259,8 @@ body.is-landing { padding-top: 0; }
 }
 
 @media (max-width: 600px) {
+  /* header logo matches the footer logo size on phones (60px) */
+  .landing { --lp-logo-h-m: 60px; }
   .landing__bar-actions { gap: 12px; }
   .landing__signin { font-size: 13px; }
   .landing__start { padding: 8px 14px; font-size: 13px; }
@@ -292,10 +297,4 @@ body.is-landing { padding-top: 0; }
 
   .foot__logo img { height: 60px; }
   .foot__nav { gap: 14px 20px; }
-}
-
-/* very small phones: keep logo + buttons on one line */
-@media (max-width: 380px) {
-  .landing__logo img { height: 32px; }
-  .landing__bar-actions { gap: 10px; }
 }
