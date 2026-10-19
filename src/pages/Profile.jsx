@@ -17,6 +17,10 @@ const KYC_BADGE = {
   rejected: ['Rejected', 'profile__badge--bad'],
 }
 
+// false = personal details start blank so each user fills in their own (saving still writes to Supabase)
+// true  = pre-fill the form with what is already stored in the profiles table
+const SHOW_SAVED_DETAILS = false
+
 // Handles null as well as undefined
 const splitName = (full) => {
   const parts = String(full || '').trim().split(/\s+/).filter(Boolean)
@@ -64,7 +68,8 @@ function ProfileInner() {
   const kycStatus = kyc.status || 'none'
   const email = user?.email || ''
 
-  const [firstSaved, lastSaved] = splitName(profile?.full_name)
+  const [firstSaved, lastSaved] = SHOW_SAVED_DETAILS ? splitName(profile?.full_name) : ['', '']
+  const phoneSaved = SHOW_SAVED_DETAILS ? profile?.phone || '' : ''
   const [editing, setEditing] = useState(false)
   const [first, setFirst] = useState('')
   const [last, setLast] = useState('')
@@ -75,14 +80,14 @@ function ProfileInner() {
 
 
   useEffect(() => {
-    const [f, l] = splitName(profile?.full_name)
+    const [f, l] = SHOW_SAVED_DETAILS ? splitName(profile?.full_name) : ['', '']
     setFirst(f)
     setLast(l)
-    setPhone(profile?.phone || '')
+    setPhone(SHOW_SAVED_DETAILS ? profile?.phone || '' : '')
     setLocal(null)
   }, [profile?.full_name, profile?.phone])
 
-  const shown = local || { first: firstSaved, last: lastSaved, phone: profile?.phone || '' }
+  const shown = local || { first: firstSaved, last: lastSaved, phone: phoneSaved }
 
   const cancelEdit = () => {
     setFirst(shown.first)
