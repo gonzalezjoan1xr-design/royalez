@@ -286,4 +286,20 @@ body.is-landing { padding-top: 0; }
   .perks__card { padding: 20px; }
   .perks__card h3 { margin-top: 20px; }
 
-  .why__phone { width: min(100%, 240px);
+  .why__phone { width: min(100%, 240px); border-radius: 28px; }
+
+  .prices__table { min-width: 620px; }
+  .prices__table th { padding: 12px 10px; font-size: 13px; }
+  .prices__table td { padding: 14px 10px; font-size: 14px; }
+  .prices__asset { gap: 10px; }
+
+  .closing__stat strong { font-size: 28px; }
+  .closing__stat span { font-size: 13px; }
+  .closing__buttons { flex-direction: column; }
+  .closing__main, .closing__alt { width: 100%; padding: 14px 20px; }
+
+  .legal__inner { padding: 40px 20px 50px; }
+
+  .foot__logo img { height: 60px; }
+  .foot__nav { gap: 14px 20px; }
+}
