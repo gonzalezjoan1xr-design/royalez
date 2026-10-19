@@ -367,7 +367,9 @@ export default function Verify() {
       <Shell onBack={goBack} mainClass="kyc__main--center">
         <h1 className="kyc__title kyc__title--sm kyc__title--choose">{title}</h1>
         <p className="kyc__sub kyc__sub--tight">
-          Place your {typeInfo.label} on a flat surface in good lighting
+          {isBack
+            ? `Flip your ${typeInfo.label} over and take a photo of the back`
+            : `Place your ${typeInfo.label} on a flat surface in good lighting`}
         </p>
 
         <button
@@ -381,7 +383,11 @@ export default function Verify() {
             <span className="kyc__cap-empty">
               <Camera size={41} strokeWidth={1.8} />
               <b>Tap to open camera</b>
-              <small>Ensure all four corners are visible and text is clear</small>
+              <small>
+                {isBack
+                  ? 'Make sure the barcode or magnetic stripe is clearly visible'
+                  : 'Ensure all four corners are visible and text is clear'}
+              </small>
             </span>
           )}
         </button>
