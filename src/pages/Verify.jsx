@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
-  ShieldCheck, Camera, FileText, Upload, Check, Clock, AlertTriangle, RotateCcw, ArrowLeft,
+  ShieldCheck, Camera, Upload, Check, Clock, AlertTriangle, RotateCcw, ArrowLeft,
   ChevronRight,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -53,47 +53,6 @@ function Shell({ onBack, mainClass = '', children }) {
   )
 }
 
-function FileDrop({ label, hint, file, onPick }) {
-  const preview = usePreview(file)
-  const inputRef = useRef(null)
-  return (
-    <div className="kyc-drop">
-      <span className="kyc-drop__label">{label}</span>
-      <button
-        type="button"
-        className={`kyc-drop__box ${preview ? 'has-img' : ''}`}
-        onClick={() => inputRef.current?.click()}
-      >
-        {preview ? (
-          <img src={preview} alt={label} />
-        ) : (
-          <span className="kyc-drop__empty">
-            <Upload size={22} strokeWidth={1.7} />
-            <b>Tap to upload</b>
-            <small>{hint}</small>
-          </span>
-        )}
-      </button>
-      {preview && (
-        <button type="button" className="kyc-link" onClick={() => inputRef.current?.click()}>
-          Replace photo
-        </button>
-      )}
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        hidden
-        onChange={(e) => {
-          const f = e.target.files?.[0]
-          e.target.value = ''
-          if (f) onPick(f)
-        }}
-      />
-    </div>
-  )
-}
-
 export default function Verify() {
   const { user } = useAuth()
   const { record, status, loading, refresh } = useKyc()
@@ -104,6 +63,7 @@ export default function Verify() {
   const [started, setStarted] = useState(false) // false = intro screen
   const [picked, setPicked] = useState(false) // false = "Choose Document Type" screen
   const [step, setStep] = useState(1)
+  const [idSide, setIdSide] = useState('front') // which side of the ID is being captured in step 1
   const [idType, setIdType] = useState('national_id')
   const [idFront, setIdFront] = useState(null)
   const [idBack, setIdBack] = useState(null)
@@ -134,6 +94,7 @@ export default function Verify() {
   const streamRef = useRef(null)
   const [cam, setCam] = useState('idle') // idle | starting | live | error
   const selfieInputRef = useRef(null)
+  const idInputRef = useRef(null)
 
   const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop())
@@ -202,10 +163,9 @@ export default function Verify() {
     if (!ID_TYPES.find((t) => t.id === id).back) setIdBack(null)
     setError('')
     setStep(1)
+    setIdSide('front')
     setPicked(true)
   }
-
-  const step1Ready = Boolean(idFront) && (!typeInfo.back || Boolean(idBack))
 
   const submit = async () => {
     setBusy(true)
@@ -242,16 +202,25 @@ export default function Verify() {
     }
   }
 
+  // One step back: face check -> ID back/front -> document type
+  const prevStep = () => {
+    setError('')
+    if (step > 1) {
+      if (step === 2) setIdSide(typeInfo.back ? 'back' : 'front')
+      setStep(step - 1)
+    } else if (idSide === 'back') {
+      setIdSide('front')
+    } else {
+      setPicked(false)
+    }
+  }
+
   // Back arrow: previous step, then document type, then intro, then leave the page
   const goBack = () => {
     setError('')
     if (canShowWizard && started) {
-      if (picked) {
-        if (step > 1) setStep(step - 1)
-        else setPicked(false)
-      } else {
-        setStarted(false)
-      }
+      if (picked) prevStep()
+      else setStarted(false)
       return
     }
     nav(-1)
@@ -359,7 +328,7 @@ export default function Verify() {
   /* ---------- choose document type (matches the screenshot) ---------- */
   if (!picked) {
     return (
-      <Shell onBack={goBack} mainClass="kyc__main--choose">
+      <Shell onBack={goBack} mainClass="kyc__main--center">
         <h1 className="kyc__title kyc__title--sm kyc__title--choose">Choose Document Type</h1>
         <p className="kyc__sub kyc__sub--tight">Select the type of ID you'll be using</p>
 
@@ -382,7 +351,69 @@ export default function Verify() {
     )
   }
 
-  /* ---------- wizard ---------- */
+  /* ---------- capture the ID: front, then back (matches the screenshot) ---------- */
+  if (picked && step === 1) {
+    const isBack = idSide === 'back'
+    const file = isBack ? idBack : idFront
+    const preview = isBack ? backPreview : frontPreview
+    const setFile = isBack ? setIdBack : setIdFront
+    const title = isBack ? 'Back of Document' : typeInfo.back ? 'Front of Document' : 'Photo Page'
+    const next = () => {
+      setError('')
+      if (!isBack && typeInfo.back) setIdSide('back')
+      else setStep(2)
+    }
+    return (
+      <Shell onBack={goBack} mainClass="kyc__main--center">
+        <h1 className="kyc__title kyc__title--sm kyc__title--choose">{title}</h1>
+        <p className="kyc__sub kyc__sub--tight">
+          Place your {typeInfo.label} on a flat surface in good lighting
+        </p>
+
+        <button
+          type="button"
+          className={`kyc__cap ${preview ? 'has-img' : ''}`}
+          onClick={() => idInputRef.current?.click()}
+        >
+          {preview ? (
+            <img src={preview} alt={title} />
+          ) : (
+            <span className="kyc__cap-empty">
+              <Camera size={41} strokeWidth={1.8} />
+              <b>Tap to open camera</b>
+              <small>Ensure all four corners are visible and text is clear</small>
+            </span>
+          )}
+        </button>
+        <input
+          ref={idInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          hidden
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            e.target.value = ''
+            if (f) pickImage(setFile)(f)
+          }}
+        />
+
+        {preview && (
+          <button type="button" className="kyc-link kyc__retake" onClick={() => idInputRef.current?.click()}>
+            Retake photo
+          </button>
+        )}
+        {error && <div className="kyc__banner kyc__banner--err">{error}</div>}
+
+        <button type="button" className="kyc-btn kyc-btn--block kyc-btn--cap" onClick={next} disabled={!file}>
+          Continue
+          <ChevronRight size={16} strokeWidth={2} />
+        </button>
+      </Shell>
+    )
+  }
+
+  /* ---------- wizard (face check, review) ---------- */
   return (
     <Shell onBack={goBack}>
       <h1 className="kyc__title kyc__title--sm">Verify your identity</h1>
@@ -403,27 +434,6 @@ export default function Verify() {
       </ol>
 
       <div className="kyc__card">
-        {step === 1 && (
-          <>
-            <h2><FileText size={18} strokeWidth={1.8} /> Upload your {typeInfo.label}</h2>
-            <div className={`kyc__drops ${typeInfo.back ? '' : 'kyc__drops--one'}`}>
-              <FileDrop
-                label={typeInfo.back ? 'Front of ID' : 'Photo page'}
-                hint="All four corners visible"
-                file={idFront}
-                onPick={pickImage(setIdFront)}
-              />
-              {typeInfo.back && (
-                <FileDrop label="Back of ID" hint="All four corners visible" file={idBack} onPick={pickImage(setIdBack)} />
-              )}
-            </div>
-            <ul className="kyc__tips">
-              <li>Use the original document, not a copy or a screenshot.</li>
-              <li>Make sure the text is sharp and there is no glare.</li>
-            </ul>
-          </>
-        )}
-
         {step === 2 && (
           <>
             <h2><Camera size={18} strokeWidth={1.8} /> Face check</h2>
@@ -513,7 +523,7 @@ export default function Verify() {
 
         <div className="kyc__nav">
           {step > 1 ? (
-            <button type="button" className="kyc-btn kyc-btn--ghost" onClick={() => setStep(step - 1)} disabled={busy}>
+            <button type="button" className="kyc-btn kyc-btn--ghost" onClick={prevStep} disabled={busy}>
               <ArrowLeft size={16} strokeWidth={1.8} /> Back
             </button>
           ) : (
@@ -524,7 +534,7 @@ export default function Verify() {
               type="button"
               className="kyc-btn"
               onClick={() => setStep(step + 1)}
-              disabled={step === 1 ? !step1Ready : !selfie}
+              disabled={!selfie}
             >
               Continue
             </button>
