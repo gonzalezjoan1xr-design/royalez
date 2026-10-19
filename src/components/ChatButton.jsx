@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronLeft, ChevronDown, Menu, ThumbsUp, Paperclip, Smile } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
 import './ChatButton.css'
 
 const SUPPORT_EMAIL = 'support@royalmarkets.com'
@@ -23,17 +25,48 @@ const Avatar = () => (
   </span>
 )
 
+const AgentBubble = ({ children }) => (
+  <div className="cb-row">
+    <Avatar />
+    <div className="cb-col">
+      <span className="cb-name">Customer Support</span>
+      <div className="cb-bubble cb-bubble--agent">{children}</div>
+    </div>
+  </div>
+)
+
 export default function ChatButton() {
+  const { user } = useAuth()
   const [open, setOpen] = useState(false)
   const [menu, setMenu] = useState(false)
   const [unread, setUnread] = useState(1)
   const [text, setText] = useState('')
   const [messages, setMessages] = useState([])
+  const [guestNote, setGuestNote] = useState(false)
   const bodyRef = useRef(null)
+  const openRef = useRef(false)
+
+  useEffect(() => { openRef.current = open }, [open])
 
   useEffect(() => {
     if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight
-  }, [messages, open])
+  }, [messages, open, guestNote])
+
+  // load history and receive support replies live
+  useEffect(() => {
+    if (!user?.id) { setMessages([]); return }
+    let live = true
+    supabase.from('support_messages').select('*').eq('user_id', user.id).order('created_at', { ascending: true })
+      .then(({ data }) => { if (live) setMessages(data || []) })
+    const channel = supabase
+      .channel(`support-${user.id}-${Math.random().toString(36).slice(2)}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `user_id=eq.${user.id}` }, (p) => {
+        setMessages((m) => (m.some((x) => x.id === p.new.id) ? m : [...m, p.new]))
+        if (p.new.sender === 'admin' && !openRef.current) setUnread((u) => u + 1)
+      })
+      .subscribe()
+    return () => { live = false; supabase.removeChannel(channel) }
+  }, [user?.id])
 
   const toggle = () => {
     setOpen((o) => !o)
@@ -41,17 +74,18 @@ export default function ChatButton() {
     setUnread(0)
   }
 
-  const send = (value) => {
-    const msg = value.trim()
-    if (!msg) return
-    setMessages((m) => [...m, { from: 'me', text: msg }])
+  const send = async (value) => {
+    const body = value.trim()
+    if (!body) return
+    if (!user) { setGuestNote(true); setText(''); return }
     setText('')
-    setTimeout(() => {
-      setMessages((m) => [
-        ...m,
-        { from: 'agent', text: 'Thanks for reaching out! A support agent will reply shortly.' },
-      ])
-    }, 800)
+    const { data, error } = await supabase
+      .from('support_messages')
+      .insert({ user_id: user.id, sender: 'user', body })
+      .select()
+      .single()
+    if (error) { setText(body); return }
+    setMessages((m) => (m.some((x) => x.id === data.id) ? m : [...m, data]))
   }
 
   return (
@@ -69,24 +103,15 @@ export default function ChatButton() {
             {menu && (
               <div className="cb-menu">
                 <a href={`mailto:${SUPPORT_EMAIL}`}>Email support</a>
-                <button type="button" onClick={() => { setMessages([]); setMenu(false) }}>
-                  Clear conversation
-                </button>
               </div>
             )}
           </header>
 
           <div className="cb-body" ref={bodyRef}>
             <div className="cb-spacer" />
-            <div className="cb-row">
-              <Avatar />
-              <div className="cb-col">
-                <span className="cb-name">Customer Support</span>
-                <div className="cb-bubble cb-bubble--agent">👋 Hi! How can we help?</div>
-              </div>
-            </div>
+            <AgentBubble>👋 Hi! How can we help?</AgentBubble>
 
-            {messages.length === 0 && (
+            {messages.length === 0 && !guestNote && (
               <div className="cb-quick">
                 {QUICK_REPLIES.map((q) => (
                   <button key={q} type="button" className="cb-quick__btn" onClick={() => send(q)}>
@@ -96,21 +121,17 @@ export default function ChatButton() {
               </div>
             )}
 
-            {messages.map((m, i) =>
-              m.from === 'me' ? (
-                <div key={i} className="cb-me">
-                  <div className="cb-bubble cb-bubble--me">{m.text}</div>
+            {messages.map((m) =>
+              m.sender === 'user' ? (
+                <div key={m.id} className="cb-me">
+                  <div className="cb-bubble cb-bubble--me">{m.body}</div>
                 </div>
               ) : (
-                <div key={i} className="cb-row">
-                  <Avatar />
-                  <div className="cb-col">
-                    <span className="cb-name">Customer Support</span>
-                    <div className="cb-bubble cb-bubble--agent">{m.text}</div>
-                  </div>
-                </div>
+                <AgentBubble key={m.id}>{m.body}</AgentBubble>
               )
             )}
+
+            {guestNote && <AgentBubble>Please log in to chat with support.</AgentBubble>}
           </div>
 
           <footer className="cb-foot">
