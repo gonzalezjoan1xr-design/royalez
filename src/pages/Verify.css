@@ -9,9 +9,9 @@
 .kyc {
   --v-bg: #000;
   --v-card: #0f0f0f;
-  --v-line: #222;
+  --v-line: #262626;
   --v-text: #fff;
-  --v-sub: #9ca3af;
+  --v-sub: #a3a3a3;
   --v-green: #00ff88;
   --v-green-bg: rgba(0, 255, 136, 0.08);
   --v-green-line: rgba(0, 255, 136, 0.3);
@@ -184,12 +184,13 @@ img.kyc__face-media { transform: none; }
 .kyc-btn--block { width: 100%; margin-top: 24px; border: 0; }
 
 /* ---- choose document type (second screen) ---- */
-.kyc__main--choose { padding-top: 128px; }
-.kyc__sub--tight { margin-top: 6px; }
+.kyc__main--choose { padding-top: 131px; }
+.kyc__title--choose { font-size: 21px; }
+.kyc__sub--tight { margin-top: 7px; }
 .kyc__docs { list-style: none; width: 100%; margin-top: 22px; display: grid; gap: 12px; }
 .kyc__doc {
-  display: flex; align-items: center; gap: 16px; width: 100%; height: 66px; padding: 0 18px 0 20px;
-  background: var(--v-card); border: 1px solid var(--v-line); border-radius: 12px;
+  display: flex; align-items: center; gap: 16px; width: 100%; height: 66px; padding: 0 16px 0 20px;
+  background: var(--v-card); border: 1px solid var(--v-line); border-radius: 10px;
   color: var(--v-sub); font-size: 15px; font-weight: 500; text-align: left; cursor: pointer;
 }
 .kyc__doc:hover { border-color: #333; color: var(--v-text); }
