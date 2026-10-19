@@ -15,9 +15,11 @@ body.is-landing { padding-top: 0; }
   --lp-down: #f4525f;
   --lp-bar-h: 56px;
   /* logo height (width follows the image's own proportions).
-     Matches the footer logo; it overflows the bar evenly instead of enlarging it. */
+     Matches the footer logo; it overflows the bar downward instead of enlarging it. */
   --lp-logo-h: 72px;
   --lp-logo-h-m: 72px;
+  /* gap between the top edge and the logo, so it never touches the line above */
+  --lp-logo-top: 4px;
   min-height: 100vh;
   padding-top: var(--lp-bar-h);
   overflow-x: hidden;
@@ -45,16 +47,19 @@ body.is-landing { padding-top: 0; }
   background: #050505;
   border-bottom: 0;
 }
-.landing__logo { display: flex; align-items: center; justify-content: flex-start; flex-shrink: 0; height: var(--lp-bar-h); overflow: visible; }
+/* logo box: stays bar-height and aligns to the top, so a taller logo overflows downward only */
+.landing__logo { display: flex; align-items: flex-start; justify-content: flex-start; flex-shrink: 0; height: var(--lp-bar-h); overflow: visible; }
 /* logo: fixed height, width follows the image so it is never stretched.
-   The box above stays bar-height, so a taller logo overflows evenly and the bar never grows. */
+   Instead of blending, the filter below makes the near-black background transparent
+   (alpha = 3 * (r + g + b) - 0.9). Raise 0.9 if a faint box remains, lower it if dark edges fade. */
 .landing__logo img {
   display: block;
   height: var(--lp-logo-h);
   width: auto;
   max-width: 100%;
   flex-shrink: 0;
-  mix-blend-mode: lighten; /* hides the logo's black background */
+  margin-top: var(--lp-logo-top);
+  filter: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='k' color-interpolation-filters='sRGB'%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 3 3 3 0 -0.9'/%3E%3C/filter%3E%3C/svg%3E#k");
 }
 .landing__bar-actions { display: flex; align-items: center; gap: 22px; }
 .landing__signin { font-size: 14px; font-weight: 600; color: #fff; text-decoration: none; }
@@ -260,7 +265,7 @@ body.is-landing { padding-top: 0; }
 
 @media (max-width: 600px) {
   /* header logo matches the footer logo size on phones (60px) */
-  .landing { --lp-logo-h-m: 60px; }
+  .landing { --lp-logo-h-m: 60px; --lp-logo-top: 3px; }
   .landing__bar-actions { gap: 12px; }
   .landing__signin { font-size: 13px; }
   .landing__start { padding: 8px 14px; font-size: 13px; }
@@ -281,20 +286,4 @@ body.is-landing { padding-top: 0; }
   .perks__card { padding: 20px; }
   .perks__card h3 { margin-top: 20px; }
 
-  .why__phone { width: min(100%, 240px); border-radius: 28px; }
-
-  .prices__table { min-width: 620px; }
-  .prices__table th { padding: 12px 10px; font-size: 13px; }
-  .prices__table td { padding: 14px 10px; font-size: 14px; }
-  .prices__asset { gap: 10px; }
-
-  .closing__stat strong { font-size: 28px; }
-  .closing__stat span { font-size: 13px; }
-  .closing__buttons { flex-direction: column; }
-  .closing__main, .closing__alt { width: 100%; padding: 14px 20px; }
-
-  .legal__inner { padding: 40px 20px 50px; }
-
-  .foot__logo img { height: 60px; }
-  .foot__nav { gap: 14px 20px; }
-}
+  .why__phone { width: min(100%, 240px);
