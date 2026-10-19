@@ -6,7 +6,7 @@
   box-sizing: border-box;
   max-width: 640px;
   margin: 0 auto;
-  padding: 32px 20px 64px;
+  padding: 0 20px;
   display: grid;
   gap: 24px;
   color: #fff;
@@ -14,8 +14,6 @@
   /* paint the black edge to edge, even inside a padded or green layout */
   box-shadow: 0 0 0 100vmax #000;
   clip-path: inset(0 -100vmax);
-  min-height: 100vh;
-  align-content: start;
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
@@ -86,7 +84,7 @@
 .profile__msg--err { background: rgba(255, 59, 78, 0.12); color: var(--nav-red, #ff3b4e); }
 
 @media (max-width: 560px) {
-  .profile { padding: 24px 12px 48px; gap: 18px; }
+  .profile { padding: 0 12px; gap: 18px; }
   .profile__card { padding: 18px; }
   .profile__field { width: 58%; }
 }
