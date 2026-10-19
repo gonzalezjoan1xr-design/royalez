@@ -1,10 +1,14 @@
-import { useState, useEffect } from 'react'
+import { Component, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Mail, Phone, User, Shield, ShieldCheck, Lock, LogOut, Save, Pencil, Calendar, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
-import { useKyc, KYC_WITHDRAW_THRESHOLD } from '../lib/kyc'
+import * as kycLib from '../lib/kyc'
 import './Profile.css'
+
+// Safe against a missing export in ../lib/kyc (a missing named import blanks the whole app in Vite)
+const KYC_WITHDRAW_THRESHOLD = kycLib.KYC_WITHDRAW_THRESHOLD ?? 100
+const useKyc = kycLib.useKyc || (() => ({ status: 'none' }))
 
 const KYC_TEXT = {
   none: `Withdrawals of $${KYC_WITHDRAW_THRESHOLD} or more need ID and face verification. Verify now`,
@@ -21,11 +25,19 @@ const KYC_BADGE = {
   rejected: ['Rejected', 'profile__badge--bad'],
 }
 
-const splitName = (full = '') => {
-  const parts = full.trim().split(/\s+/).filter(Boolean)
+// Handles null as well as undefined
+const splitName = (full) => {
+  const parts = String(full || '').trim().split(/\s+/).filter(Boolean)
   return [parts[0] || '', parts.slice(1).join(' ')]
 }
-const fmtDate = (iso) => (iso ? new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '—')
+
+const fmtDate = (iso) => {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime())
+    ? '—'
+    : d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+}
 
 function Row({ icon: Icon, label, children }) {
   return (
@@ -36,9 +48,28 @@ function Row({ icon: Icon, label, children }) {
   )
 }
 
-export default function Profile() {
-  const { user, profile, signOut } = useAuth()
-  const { status: kycStatus } = useKyc()
+/* Shows the real error on the page instead of a blank screen */
+class ProfileBoundary extends Component {
+  state = { error: null }
+  static getDerivedStateFromError(error) { return { error } }
+  componentDidCatch(error, info) { console.error('Profile crashed:', error, info) }
+  render() {
+    if (!this.state.error) return this.props.children
+    return (
+      <div className="profile">
+        <div className="profile__msg profile__msg--err">
+          Profile could not load: {String(this.state.error?.message || this.state.error)}
+        </div>
+      </div>
+    )
+  }
+}
+
+function ProfileInner() {
+  const auth = useAuth() || {}
+  const { user, profile, signOut } = auth
+  const kyc = useKyc() || {}
+  const kycStatus = kyc.status || 'none'
   const email = user?.email || ''
 
   const [firstSaved, lastSaved] = splitName(profile?.full_name)
@@ -48,6 +79,7 @@ export default function Profile() {
   const [phone, setPhone] = useState('')
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState(null)
+  const [local, setLocal] = useState(null) // shows saved values immediately, before auth refetches
 
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -59,25 +91,31 @@ export default function Profile() {
     setFirst(f)
     setLast(l)
     setPhone(profile?.phone || '')
+    setLocal(null)
   }, [profile?.full_name, profile?.phone])
 
+  const shown = local || { first: firstSaved, last: lastSaved, phone: profile?.phone || '' }
+
   const cancelEdit = () => {
-    setFirst(firstSaved)
-    setLast(lastSaved)
-    setPhone(profile?.phone || '')
+    setFirst(shown.first)
+    setLast(shown.last)
+    setPhone(shown.phone)
     setEditing(false)
   }
 
   const onSave = async (e) => {
     e.preventDefault()
+    if (!user) return
     setSaving(true)
     setMsg(null)
+    const next = { first: first.trim(), last: last.trim(), phone: phone.trim() }
+    // upsert also works when the profile row doesn't exist yet
     const { error } = await supabase
       .from('profiles')
-      .update({ full_name: `${first.trim()} ${last.trim()}`.trim(), phone: phone.trim() })
-      .eq('id', user.id)
+      .upsert({ id: user.id, full_name: `${next.first} ${next.last}`.trim(), phone: next.phone })
     setSaving(false)
     if (error) return setMsg({ type: 'err', text: error.message })
+    setLocal(next)
     setMsg({ type: 'ok', text: 'Profile updated.' })
     setEditing(false)
   }
@@ -97,7 +135,24 @@ export default function Profile() {
   }
 
   const [kycLabel, kycClass] = KYC_BADGE[kycStatus] || KYC_BADGE.none
-  const val = (v) => (v ? <span className="profile__value">{v}</span> : <span className="profile__value profile__value--empty">—</span>)
+  const val = (v) =>
+    v ? <span className="profile__value">{v}</span> : <span className="profile__value profile__value--empty">—</span>
+
+  // Never render nothing: show a state while the user loads
+  if (!user) {
+    return (
+      <div className="profile">
+        <div className="profile__top">
+          <h1 className="profile__title">Profile</h1>
+          <p className="profile__subtitle">Loading your account…</p>
+        </div>
+        <Link to="/login" className="profile__hint">
+          <ShieldCheck size={16} strokeWidth={1.8} />
+          Not signed in? Go to sign in.
+        </Link>
+      </div>
+    )
+  }
 
   return (
     <div className="profile">
@@ -115,7 +170,9 @@ export default function Profile() {
             <p>Your basic profile details</p>
           </div>
           <button
-            type="button" className="profile__edit" aria-label={editing ? 'Cancel editing' : 'Edit profile'}
+            type="button"
+            className="profile__edit"
+            aria-label={editing ? 'Cancel editing' : 'Edit profile'}
             onClick={() => (editing ? cancelEdit() : (setMsg(null), setEditing(true)))}
           >
             {editing ? <X strokeWidth={1.8} /> : <Pencil strokeWidth={1.8} />}
@@ -127,18 +184,18 @@ export default function Profile() {
             <Row icon={User} label="First Name">
               {editing
                 ? <input className="profile__field" value={first} onChange={(e) => setFirst(e.target.value)} placeholder="First name" autoComplete="given-name" />
-                : val(first)}
+                : val(shown.first)}
             </Row>
             <Row icon={User} label="Last Name">
               {editing
                 ? <input className="profile__field" value={last} onChange={(e) => setLast(e.target.value)} placeholder="Last name" autoComplete="family-name" />
-                : val(last)}
+                : val(shown.last)}
             </Row>
             <Row icon={Mail} label="Email">{val(email)}</Row>
             <Row icon={Phone} label="Phone">
               {editing
                 ? <input className="profile__field" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+254 700 000 000" autoComplete="tel" />
-                : val(profile?.phone)}
+                : val(shown.phone)}
             </Row>
           </div>
 
@@ -210,9 +267,17 @@ export default function Profile() {
         </form>
       </section>
 
-      <button className="profile__signout" type="button" onClick={signOut}>
+      <button className="profile__signout" type="button" onClick={() => signOut?.()}>
         <LogOut size={16} strokeWidth={1.8} /> Sign out
       </button>
     </div>
+  )
+}
+
+export default function Profile() {
+  return (
+    <ProfileBoundary>
+      <ProfileInner />
+    </ProfileBoundary>
   )
 }
