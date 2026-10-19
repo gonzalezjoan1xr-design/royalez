@@ -65,12 +65,12 @@
 /* ---- intro list ---- */
 .kyc__list { list-style: none; margin-top: 32px; width: 100%; display: grid; gap: 16px; }
 .kyc__item {
-  display: flex; align-items: center; gap: 18px; padding: 20px 24px;
-  background: var(--v-card); border: 1px solid var(--v-line); border-radius: 8px;
+  display: flex; align-items: center; gap: 20px; padding: 24px 28px;
+  background: var(--v-card); border: 1px solid var(--v-line); border-radius: 10px;
 }
-.kyc__item h2 { font-size: 16px; font-weight: 600; line-height: 22px; }
-.kyc__item p { margin-top: 4px; color: var(--v-sub); font-size: 14px; line-height: 20px; }
-.kyc__emoji { flex: none; width: 28px; font-size: 24px; line-height: 1; text-align: center; }
+.kyc__item h2 { font-size: 17px; font-weight: 600; line-height: 24px; }
+.kyc__item p { margin-top: 4px; color: var(--v-sub); font-size: 14.5px; line-height: 21px; }
+.kyc__emoji { flex: none; width: 30px; font-size: 26px; line-height: 1; text-align: center; }
 
 .kyc__privacy {
   display: flex; align-items: flex-start; gap: 18px; width: 100%; margin-top: 32px; padding: 20px 24px;
