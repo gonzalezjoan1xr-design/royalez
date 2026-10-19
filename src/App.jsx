@@ -13,6 +13,7 @@ import Withdraw from './pages/Withdraw'
 import Verify from './pages/Verify'
 import Profile from './pages/Profile'
 import Notifications from './pages/Notifications'
+import Admin from './pages/Admin'
 import './App.css'
 
 function Protected({ children }) {
@@ -25,6 +26,7 @@ export default function App() {
   const { user } = useAuth()
   const { pathname } = useLocation()
   const publicPage = ['/', '/login', '/signup'].includes(pathname)
+  const adminPage = pathname.startsWith('/admin')
 
   return (
     <>
@@ -43,10 +45,11 @@ export default function App() {
           <Route path="/bots" element={<Protected><Bots /></Protected>} />
           <Route path="/profile" element={<Protected><Profile /></Protected>} />
           <Route path="/notifications" element={<Protected><Notifications /></Protected>} />
+          <Route path="/admin" element={<Protected><Admin /></Protected>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      <ChatButton />
+      {!adminPage && <ChatButton />}
     </>
   )
 }
