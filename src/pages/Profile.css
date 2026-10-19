@@ -17,6 +17,10 @@
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
+/* Turn every wrapper around the profile page black too (removes the dark green strips above and below).
+   Only ancestors of .profile are affected, so other pages keep their own background. */
+:not(.profile):has(.profile) { background: #000 !important; }
+
 /* ---- page title ---- */
 .profile__title { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
 .profile__subtitle { margin: 6px 0 0; color: var(--p-dim); font-size: 14px; }
