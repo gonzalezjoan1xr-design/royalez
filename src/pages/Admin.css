@@ -1,0 +1,84 @@
+.adm { max-width: 1200px; margin: 0 auto; padding: 24px 20px 60px; color: #e5e7eb; }
+.adm__head { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.adm__head h1 { margin: 0; font-size: 26px; }
+.adm__head p { margin: 2px 0 0; color: #9ca3af; font-size: 14px; }
+.adm__tile { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; background: rgba(34, 197, 94, 0.12); color: var(--green); }
+
+.adm__tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.adm__tabs button, .adm__filter button {
+  display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; cursor: pointer;
+  background: #111; border: 1px solid #1f2937; color: #cbd5e1; font-size: 14px;
+}
+.adm__tabs button.is-on, .adm__filter button.is-on { border-color: var(--green); color: var(--green); background: rgba(34, 197, 94, 0.08); }
+.adm__count {
+  min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--green); color: #04130a;
+  font-size: 12px; font-weight: 700; display: inline-grid; place-items: center;
+}
+.adm__filter { display: flex; gap: 8px; margin-bottom: 12px; }
+.adm__filter button { padding: 6px 14px; font-size: 13px; }
+
+.adm__card { background: #0d0d0d; border: 1px solid #1f2937; border-radius: 14px; overflow: hidden; }
+.adm__scroll { overflow-x: auto; }
+.adm__table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.adm__table th { text-align: left; padding: 12px 14px; color: #9ca3af; font-weight: 500; border-bottom: 1px solid #1f2937; white-space: nowrap; }
+.adm__table td { padding: 12px 14px; border-bottom: 1px solid #161616; vertical-align: middle; }
+.adm__table tr:last-child td { border-bottom: 0; }
+.adm__addr { display: block; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: #9ca3af; }
+.adm__acts { white-space: nowrap; display: flex; gap: 6px; justify-content: flex-end; }
+.adm__hold { color: #f59e0b; }
+.adm-empty { padding: 28px; text-align: center; color: #6b7280; margin: 0; }
+
+.adm-badge { padding: 3px 10px; border-radius: 999px; font-size: 12px; text-transform: capitalize; background: #1f2937; color: #cbd5e1; }
+.adm-badge--pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.adm-badge--completed, .adm-badge--approved { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+.adm-badge--failed, .adm-badge--rejected { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+
+.adm-btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px; cursor: pointer;
+  background: #151515; border: 1px solid #2a2a2a; color: #e5e7eb; font-size: 13px;
+}
+.adm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.adm-btn--ok { background: var(--green); border-color: var(--green); color: #04130a; font-weight: 600; }
+.adm-btn--no { color: #ef4444; border-color: rgba(239, 68, 68, 0.4); background: transparent; }
+
+/* chat */
+.adm__chat { display: grid; grid-template-columns: 280px 1fr; gap: 14px; height: min(620px, calc(100vh - 260px)); min-height: 380px; }
+.adm__threads, .adm__conv { background: #0d0d0d; border: 1px solid #1f2937; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
+.adm__threads { overflow-y: auto; }
+.adm__thread { text-align: left; padding: 12px 14px; background: none; border: 0; border-bottom: 1px solid #161616; color: #e5e7eb; cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
+.adm__thread.is-on { background: rgba(34, 197, 94, 0.08); }
+.adm__thread-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.adm__thread b { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm__thread small { color: #9ca3af; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm__conv-head { padding: 14px 16px; border-bottom: 1px solid #1f2937; font-weight: 600; }
+.adm__conv-head small { color: #9ca3af; font-weight: 400; }
+.adm__msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.adm__msg { max-width: 75%; padding: 10px 14px; border-radius: 12px; font-size: 14px; word-break: break-word; display: flex; flex-direction: column; gap: 4px; }
+.adm__msg small { font-size: 11px; opacity: 0.6; }
+.adm__msg--user { align-self: flex-start; background: #1a1a1a; border-bottom-left-radius: 4px; }
+.adm__msg--admin { align-self: flex-end; background: var(--green); color: #04130a; border-bottom-right-radius: 4px; }
+.adm__reply { display: flex; gap: 8px; padding: 12px; border-top: 1px solid #1f2937; }
+.adm__reply input { flex: 1; min-width: 0; padding: 10px 12px; border-radius: 8px; border: 1px solid #2a2a2a; background: #111; color: #e5e7eb; font-size: 14px; outline: 0; }
+.adm__reply input:focus { border-color: var(--green); }
+
+/* modal */
+.adm__modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 100; display: grid; place-items: center; padding: 16px; }
+.adm__modal-card { background: #0d0d0d; border: 1px solid #1f2937; border-radius: 14px; width: min(900px, 100%); max-height: 92vh; overflow-y: auto; padding: 18px; }
+.adm__modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.adm__modal-head h2 { margin: 0; font-size: 18px; }
+.adm__x { background: none; border: 0; color: #9ca3af; cursor: pointer; }
+.adm__photos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.adm__photos figure { margin: 0; }
+.adm__photos img { width: 100%; border-radius: 10px; border: 1px solid #1f2937; display: block; background: #111; }
+.adm__photos figcaption { margin-top: 6px; font-size: 13px; color: #9ca3af; text-align: center; }
+.adm__modal-acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+.adm__toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); padding: 12px 18px; border-radius: 10px; font-size: 14px; z-index: 110; max-width: 90vw; }
+.adm__toast--ok { background: var(--green); color: #04130a; }
+.adm__toast--err { background: #7f1d1d; color: #fff; }
+
+@media (max-width: 760px) {
+  .adm__chat { grid-template-columns: 1fr; height: auto; }
+  .adm__threads { max-height: 180px; }
+  .adm__conv { height: 480px; }
+}
