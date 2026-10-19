@@ -220,6 +220,15 @@ img.kyc__face-media { transform: none; }
 .kyc__cap-empty small { font-size: 12px; line-height: 18px; }
 .kyc__retake { margin-top: 12px; }
 
+/* ---- selfie checklist ---- */
+.kyc__checks {
+  list-style: none; width: 100%; margin-top: 20px; display: grid; gap: 4px;
+  color: var(--v-sub); font-size: 13px; line-height: 20px; text-align: left;
+}
+.kyc__checks li { display: flex; align-items: flex-start; gap: 8px; }
+.kyc__checks li span { flex: none; width: 9px; color: var(--v-green); }
+.kyc__cap--after-list { margin-top: 22px; }
+
 @media (max-width: 520px) {
   .kyc__main { padding: 28px 16px 40px; }
   .kyc__main--center { padding-block: 24px; }
