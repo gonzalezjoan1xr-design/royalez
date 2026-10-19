@@ -64,19 +64,19 @@
 /* ---- intro list ---- */
 .kyc__list { list-style: none; margin-top: 24px; width: 100%; display: grid; gap: 12px; }
 .kyc__item {
-  display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px; padding: 12px 16px;
   background: var(--v-card); border: 1px solid var(--v-line); border-radius: 8px;
 }
-.kyc__item h2 { font-size: 14px; font-weight: 600; }
+.kyc__item h2 { font-size: 14px; font-weight: 600; line-height: 1.2; }
 .kyc__item p { margin-top: 2px; color: var(--v-sub); font-size: 12px; line-height: 1.4; }
 .kyc__emoji { flex: none; width: 20px; font-size: 18px; line-height: 1; text-align: center; }
 
 .kyc__privacy {
-  display: flex; align-items: flex-start; gap: 14px; width: 100%; margin-top: 24px; padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 12px; width: 100%; margin-top: 24px; padding: 12px;
   background: #0a0c0b; border: 1px solid #1f1f1f; border-radius: 8px;
 }
-.kyc__privacy .kyc__emoji { margin-top: 2px; }
-.kyc__privacy p { color: var(--v-sub); font-size: 13px; line-height: 1.7; }
+.kyc__privacy .kyc__emoji { margin-top: 0; }
+.kyc__privacy p { color: var(--v-sub); font-size: 13px; line-height: 1.5; }
 
 /* ---- banners ---- */
 .kyc__banner {
