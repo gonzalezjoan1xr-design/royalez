@@ -3,8 +3,15 @@
   margin: 0 auto;
   padding: 32px 20px 64px;
   color: var(--nav-text-strong);
+  background: #000;
+  /* paint the black edge to edge, even inside a padded or green layout */
+  box-shadow: 0 0 0 100vmax #000;
+  clip-path: inset(0 -100vmax);
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
+
+/* Turn every wrapper around this page black too (only ancestors of .notifs are affected) */
+:not(.notifs):has(.notifs) { background: #000 !important; }
 
 .notifs__head {
   display: flex;
