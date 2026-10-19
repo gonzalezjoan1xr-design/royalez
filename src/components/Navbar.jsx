@@ -5,6 +5,7 @@ import {
   Search, Play, Apple, Wallet, ShieldCheck, Bell, User, LogOut, Menu, X,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { supabase } from '../lib/supabase'
 import logo from '../Assets/justR.png'
 import './Navbar.css'
 
@@ -18,13 +19,40 @@ const links = [
 ]
 
 export default function Navbar() {
-  const { profile, signOut } = useAuth()
+  const { user, profile, signOut } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
+  const [unread, setUnread] = useState(0)
   const balance = Number(profile?.balance || 0)
-  const notifications = 4 // TODO: wire to real unread count
+
+  // unread notification count (live)
+  useEffect(() => {
+    if (!user?.id) return
+    let active = true
+    const load = async () => {
+      const { count } = await supabase
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('read', false)
+      if (active) setUnread(count || 0)
+    }
+    load()
+    const channel = supabase
+      .channel(`navbar-notifications-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        load
+      )
+      .subscribe()
+    return () => {
+      active = false
+      supabase.removeChannel(channel)
+    }
+  }, [user?.id])
 
   // close drawer on route change
   useEffect(() => {
@@ -53,6 +81,7 @@ export default function Navbar() {
 
   const linkClass = ({ isActive }) => `nav__link ${isActive ? 'is-active' : ''}`
   const drawerLinkClass = ({ isActive }) => `drawer__link ${isActive ? 'is-active' : ''}`
+  const badgeText = unread > 9 ? '9+' : unread
 
   return (
     <>
@@ -96,14 +125,18 @@ export default function Navbar() {
             <ShieldCheck size={20} strokeWidth={1.8} />
           </Link>
 
-          <button className="nav__icon nav__bell" aria-label="Notifications" type="button">
+          <Link
+            to="/notifications"
+            className="nav__icon nav__bell"
+            aria-label={unread > 0 ? `Notifications (${unread} unread)` : 'Notifications'}
+          >
             <Bell size={20} strokeWidth={1.8} />
-            {notifications > 0 && <span className="nav__badge">{notifications}</span>}
-          </button>
+            {unread > 0 && <span className="nav__badge">{badgeText}</span>}
+          </Link>
 
-          <button className="nav__icon" aria-label="Profile" type="button">
+          <Link to="/profile" className="nav__icon" aria-label="Profile">
             <User size={20} strokeWidth={1.8} />
-          </button>
+          </Link>
 
           <button className="nav__icon nav__icon--red" onClick={signOut} aria-label="Sign out" type="button">
             <LogOut size={20} strokeWidth={1.8} />
@@ -142,6 +175,12 @@ export default function Navbar() {
               <Icon size={18} strokeWidth={1.8} /> <span>{label}</span>
             </NavLink>
           ))}
+          <NavLink to="/notifications" className={drawerLinkClass}>
+            <Bell size={18} strokeWidth={1.8} /> <span>Notifications{unread > 0 ? ` (${badgeText})` : ''}</span>
+          </NavLink>
+          <NavLink to="/profile" className={drawerLinkClass}>
+            <User size={18} strokeWidth={1.8} /> <span>Profile</span>
+          </NavLink>
           <NavLink to="/verify" className="drawer__link drawer__link--accent">
             <ShieldCheck size={18} strokeWidth={1.8} /> <span>Verify Identity</span>
           </NavLink>
