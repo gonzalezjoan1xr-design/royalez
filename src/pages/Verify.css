@@ -212,13 +212,23 @@ img.kyc__face-media { transform: none; }
   color: var(--v-sub); cursor: pointer;
 }
 .kyc__cap:hover { border-color: #3a3a3a; }
+/* selfie page: thinner 1px dashed border and 12px corners (measured from its screenshot) */
+.kyc__cap--thin { border-width: 1px; border-radius: 12px; }
 .kyc__cap:focus-visible { outline: 2px solid var(--v-green); outline-offset: 2px; }
 .kyc__cap.has-img { border-style: solid; }
-.kyc__cap img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.kyc__cap img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .kyc__cap-empty { display: grid; justify-items: center; gap: 10px; padding: 0 12px; }
 .kyc__cap-empty b { font-size: 14px; font-weight: 600; line-height: 21px; }
 .kyc__cap-empty small { font-size: 12px; line-height: 18px; }
-.kyc__retake { margin-top: 12px; }
+.kyc__cap-wrap { position: relative; width: 100%; max-width: 384px; margin-top: 22px; }
+.kyc__cap-wrap .kyc__cap { margin-top: 0; max-width: none; }
+.kyc__cap-reset {
+  position: absolute; top: 8px; right: 8px; display: grid; place-items: center;
+  width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7); color: #fff; cursor: pointer;
+}
+.kyc__cap-reset:hover { background: rgba(0, 0, 0, 0.85); }
+.kyc__cap-reset:focus-visible { outline: 2px solid var(--v-green); outline-offset: 2px; }
 
 /* ---- selfie checklist ---- */
 .kyc__checks {
@@ -227,7 +237,6 @@ img.kyc__face-media { transform: none; }
 }
 .kyc__checks li { display: flex; align-items: flex-start; gap: 8px; }
 .kyc__checks li span { flex: none; width: 9px; color: var(--v-green); }
-.kyc__cap--after-list { margin-top: 22px; }
 
 @media (max-width: 520px) {
   .kyc__main { padding: 28px 16px 40px; }
