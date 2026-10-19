@@ -10,7 +10,7 @@ import Spot from './pages/Spot'
 import Bots from './pages/Bots'
 import Deposit from './pages/Deposit'
 import Withdraw from './pages/Withdraw'
-import WithdrawAuth from './pages/WithdrawAuth'
+import Verify from './pages/Verify'
 import Profile from './pages/Profile'
 import Notifications from './pages/Notifications'
 import './App.css'
@@ -39,7 +39,7 @@ export default function App() {
           <Route path="/spot" element={<Protected><Spot /></Protected>} />
           <Route path="/deposit" element={<Protected><Deposit /></Protected>} />
           <Route path="/withdraw" element={<Protected><Withdraw /></Protected>} />
-          <Route path="/withdraw/verify" element={<Protected><WithdrawAuth /></Protected>} />
+          <Route path="/verify" element={<Protected><Verify /></Protected>} />
           <Route path="/bots" element={<Protected><Bots /></Protected>} />
           <Route path="/profile" element={<Protected><Profile /></Protected>} />
           <Route path="/notifications" element={<Protected><Notifications /></Protected>} />
