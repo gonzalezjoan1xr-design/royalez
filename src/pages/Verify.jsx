@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
-  ShieldCheck, Camera, Upload, Check, Clock, AlertTriangle, RotateCcw, ArrowLeft,
+  ShieldCheck, Camera, Upload, Check, Clock, AlertTriangle, ArrowLeft,
   ChevronRight,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -89,65 +89,11 @@ export default function Verify() {
     }
   }, [])
 
-  /* ---------- camera ---------- */
-  const videoRef = useRef(null)
-  const streamRef = useRef(null)
-  const [cam, setCam] = useState('idle') // idle | starting | live | error
+  /* ---------- refs ---------- */
   const selfieInputRef = useRef(null)
   const idInputRef = useRef(null)
 
-  const stopCamera = useCallback(() => {
-    streamRef.current?.getTracks().forEach((t) => t.stop())
-    streamRef.current = null
-    setCam('idle')
-  }, [])
-
-  const startCamera = useCallback(async () => {
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setCam('error')
-      return
-    }
-    setCam('starting')
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 960 }, height: { ideal: 960 } },
-        audio: false,
-      })
-      streamRef.current = stream
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        await videoRef.current.play().catch(() => {})
-      }
-      setCam('live')
-    } catch {
-      setCam('error')
-    }
-  }, [])
-
   const canShowWizard = status === 'none' || status === 'rejected'
-
-  useEffect(() => {
-    if (canShowWizard && started && picked && step === 2 && !selfie) startCamera()
-    return () => stopCamera()
-  }, [canShowWizard, started, picked, step, selfie, startCamera, stopCamera])
-
-  const takePhoto = () => {
-    const v = videoRef.current
-    if (!v || !v.videoWidth) return
-    const size = Math.min(v.videoWidth, v.videoHeight)
-    const canvas = document.createElement('canvas')
-    canvas.width = 720
-    canvas.height = 720
-    const ctx = canvas.getContext('2d')
-    ctx.drawImage(v, (v.videoWidth - size) / 2, (v.videoHeight - size) / 2, size, size, 0, 0, 720, 720)
-    canvas.toBlob(
-      (blob) => {
-        if (blob) setSelfie(new File([blob], 'face.jpg', { type: 'image/jpeg' }))
-      },
-      'image/jpeg',
-      0.9
-    )
-  }
 
   /* ---------- helpers ---------- */
   const pickImage = (setter) => (file) => {
@@ -419,7 +365,68 @@ export default function Verify() {
     )
   }
 
-  /* ---------- wizard (face check, review) ---------- */
+  /* ---------- live selfie (matches the screenshot) ---------- */
+  if (picked && step === 2) {
+    return (
+      <Shell onBack={goBack} mainClass="kyc__main--center">
+        <h1 className="kyc__title kyc__title--sm kyc__title--choose">Take a Live Selfie</h1>
+        <p className="kyc__sub kyc__sub--tight">Look directly at the camera in a well-lit area</p>
+
+        <ul className="kyc__checks">
+          <li><span aria-hidden="true">✓</span>Remove sunglasses or hats</li>
+          <li><span aria-hidden="true">✓</span>Ensure your full face is visible</li>
+          <li><span aria-hidden="true">✓</span>Use good lighting — avoid strong backlighting</li>
+        </ul>
+
+        <button
+          type="button"
+          className={`kyc__cap kyc__cap--after-list ${selfiePreview ? 'has-img' : ''}`}
+          onClick={() => selfieInputRef.current?.click()}
+        >
+          {selfiePreview ? (
+            <img src={selfiePreview} alt="Your face" />
+          ) : (
+            <span className="kyc__cap-empty">
+              <Camera size={41} strokeWidth={1.8} />
+              <b>Tap to open camera</b>
+              <small>Front-facing camera will open automatically</small>
+            </span>
+          )}
+        </button>
+        <input
+          ref={selfieInputRef}
+          type="file"
+          accept="image/*"
+          capture="user"
+          hidden
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            e.target.value = ''
+            if (f) pickImage(setSelfie)(f)
+          }}
+        />
+
+        {selfiePreview && (
+          <button type="button" className="kyc-link kyc__retake" onClick={() => selfieInputRef.current?.click()}>
+            Retake photo
+          </button>
+        )}
+        {error && <div className="kyc__banner kyc__banner--err">{error}</div>}
+
+        <button
+          type="button"
+          className="kyc-btn kyc-btn--block kyc-btn--cap"
+          onClick={() => { setError(''); setStep(3) }}
+          disabled={!selfie}
+        >
+          Continue
+          <ChevronRight size={16} strokeWidth={2} />
+        </button>
+      </Shell>
+    )
+  }
+
+  /* ---------- review and submit ---------- */
   return (
     <Shell onBack={goBack}>
       <h1 className="kyc__title kyc__title--sm">Verify your identity</h1>
@@ -440,66 +447,6 @@ export default function Verify() {
       </ol>
 
       <div className="kyc__card">
-        {step === 2 && (
-          <>
-            <h2><Camera size={18} strokeWidth={1.8} /> Face check</h2>
-            <div className="kyc__face">
-              {selfiePreview ? (
-                <img src={selfiePreview} alt="Your face" className="kyc__face-media" />
-              ) : (
-                <>
-                  <video ref={videoRef} className={`kyc__face-media ${cam === 'live' ? '' : 'is-hidden'}`} playsInline muted autoPlay />
-                  {cam !== 'live' && (
-                    <div className="kyc__face-state">
-                      {cam === 'error' ? (
-                        <>
-                          <AlertTriangle size={24} strokeWidth={1.7} />
-                          <span>We could not open the camera. Allow camera access in your browser, or upload a photo instead.</span>
-                        </>
-                      ) : (
-                        <span>Starting camera…</span>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            <div className="kyc__face-actions">
-              {selfiePreview ? (
-                <button type="button" className="kyc-btn kyc-btn--ghost" onClick={() => setSelfie(null)}>
-                  <RotateCcw size={16} strokeWidth={1.8} /> Retake
-                </button>
-              ) : (
-                <>
-                  <button type="button" className="kyc-btn" onClick={takePhoto} disabled={cam !== 'live'}>
-                    <Camera size={16} strokeWidth={1.8} /> Take photo
-                  </button>
-                  <button type="button" className="kyc-btn kyc-btn--ghost" onClick={() => selfieInputRef.current?.click()}>
-                    <Upload size={16} strokeWidth={1.8} /> Upload instead
-                  </button>
-                  <input
-                    ref={selfieInputRef}
-                    type="file"
-                    accept="image/*"
-                    capture="user"
-                    hidden
-                    onChange={(e) => {
-                      const f = e.target.files?.[0]
-                      e.target.value = ''
-                      if (f) pickImage(setSelfie)(f)
-                    }}
-                  />
-                </>
-              )}
-            </div>
-            <ul className="kyc__tips">
-              <li>Look straight at the camera in good light.</li>
-              <li>Remove sunglasses, hats and masks.</li>
-            </ul>
-          </>
-        )}
-
         {step === 3 && (
           <>
             <h2><Check size={18} strokeWidth={1.8} /> Review and submit</h2>
@@ -534,16 +481,6 @@ export default function Verify() {
             </button>
           ) : (
             <span />
-          )}
-          {step < 3 && (
-            <button
-              type="button"
-              className="kyc-btn"
-              onClick={() => setStep(step + 1)}
-              disabled={!selfie}
-            >
-              Continue
-            </button>
           )}
           {step === 3 && (
             <button type="button" className="kyc-btn" onClick={submit} disabled={busy}>
