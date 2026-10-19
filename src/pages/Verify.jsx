@@ -300,7 +300,7 @@ export default function Verify() {
   /* ---------- intro ---------- */
   if (!started) {
     return (
-      <Shell onBack={goBack}>
+      <Shell onBack={goBack} mainClass="kyc__main--intro">
         <span className="kyc__hero" aria-hidden="true">
           <Upload size={28} strokeWidth={1.8} />
         </span>
@@ -368,7 +368,7 @@ export default function Verify() {
             <li key={t.id}>
               <button
                 type="button"
-                className={`kyc__doc ${t.id === idType ? 'is-on' : ''}`}
+                className="kyc__doc"
                 onClick={() => chooseType(t.id)}
               >
                 <span className="kyc__doc-icon" aria-hidden="true">{t.icon}</span>
