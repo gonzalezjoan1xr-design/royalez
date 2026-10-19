@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   ShieldCheck, Camera, FileText, Upload, Check, Clock, AlertTriangle, RotateCcw, ArrowLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
@@ -17,6 +18,12 @@ const ID_TYPES = [
 const MAX_MB = 8
 const STEPS = ['ID document', 'Face check', 'Review']
 
+const INTRO = [
+  { icon: '🪪', title: 'Government-issued ID', text: "Passport, national ID, or driver's license" },
+  { icon: '🤳', title: 'Live selfie', text: 'A photo of your face taken in real time' },
+  { icon: '⏱️', title: 'Quick process', text: 'Takes less than 2 minutes to complete' },
+]
+
 function usePreview(file) {
   const [url, setUrl] = useState('')
   useEffect(() => {
@@ -29,6 +36,21 @@ function usePreview(file) {
     return () => URL.revokeObjectURL(u)
   }, [file])
   return url
+}
+
+/* Full-screen black shell with the top bar, shared by every state */
+function Shell({ onBack, children }) {
+  return (
+    <div className="kyc">
+      <header className="kyc__bar">
+        <button type="button" className="kyc__back" onClick={onBack} aria-label="Go back">
+          <ArrowLeft size={20} strokeWidth={1.8} />
+        </button>
+        <span className="kyc__bar-title">Identity Verification</span>
+      </header>
+      <main className="kyc__main">{children}</main>
+    </div>
+  )
 }
 
 function FileDrop({ label, hint, file, onPick }) {
@@ -76,8 +98,10 @@ export default function Verify() {
   const { user } = useAuth()
   const { record, status, loading, refresh } = useKyc()
   const location = useLocation()
+  const nav = useNavigate()
   const fromWithdraw = location.state?.reason === 'withdraw'
 
+  const [started, setStarted] = useState(false) // false = intro screen
   const [step, setStep] = useState(1)
   const [idType, setIdType] = useState('national_id')
   const [idFront, setIdFront] = useState(null)
@@ -90,6 +114,19 @@ export default function Verify() {
   const frontPreview = usePreview(idFront)
   const backPreview = usePreview(idBack)
   const selfiePreview = usePreview(selfie)
+
+  // Keep the whole viewport pure black while this page is open
+  useEffect(() => {
+    const html = document.documentElement
+    const body = document.body
+    const prev = [html.style.background, body.style.background]
+    html.style.background = '#000'
+    body.style.background = '#000'
+    return () => {
+      html.style.background = prev[0]
+      body.style.background = prev[1]
+    }
+  }, [])
 
   /* ---------- camera ---------- */
   const videoRef = useRef(null)
@@ -128,9 +165,9 @@ export default function Verify() {
   const canShowWizard = status === 'none' || status === 'rejected'
 
   useEffect(() => {
-    if (canShowWizard && step === 2 && !selfie) startCamera()
+    if (canShowWizard && started && step === 2 && !selfie) startCamera()
     return () => stopCamera()
-  }, [canShowWizard, step, selfie, startCamera, stopCamera])
+  }, [canShowWizard, started, step, selfie, startCamera, stopCamera])
 
   const takePhoto = () => {
     const v = videoRef.current
@@ -200,69 +237,123 @@ export default function Verify() {
     }
   }
 
+  // Back arrow: previous step, then intro, then leave the page
+  const goBack = () => {
+    setError('')
+    if (canShowWizard && started) {
+      if (step > 1) setStep(step - 1)
+      else setStarted(false)
+      return
+    }
+    nav(-1)
+  }
+
   /* ---------- states ---------- */
-  if (loading) return <div className="kyc"><div className="kyc__state">Loading…</div></div>
+  if (loading) {
+    return (
+      <Shell onBack={() => nav(-1)}>
+        <div className="kyc__state">Loading…</div>
+      </Shell>
+    )
+  }
 
   if (status === 'approved') {
     return (
-      <div className="kyc">
-        <div className="kyc__card kyc__card--center">
-          <span className="kyc__badge kyc__badge--ok"><ShieldCheck size={32} strokeWidth={1.7} /></span>
-          <h1>You are verified</h1>
-          <p>Your ID and face verification is approved. You can withdraw any amount.</p>
-          <div className="kyc__actions">
-            <Link to="/withdraw" className="kyc-btn">Go to withdraw</Link>
-            <Link to="/dashboard" className="kyc-btn kyc-btn--ghost">Dashboard</Link>
-          </div>
+      <Shell onBack={goBack}>
+        <span className="kyc__hero"><ShieldCheck size={28} strokeWidth={1.8} /></span>
+        <h1 className="kyc__title">You are verified</h1>
+        <p className="kyc__sub">Your ID and face verification is approved. You can withdraw any amount.</p>
+        <div className="kyc__actions">
+          <Link to="/withdraw" className="kyc-btn">Go to withdraw</Link>
+          <Link to="/dashboard" className="kyc-btn kyc-btn--ghost">Dashboard</Link>
         </div>
-      </div>
+      </Shell>
     )
   }
 
   if (status === 'pending') {
     return (
-      <div className="kyc">
-        <div className="kyc__card kyc__card--center">
-          <span className="kyc__badge kyc__badge--wait"><Clock size={32} strokeWidth={1.7} /></span>
-          <h1>Verification under review</h1>
-          <p>
-            We received your ID and face photo and are reviewing them. We will send you a notification as
-            soon as the review is done.
-          </p>
-          <div className="kyc__actions">
-            <Link to="/notifications" className="kyc-btn kyc-btn--ghost">View notifications</Link>
-            <Link to="/dashboard" className="kyc-btn kyc-btn--ghost">Dashboard</Link>
-          </div>
+      <Shell onBack={goBack}>
+        <span className="kyc__hero kyc__hero--wait"><Clock size={28} strokeWidth={1.8} /></span>
+        <h1 className="kyc__title">Verification under review</h1>
+        <p className="kyc__sub">
+          We received your ID and face photo and are reviewing them. We will send you a notification as
+          soon as the review is done.
+        </p>
+        <div className="kyc__actions">
+          <Link to="/notifications" className="kyc-btn kyc-btn--ghost">View notifications</Link>
+          <Link to="/dashboard" className="kyc-btn kyc-btn--ghost">Dashboard</Link>
         </div>
-      </div>
+      </Shell>
     )
   }
 
-  return (
-    <div className="kyc">
-      <header className="kyc__head">
-        <span className="kyc__badge"><ShieldCheck size={26} strokeWidth={1.7} /></span>
-        <div>
-          <h1>Verify your identity</h1>
-          <p>ID document and a live face photo. Required for withdrawals of ${KYC_WITHDRAW_THRESHOLD} or more.</p>
-        </div>
-      </header>
+  /* ---------- intro (matches the screenshot) ---------- */
+  if (!started) {
+    return (
+      <Shell onBack={goBack}>
+        <span className="kyc__hero" aria-hidden="true">
+          <Upload size={28} strokeWidth={1.8} />
+        </span>
 
-      {fromWithdraw && (
-        <div className="kyc__banner kyc__banner--info">
-          <ShieldCheck size={18} strokeWidth={1.8} />
-          Your withdrawal needs verification first. Complete the steps below, then return to Withdraw.
+        <h1 className="kyc__title">Verify Your Identity</h1>
+        <p className="kyc__sub">
+          Complete a quick identity check to unlock <strong>higher withdrawal limits</strong> and
+          gain full access to all platform features.
+        </p>
+
+        {fromWithdraw && (
+          <div className="kyc__banner kyc__banner--info">
+            <ShieldCheck size={18} strokeWidth={1.8} />
+            Your withdrawal needs verification first. Complete the steps, then return to Withdraw.
+          </div>
+        )}
+        {status === 'rejected' && (
+          <div className="kyc__banner kyc__banner--err">
+            <AlertTriangle size={18} strokeWidth={1.8} />
+            <span>
+              <b>Your last submission was rejected.</b>{' '}
+              {record?.rejection_reason || 'Please submit clear photos again.'}
+            </span>
+          </div>
+        )}
+
+        <ul className="kyc__list">
+          {INTRO.map((s) => (
+            <li key={s.title} className="kyc__item">
+              <span className="kyc__emoji" aria-hidden="true">{s.icon}</span>
+              <div>
+                <h2>{s.title}</h2>
+                <p>{s.text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        <div className="kyc__privacy">
+          <span className="kyc__emoji" aria-hidden="true">🔒</span>
+          <p>
+            Your documents are <strong>used solely for identity verification</strong> and are
+            permanently deleted from our systems once verification is complete. We do not share
+            your data with third parties.
+          </p>
         </div>
-      )}
-      {status === 'rejected' && (
-        <div className="kyc__banner kyc__banner--err">
-          <AlertTriangle size={18} strokeWidth={1.8} />
-          <span>
-            <b>Your last submission was rejected.</b>{' '}
-            {record?.rejection_reason || 'Please submit clear photos again.'}
-          </span>
-        </div>
-      )}
+
+        <button type="button" className="kyc-btn kyc-btn--block" onClick={() => setStarted(true)}>
+          Start Verification
+          <ChevronRight size={16} strokeWidth={2} />
+        </button>
+      </Shell>
+    )
+  }
+
+  /* ---------- wizard ---------- */
+  return (
+    <Shell onBack={goBack}>
+      <h1 className="kyc__title kyc__title--sm">Verify your identity</h1>
+      <p className="kyc__sub">
+        ID document and a live face photo. Required for withdrawals of ${KYC_WITHDRAW_THRESHOLD} or more.
+      </p>
 
       <ol className="kyc__steps">
         {STEPS.map((label, i) => {
@@ -422,6 +513,6 @@ export default function Verify() {
           )}
         </div>
       </div>
-    </div>
+    </Shell>
   )
 }
