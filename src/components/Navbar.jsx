@@ -5,7 +5,7 @@ import {
   Search, Play, Apple, Wallet, ShieldCheck, Bell, User, LogOut, Menu, X,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import logo from '../Assets/logo-R.png'
+import logo from '../Assets/justR.png'
 import './Navbar.css'
 
 const links = [
