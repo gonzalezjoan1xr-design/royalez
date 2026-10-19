@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { needsVerification, isVerified, clearVerified } from '../lib/withdrawGate'
+import { needsVerification, isVerified, clearVerified, WITHDRAW_AUTH_THRESHOLD } from '../lib/withdrawGate'
 import { supabase } from '../lib/supabase' // adjust if your client lives elsewhere
 import './Withdraw.css'
 
@@ -100,12 +100,18 @@ function Dropdown({ value, options, placeholder, onChange, renderOption }) {
 /* ---------- page ---------- */
 export default function Withdraw() {
   const { user, profile } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
   const balance = Number(profile?.balance || 0)
 
-  const [coin, setCoin] = useState('')
-  const [network, setNetwork] = useState('')
-  const [address, setAddress] = useState('')
-  const [amount, setAmount] = useState('')
+  // details sent back by the verification page (if the user just came from there)
+  const returned = location.state?.pending
+  const cameBackVerified = Boolean(location.state?.verified)
+
+  const [coin, setCoin] = useState(returned?.coin ?? '')
+  const [network, setNetwork] = useState(returned?.network ?? '')
+  const [address, setAddress] = useState(returned?.address ?? '')
+  const [amount, setAmount] = useState(returned?.amount != null ? String(returned.amount) : '')
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState(null) // { type: 'ok' | 'err', title, text }
   const [history, setHistory] = useState([])
@@ -151,6 +157,52 @@ export default function Withdraw() {
 
   useEffect(() => { loadHistory() }, [loadHistory])
 
+  // saves the withdrawal request; returns true on success
+  const createWithdrawal = useCallback(
+    async ({ coin: c, network: n, address: a, amt: value }) => {
+      setBusy(true)
+      const { error } = await supabase.from('withdrawals').insert({
+        user_id: user.id,
+        coin: c,
+        network: n,
+        address: a,
+        amount: value,
+        status: 'pending',
+      })
+      setBusy(false)
+
+      if (error) {
+        notify({ type: 'err', title: 'Withdrawal failed', text: error.message })
+        return false
+      }
+      clearVerified()
+      setAmount('')
+      setAddress('')
+      notify({ type: 'ok', title: 'Withdrawal submitted', text: 'Your request will be reviewed and processed shortly.' })
+      loadHistory()
+      return true
+    },
+    [user, notify, loadHistory]
+  )
+
+  // coming back from /withdraw/verify: submit the verified withdrawal once
+  const autoRan = useRef(false)
+  useEffect(() => {
+    if (autoRan.current || !returned || !cameBackVerified || !user || !profile) return
+    autoRan.current = true
+
+    // clear the router state so a refresh can never submit it again
+    navigate('/withdraw', { replace: true, state: null })
+
+    if (!isVerified()) return
+    const value = Number(returned.amount)
+    if (value > balance) {
+      notify({ type: 'err', title: 'Insufficient Balance', text: "You don't have enough balance for this withdrawal" })
+      return
+    }
+    createWithdrawal({ coin: returned.coin, network: returned.network, address: returned.address, amt: value })
+  }, [returned, cameBackVerified, user, profile, balance, navigate, notify, createWithdrawal])
+
   const changeCoin = (c) => {
     setCoin(c)
     setNetwork(NETWORKS[c][0].id)
@@ -165,22 +217,15 @@ export default function Withdraw() {
     if (amt < MIN_WITHDRAWAL) return notify({ type: 'err', title: 'Amount too low', text: `The minimum withdrawal is ${money(MIN_WITHDRAWAL)}.` })
     if (amt > balance) return notify({ type: 'err', title: 'Insufficient Balance', text: "You don't have enough balance for this withdrawal" })
 
-    setBusy(true)
-    const { error } = await supabase.from('withdrawals').insert({
-      user_id: user.id,
-      coin,
-      network,
-      address: address.trim(),
-      amount: amt,
-      status: 'pending',
-    })
-    setBusy(false)
+    // large withdrawals need an email code first
+    if (needsVerification(amt) && !isVerified()) {
+      navigate('/withdraw/verify', {
+        state: { pending: { coin, network, address: address.trim(), amount: amt } },
+      })
+      return
+    }
 
-    if (error) return notify({ type: 'err', title: 'Withdrawal failed', text: error.message })
-    setAmount('')
-    setAddress('')
-    notify({ type: 'ok', title: 'Withdrawal submitted', text: 'Your request will be reviewed and processed shortly.' })
-    loadHistory()
+    await createWithdrawal({ coin, network, address: address.trim(), amt })
   }
 
   return (
@@ -252,6 +297,11 @@ export default function Withdraw() {
                   />
                 </div>
                 <p className="wd-hint">Minimum withdrawal: {money(MIN_WITHDRAWAL).replace('.00', '')}</p>
+                {needsVerification(amt) && (
+                  <p className="wd-hint">
+                    Withdrawals of ${WITHDRAW_AUTH_THRESHOLD} or more need email verification before they are submitted.
+                  </p>
+                )}
 
                 <div className="wd-summary">
                   <div className="wd-summary__row">
