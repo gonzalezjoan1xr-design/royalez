@@ -360,7 +360,7 @@ export default function Verify() {
   if (!picked) {
     return (
       <Shell onBack={goBack} mainClass="kyc__main--choose">
-        <h1 className="kyc__title kyc__title--sm">Choose Document Type</h1>
+        <h1 className="kyc__title kyc__title--sm kyc__title--choose">Choose Document Type</h1>
         <p className="kyc__sub kyc__sub--tight">Select the type of ID you'll be using</p>
 
         <ul className="kyc__docs">
@@ -373,7 +373,7 @@ export default function Verify() {
               >
                 <span className="kyc__doc-icon" aria-hidden="true">{t.icon}</span>
                 <span className="kyc__doc-label">{t.label}</span>
-                <ChevronRight size={16} strokeWidth={2} />
+                <ChevronRight size={18} strokeWidth={2} />
               </button>
             </li>
           ))}
