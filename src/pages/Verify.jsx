@@ -10,9 +10,9 @@ import { useKyc, KYC_WITHDRAW_THRESHOLD } from '../lib/kyc'
 import './Verify.css'
 
 const ID_TYPES = [
-  { id: 'national_id', label: 'National ID', back: true },
-  { id: 'passport', label: 'Passport', back: false },
-  { id: 'drivers_license', label: "Driver's license", back: true },
+  { id: 'passport', label: 'Passport', icon: '📕', back: false },
+  { id: 'national_id', label: 'National ID Card', icon: '🪪', back: true },
+  { id: 'drivers_license', label: "Driver's License", icon: '🚗', back: true },
 ]
 
 const MAX_MB = 8
@@ -39,7 +39,7 @@ function usePreview(file) {
 }
 
 /* Full-screen black shell with the top bar, shared by every state */
-function Shell({ onBack, children }) {
+function Shell({ onBack, mainClass = '', children }) {
   return (
     <div className="kyc">
       <header className="kyc__bar">
@@ -48,7 +48,7 @@ function Shell({ onBack, children }) {
         </button>
         <span className="kyc__bar-title">Identity Verification</span>
       </header>
-      <main className="kyc__main">{children}</main>
+      <main className={`kyc__main ${mainClass}`}>{children}</main>
     </div>
   )
 }
@@ -102,6 +102,7 @@ export default function Verify() {
   const fromWithdraw = location.state?.reason === 'withdraw'
 
   const [started, setStarted] = useState(false) // false = intro screen
+  const [picked, setPicked] = useState(false) // false = "Choose Document Type" screen
   const [step, setStep] = useState(1)
   const [idType, setIdType] = useState('national_id')
   const [idFront, setIdFront] = useState(null)
@@ -165,9 +166,9 @@ export default function Verify() {
   const canShowWizard = status === 'none' || status === 'rejected'
 
   useEffect(() => {
-    if (canShowWizard && started && step === 2 && !selfie) startCamera()
+    if (canShowWizard && started && picked && step === 2 && !selfie) startCamera()
     return () => stopCamera()
-  }, [canShowWizard, started, step, selfie, startCamera, stopCamera])
+  }, [canShowWizard, started, picked, step, selfie, startCamera, stopCamera])
 
   const takePhoto = () => {
     const v = videoRef.current
@@ -195,9 +196,13 @@ export default function Verify() {
     setter(file)
   }
 
-  const changeType = (id) => {
+  // Tapping a document type on the "Choose Document Type" screen opens the upload step
+  const chooseType = (id) => {
     setIdType(id)
     if (!ID_TYPES.find((t) => t.id === id).back) setIdBack(null)
+    setError('')
+    setStep(1)
+    setPicked(true)
   }
 
   const step1Ready = Boolean(idFront) && (!typeInfo.back || Boolean(idBack))
@@ -237,12 +242,16 @@ export default function Verify() {
     }
   }
 
-  // Back arrow: previous step, then intro, then leave the page
+  // Back arrow: previous step, then document type, then intro, then leave the page
   const goBack = () => {
     setError('')
     if (canShowWizard && started) {
-      if (step > 1) setStep(step - 1)
-      else setStarted(false)
+      if (picked) {
+        if (step > 1) setStep(step - 1)
+        else setPicked(false)
+      } else {
+        setStarted(false)
+      }
       return
     }
     nav(-1)
@@ -288,7 +297,7 @@ export default function Verify() {
     )
   }
 
-  /* ---------- intro (matches the screenshot) ---------- */
+  /* ---------- intro ---------- */
   if (!started) {
     return (
       <Shell onBack={goBack}>
@@ -347,6 +356,32 @@ export default function Verify() {
     )
   }
 
+  /* ---------- choose document type (matches the screenshot) ---------- */
+  if (!picked) {
+    return (
+      <Shell onBack={goBack} mainClass="kyc__main--choose">
+        <h1 className="kyc__title kyc__title--sm">Choose Document Type</h1>
+        <p className="kyc__sub kyc__sub--tight">Select the type of ID you'll be using</p>
+
+        <ul className="kyc__docs">
+          {ID_TYPES.map((t) => (
+            <li key={t.id}>
+              <button
+                type="button"
+                className={`kyc__doc ${t.id === idType ? 'is-on' : ''}`}
+                onClick={() => chooseType(t.id)}
+              >
+                <span className="kyc__doc-icon" aria-hidden="true">{t.icon}</span>
+                <span className="kyc__doc-label">{t.label}</span>
+                <ChevronRight size={16} strokeWidth={2} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </Shell>
+    )
+  }
+
   /* ---------- wizard ---------- */
   return (
     <Shell onBack={goBack}>
@@ -370,19 +405,7 @@ export default function Verify() {
       <div className="kyc__card">
         {step === 1 && (
           <>
-            <h2><FileText size={18} strokeWidth={1.8} /> Upload your ID</h2>
-            <div className="kyc__types">
-              {ID_TYPES.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  className={t.id === idType ? 'is-on' : ''}
-                  onClick={() => changeType(t.id)}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
+            <h2><FileText size={18} strokeWidth={1.8} /> Upload your {typeInfo.label}</h2>
             <div className={`kyc__drops ${typeInfo.back ? '' : 'kyc__drops--one'}`}>
               <FileDrop
                 label={typeInfo.back ? 'Front of ID' : 'Photo page'}
