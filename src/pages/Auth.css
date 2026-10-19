@@ -1,159 +1,207 @@
-/* Full-screen pure-black layer so nothing from the app layout shows through */
-.verify {
-  --v-bg: #000000;
-  --v-card: #0f0f0f;
-  --v-line: #222222;
-  --v-text: #ffffff;
-  --v-sub: #9ca3af;
-  --v-green: #00ff88;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Full-screen layer so nothing from the app layout (headers, banners) shows above the card */
+.auth {
+  --a-page: #000000;
+  --a-card: #111111;
+  --a-card-border: #1f1f1f;
+  --a-input: #1a1a1a;
+  --a-input-border: #262626;
+  --a-text: #ffffff;
+  --a-sub: #b3b3b3;
+  --a-muted: #8c8c8c;
 
   position: fixed;
   inset: 0;
   z-index: 50;
   overflow-y: auto;
-  background: var(--v-bg);
-  color: var(--v-text);
-  color-scheme: dark;
+  display: flex;
+  padding: 16px;
+  background: var(--a-page);
+  color: var(--a-text);
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
-  -webkit-font-smoothing: antialiased;
 }
 
-/* ---- top bar ---- */
-.verify__bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 45px;
-  padding: 0 16px;
-  background: var(--v-bg);
-  border-bottom: 1px solid var(--v-line);
-}
-.verify__back {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  margin-left: -6px;
-  background: none;
-  border: 0;
-  border-radius: 8px;
-  color: var(--v-text);
-  cursor: pointer;
-}
-.verify__back:hover { background: #1a1a1a; }
-.verify__back:focus-visible { outline: 2px solid var(--v-green); outline-offset: 2px; }
-.verify__bar-title { font-size: 13px; color: #d4d8d6; }
-
-/* ---- content column ---- */
-.verify__main {
-  width: 100%;
-  max-width: 448px;
-  margin: 0 auto;
-  padding: 32px 0;
-  display: grid;
-  justify-items: center;
-}
-
-.verify__hero {
-  display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  color: var(--v-green);
-  background: rgba(0, 255, 136, 0.12);
-  border: 1px solid rgba(0, 255, 136, 0.3);
-}
-
-.verify__title {
-  margin: 22px 0 0;
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  text-align: center;
-}
-.verify__sub {
-  margin: 12px 0 0;
-  color: var(--v-sub);
-  font-size: 14px;
-  line-height: 24px;
-  text-align: center;
-}
-.verify__sub strong,
-.verify__privacy strong { color: var(--v-text); font-weight: 600; }
-
-/* ---- steps ---- */
-.verify__steps {
-  list-style: none;
-  margin: 24px 0 0;
-  padding: 0;
-  width: 100%;
-  display: grid;
-  gap: 12px;
-}
-.verify__step {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 12px 16px;
-  background: var(--v-card);
-  border: 1px solid var(--v-line);
-  border-radius: 8px;
-}
-.verify__step h2 { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.25; }
-.verify__step p { margin: 2px 0 0; color: var(--v-sub); font-size: 12px; line-height: 1.3; }
-.verify__emoji { flex: none; width: 20px; font-size: 18px; line-height: 1; text-align: center; }
-
-/* ---- privacy note ---- */
-.verify__privacy {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  width: 100%;
-  margin-top: 24px;
-  padding: 14px 16px;
-  background: #0a0c0b;
-  border: 1px solid #1f1f1f;
-  border-radius: 8px;
-}
-.verify__privacy .verify__emoji { margin-top: 2px; }
-.verify__privacy p { margin: 0; color: var(--v-sub); font-size: 13px; line-height: 1.5; }
-
-.verify__note {
-  width: 100%;
-  margin-top: 16px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: rgba(0, 255, 136, 0.08);
-  border: 1px solid rgba(0, 255, 136, 0.25);
-  color: var(--v-text);
-  font-size: 13px;
-}
-
-/* ---- call to action ---- */
-.verify__start {
+/* Back link, top-left of the page */
+.auth__back {
+  position: absolute;
+  top: 12px;
+  left: 20px;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--a-sub);
+  z-index: 1;
+}
+.auth__back svg { width: 16px; height: 16px; }
+.auth__back:hover { color: var(--a-text); }
+.auth__back:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 4px; }
+
+/* Card: same size on sign in and sign up */
+.auth__card {
   width: 100%;
-  height: 38px;
-  margin-top: 24px;
-  background: var(--v-green);
-  border: 0;
-  border-radius: 6px;
-  color: #04130a;
-  font: inherit;
+  max-width: 448px;
+  margin: auto;
+  flex-shrink: 0;
+  display: grid;
+  gap: 20px;
+  background: var(--a-card);
+  border: 1px solid var(--a-card-border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.auth__logo { justify-self: center; display: block; }
+.auth__logo img {
+  display: block;
+  height: 90px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  mix-blend-mode: lighten; /* hides the logo's black background on the dark card */
+}
+
+.auth__head { text-align: center; display: grid; gap: 8px; margin: 8px 0 6px; }
+.auth__head h1 {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: var(--a-text);
+  margin: 0;
+}
+.auth__head p { font-size: 14px; line-height: 20px; color: var(--a-sub); margin: 0; }
+
+/* Labels + inputs */
+.auth__card label,
+.auth__label {
+  display: grid;
+  gap: 8px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--a-text);
+}
+
+.auth__card input,
+.auth__card select {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  background: var(--a-input);
+  border: 1px solid var(--a-input-border);
+  border-radius: 6px;
+  color: var(--a-text);
+  font-size: 14px;
+  font-weight: 400;
+  font-family: inherit;
+}
+.auth__card input::placeholder { color: var(--a-muted); }
+.auth__card input:focus,
+.auth__card select:focus { border-color: var(--green); outline: none; }
+
+.auth__row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* Phone: country select + dial code + number */
+.auth__field { display: grid; gap: 8px; }
+.auth__phone { display: grid; grid-template-columns: 58px 1fr; gap: 8px; }
+
+.auth__country { position: relative; }
+.auth__country select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0 22px 0 12px;
+  font-weight: 700;
   cursor: pointer;
 }
-.verify__start:hover:not(:disabled) { filter: brightness(1.05); }
-.verify__start:focus-visible { outline: 2px solid var(--v-text); outline-offset: 2px; }
-.verify__start:disabled { opacity: 0.55; cursor: default; }
+.auth__country select option { background: var(--a-input); color: var(--a-text); }
+.auth__country svg {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  color: var(--a-sub);
+  pointer-events: none;
+}
 
-@media (max-width: 520px) {
-  .verify__main { padding: 28px 16px 32px; }
+.auth__dial {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding-left: 14px;
+  background: var(--a-input);
+  border: 1px solid var(--a-input-border);
+  border-radius: 6px;
+}
+.auth__dial:focus-within { border-color: var(--green); }
+.auth__dial span {
+  font-size: 14px;
+  color: var(--a-sub);
+  padding-right: 12px;
+  margin-right: 12px;
+  border-right: 1px solid var(--a-input-border);
+  line-height: 16px;
+}
+.auth__dial input {
+  border: 0;
+  background: transparent;
+  height: 100%;
+  padding: 0;
+  border-radius: 0;
+}
+.auth__dial input:focus { border: 0; }
+
+/* Submit */
+.auth__submit {
+  background: var(--green);
+  color: #04130a;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 14px;
+  height: 40px;
+  border: 0;
+  border-radius: 6px;
+  margin-top: 4px;
+  cursor: pointer;
+}
+.auth__submit:hover { filter: brightness(1.05); }
+.auth__submit:focus-visible { outline: 2px solid var(--a-text); outline-offset: 2px; }
+.auth__submit:disabled { opacity: 0.6; cursor: wait; }
+
+/* Messages */
+.auth__msg { padding: 10px 12px; border-radius: 6px; font-size: 13px; }
+.auth__msg--err { background: var(--red-soft); color: var(--red); }
+.auth__msg--ok { background: var(--green-soft); color: var(--green); }
+
+.auth__switch { text-align: center; color: var(--a-sub); font-size: 14px; margin-top: -4px; }
+.auth__switch a { color: var(--green); font-weight: 500; }
+
+/* Forgot password link (sign in only) */
+.auth__forgot {
+  justify-self: end;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--green);
+  cursor: pointer;
+}
+.auth__forgot:hover { text-decoration: underline; }
+.auth__forgot:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 4px; }
+
+/* Small screens: keep the card clear of the Back link */
+@media (max-width: 560px) {
+  .auth { padding: 52px 12px 16px; }
+  .auth__logo img { height: 80px; }
+}
+@media (max-width: 380px) {
+  .auth__row { grid-template-columns: 1fr; }
 }
