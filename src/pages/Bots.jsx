@@ -191,11 +191,11 @@ export default function Bots() {
           ...state.log
         ].slice(0, 15)
 
-        // Add/subtract from DB
-        supabase.rpc('increment_balance', { p_user_id: user.id, p_delta: gained }).then()
-        
-        // Fire custom event for every win/loss
-        window.dispatchEvent(new CustomEvent('balance-update', { detail: { delta: gained } }))
+        // Safely trigger side effects outside of the React state cycle
+        setTimeout(async () => {
+          await supabase.rpc('increment_balance', { p_user_id: user.id, p_delta: gained })
+          window.dispatchEvent(new CustomEvent('balance-update', { detail: { delta: gained } }))
+        }, 0)
 
         return { ...prev, [b.id]: { ...state, pnl: state.pnl + gained, log: newLog } }
       })
@@ -217,7 +217,6 @@ export default function Bots() {
     // Refund the original allocation
     if (alloc > 0) {
       await supabase.rpc('refund_allocation', { p_user_id: user.id, p_amount: alloc })
-      // Fire custom event for refund
       window.dispatchEvent(new CustomEvent('balance-update', { detail: { delta: alloc } }))
     }
 
