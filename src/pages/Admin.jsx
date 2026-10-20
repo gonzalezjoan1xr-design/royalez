@@ -1,13 +1,17 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { Navigate } from 'react-router-dom'
-import { ShieldCheck, ArrowUpRight, ArrowDownLeft, MessageSquare, Check, X, Send, Eye } from 'lucide-react'
+import { Navigate, Link } from 'react-router-dom'
+import { ShieldCheck, ArrowUpRight, ArrowDownLeft, MessageSquare, Check, X, Send, Eye, ArrowLeft } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { toast } from '../lib/toast'
 import { useAuth } from '../context/AuthContext'
 import './Admin.css'
 
 const money = (n) => `$${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 const when = (iso) => (iso ? new Date(iso).toLocaleString() : '')
 const ID_LABEL = { national_id: 'National ID', passport: 'Passport', drivers_license: "Driver's license" }
+
+// Full-screen layer: sits over the site header and bottom bar, so admin works without them
+const SHELL = { position: 'fixed', inset: 0, zIndex: 5000, overflowY: 'auto', background: '#000' }
 
 function Badge({ s }) {
   return <span className={`adm-badge adm-badge--${s}`}>{s}</span>
@@ -24,11 +28,17 @@ export default function Admin() {
   const [messages, setMessages] = useState([])
   const [profiles, setProfiles] = useState({})
   const [busyId, setBusyId] = useState('')
-  const [toast, setToast] = useState(null)
   const [docs, setDocs] = useState(null) // { row, urls }
   const [sel, setSel] = useState('')
   const [reply, setReply] = useState('')
   const threadRef = useRef(null)
+
+  // lock the page behind the admin layer while it is open
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [])
 
   useEffect(() => {
     if (!user) return
@@ -70,19 +80,13 @@ export default function Admin() {
     return () => { supabase.removeChannel(ch) }
   }, [ok, load])
 
-  useEffect(() => {
-    if (!toast) return
-    const t = setTimeout(() => setToast(null), 5000)
-    return () => clearTimeout(t)
-  }, [toast])
-
   /* ---------- actions ---------- */
   const run = async (key, fn, okMsg) => {
     setBusyId(key)
     const { error } = await fn()
     setBusyId('')
-    if (error) { setToast({ type: 'err', text: error.message }); return false }
-    setToast({ type: 'ok', text: okMsg })
+    if (error) { toast({ type: 'err', title: 'Action failed', text: error.message }); return false }
+    toast({ type: 'ok', title: 'Done', text: okMsg })
     load()
     return true
   }
@@ -158,11 +162,11 @@ export default function Admin() {
     if (!body || !sel) return
     setReply('')
     const { error } = await supabase.from('support_messages').insert({ user_id: sel, sender: 'admin', body })
-    if (error) { setReply(body); setToast({ type: 'err', text: error.message }) } else load()
+    if (error) { setReply(body); toast({ type: 'err', title: 'Message not sent', text: error.message }) } else load()
   }
 
   /* ---------- render ---------- */
-  if (ok === null) return <div className="adm"><p className="adm-empty">Checking access…</p></div>
+  if (ok === null) return <div style={SHELL}><div className="adm"><p className="adm-empty">Checking access…</p></div></div>
   if (!ok) return <Navigate to="/dashboard" replace />
 
   const vis = (rows) => (onlyPending ? rows.filter((r) => r.status === 'pending') : rows)
@@ -176,201 +180,202 @@ export default function Admin() {
   ]
 
   return (
-    <div className="adm">
-      <header className="adm__head">
-        <span className="adm__tile"><ShieldCheck size={24} /></span>
-        <div>
-          <h1>Admin Panel</h1>
-          <p>Confirm deposits and withdrawals, review verifications, and answer chats</p>
-        </div>
-      </header>
+    <div style={SHELL}>
+      <div className="adm">
+        <header className="adm__head">
+          <span className="adm__tile"><ShieldCheck size={24} /></span>
+          <div style={{ flex: 1 }}>
+            <h1>Admin Panel</h1>
+            <p>Confirm deposits and withdrawals, review verifications, and answer chats</p>
+          </div>
+          <Link to="/dashboard" className="adm-btn"><ArrowLeft size={15} /> Dashboard</Link>
+        </header>
 
-      <nav className="adm__tabs">
-        {TABS.map((t) => (
-          <button key={t.id} type="button" className={tab === t.id ? 'is-on' : ''} onClick={() => setTab(t.id)}>
-            <t.icon size={17} /> {t.label}
-            {t.n > 0 && <span className="adm__count">{t.n}</span>}
-          </button>
-        ))}
-      </nav>
+        <nav className="adm__tabs">
+          {TABS.map((t) => (
+            <button key={t.id} type="button" className={tab === t.id ? 'is-on' : ''} onClick={() => setTab(t.id)}>
+              <t.icon size={17} /> {t.label}
+              {t.n > 0 && <span className="adm__count">{t.n}</span>}
+            </button>
+          ))}
+        </nav>
 
-      {tab !== 'chat' && (
-        <div className="adm__filter">
-          <button type="button" className={onlyPending ? 'is-on' : ''} onClick={() => setOnlyPending(true)}>Pending</button>
-          <button type="button" className={!onlyPending ? 'is-on' : ''} onClick={() => setOnlyPending(false)}>All</button>
-        </div>
-      )}
+        {tab !== 'chat' && (
+          <div className="adm__filter">
+            <button type="button" className={onlyPending ? 'is-on' : ''} onClick={() => setOnlyPending(true)}>Pending</button>
+            <button type="button" className={!onlyPending ? 'is-on' : ''} onClick={() => setOnlyPending(false)}>All</button>
+          </div>
+        )}
 
-      {tab === 'deposits' && (
-        <div className="adm__card">
-          {vis(deposits).length === 0 ? <p className="adm-empty">No deposits here.</p> : (
-            <div className="adm__scroll">
-              <table className="adm__table">
-                <thead><tr><th>User</th><th>USD</th><th>Crypto</th><th>Network</th><th>Date</th><th>Status</th><th /></tr></thead>
-                <tbody>
-                  {vis(deposits).map((d) => (
-                    <tr key={d.id}>
-                      <td>{who(d.user_id)}</td>
-                      <td><b>{money(d.usd_amount)}</b></td>
-                      <td>{d.crypto_amount} {d.symbol}</td>
-                      <td>{d.network}</td>
-                      <td>{when(d.created_at)}</td>
-                      <td>
-                        <Badge s={d.status} />
-                        {d.status === 'pending' && new Date(d.expires_at) < new Date() && <small className="adm__hold"> past hold time</small>}
-                      </td>
-                      <td className="adm__acts">
-                        {d.status === 'pending' && (
-                          <>
-                            <button type="button" className="adm-btn adm-btn--ok" disabled={busyId === `d${d.id}`} onClick={() => confirmDeposit(d)}><Check size={15} /> Confirm</button>
-                            <button type="button" className="adm-btn adm-btn--no" disabled={busyId === `d${d.id}`} onClick={() => failDeposit(d)}><X size={15} /> Fail</button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
-
-      {tab === 'withdrawals' && (
-        <div className="adm__card">
-          {vis(withdrawals).length === 0 ? <p className="adm-empty">No withdrawals here.</p> : (
-            <div className="adm__scroll">
-              <table className="adm__table">
-                <thead><tr><th>User</th><th>Amount</th><th>Coin / network</th><th>Address</th><th>User balance</th><th>Date</th><th>Status</th><th /></tr></thead>
-                <tbody>
-                  {vis(withdrawals).map((w) => (
-                    <tr key={w.id}>
-                      <td>{who(w.user_id)}</td>
-                      <td><b>{money(w.amount)}</b></td>
-                      <td>{w.coin} · {w.network}</td>
-                      <td><code className="adm__addr">{w.address}</code></td>
-                      <td>{money(profiles[w.user_id]?.balance)}</td>
-                      <td>{when(w.created_at)}</td>
-                      <td><Badge s={w.status} /></td>
-                      <td className="adm__acts">
-                        {w.status === 'pending' && (
-                          <>
-                            <button type="button" className="adm-btn adm-btn--ok" disabled={busyId === `w${w.id}`} onClick={() => completeWithdrawal(w)}><Check size={15} /> Confirm</button>
-                            <button type="button" className="adm-btn adm-btn--no" disabled={busyId === `w${w.id}`} onClick={() => rejectWithdrawal(w)}><X size={15} /> Reject</button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
-
-      {tab === 'kyc' && (
-        <div className="adm__card">
-          {vis(kycs).length === 0 ? <p className="adm-empty">No verifications here.</p> : (
-            <div className="adm__scroll">
-              <table className="adm__table">
-                <thead><tr><th>User</th><th>ID type</th><th>Submitted</th><th>Status</th><th>Note</th><th /></tr></thead>
-                <tbody>
-                  {vis(kycs).map((k) => (
-                    <tr key={k.id}>
-                      <td>{who(k.user_id)}</td>
-                      <td>{ID_LABEL[k.id_type] || k.id_type}</td>
-                      <td>{when(k.created_at)}</td>
-                      <td><Badge s={k.status} /></td>
-                      <td>{k.rejection_reason || ''}</td>
-                      <td className="adm__acts">
-                        <button type="button" className="adm-btn" onClick={() => openDocs(k)}><Eye size={15} /> View</button>
-                        {k.status === 'pending' && (
-                          <>
-                            <button type="button" className="adm-btn adm-btn--ok" disabled={busyId === `k${k.id}`} onClick={() => approveKyc(k)}><Check size={15} /> Approve</button>
-                            <button type="button" className="adm-btn adm-btn--no" disabled={busyId === `k${k.id}`} onClick={() => rejectKyc(k)}><X size={15} /> Reject</button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
-
-      {tab === 'chat' && (
-        <div className="adm__chat">
-          <aside className="adm__threads">
-            {threads.length === 0 && <p className="adm-empty">No conversations yet.</p>}
-            {threads.map((t) => {
-              const last = t.list[t.list.length - 1]
-              return (
-                <button key={t.id} type="button" className={`adm__thread ${t.id === sel ? 'is-on' : ''}`} onClick={() => setSel(t.id)}>
-                  <span className="adm__thread-top">
-                    <b>{who(t.id)}</b>
-                    {t.unread > 0 && <span className="adm__count">{t.unread}</span>}
-                  </span>
-                  <small>{last.body}</small>
-                </button>
-              )
-            })}
-          </aside>
-
-          <section className="adm__conv">
-            {!thread ? <p className="adm-empty">Select a conversation.</p> : (
-              <>
-                <div className="adm__conv-head">{who(thread.id)} <small>{profiles[thread.id]?.balance != null ? `· balance ${money(profiles[thread.id].balance)}` : ''}</small></div>
-                <div className="adm__msgs" ref={threadRef}>
-                  {thread.list.map((m) => (
-                    <div key={m.id} className={`adm__msg adm__msg--${m.sender}`}>
-                      <div>{m.body}</div>
-                      <small>{when(m.created_at)}</small>
-                    </div>
-                  ))}
-                </div>
-                <form className="adm__reply" onSubmit={sendReply}>
-                  <input value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Type a reply…" aria-label="Reply" />
-                  <button type="submit" className="adm-btn adm-btn--ok" disabled={!reply.trim()}><Send size={15} /> Send</button>
-                </form>
-              </>
-            )}
-          </section>
-        </div>
-      )}
-
-      {docs && (
-        <div className="adm__modal" onClick={() => setDocs(null)}>
-          <div className="adm__modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="adm__modal-head">
-              <h2>{who(docs.row.user_id)} · {ID_LABEL[docs.row.id_type] || docs.row.id_type}</h2>
-              <button type="button" className="adm__x" onClick={() => setDocs(null)} aria-label="Close"><X size={20} /></button>
-            </div>
-            {!docs.urls ? <p className="adm-empty">Loading photos…</p> : (
-              <div className="adm__photos">
-                {[['ID front', docs.urls.front], ['ID back', docs.urls.back], ['Face photo', docs.urls.face]].map(([label, url]) =>
-                  url ? (
-                    <figure key={label}>
-                      <a href={url} target="_blank" rel="noreferrer"><img src={url} alt={label} /></a>
-                      <figcaption>{label}</figcaption>
-                    </figure>
-                  ) : null
-                )}
-              </div>
-            )}
-            {docs.row.status === 'pending' && (
-              <div className="adm__modal-acts">
-                <button type="button" className="adm-btn adm-btn--no" disabled={busyId === `k${docs.row.id}`} onClick={() => rejectKyc(docs.row)}><X size={15} /> Reject</button>
-                <button type="button" className="adm-btn adm-btn--ok" disabled={busyId === `k${docs.row.id}`} onClick={() => approveKyc(docs.row)}><Check size={15} /> Approve</button>
+        {tab === 'deposits' && (
+          <div className="adm__card">
+            {vis(deposits).length === 0 ? <p className="adm-empty">No deposits here.</p> : (
+              <div className="adm__scroll">
+                <table className="adm__table">
+                  <thead><tr><th>User</th><th>USD</th><th>Crypto</th><th>Network</th><th>Date</th><th>Status</th><th /></tr></thead>
+                  <tbody>
+                    {vis(deposits).map((d) => (
+                      <tr key={d.id}>
+                        <td>{who(d.user_id)}</td>
+                        <td><b>{money(d.usd_amount)}</b></td>
+                        <td>{d.crypto_amount} {d.symbol}</td>
+                        <td>{d.network}</td>
+                        <td>{when(d.created_at)}</td>
+                        <td>
+                          <Badge s={d.status} />
+                          {d.status === 'pending' && new Date(d.expires_at) < new Date() && <small className="adm__hold"> past hold time</small>}
+                        </td>
+                        <td className="adm__acts">
+                          {d.status === 'pending' && (
+                            <>
+                              <button type="button" className="adm-btn adm-btn--ok" disabled={busyId === `d${d.id}`} onClick={() => confirmDeposit(d)}><Check size={15} /> Confirm</button>
+                              <button type="button" className="adm-btn adm-btn--no" disabled={busyId === `d${d.id}`} onClick={() => failDeposit(d)}><X size={15} /> Fail</button>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
-        </div>
-      )}
+        )}
 
-      {toast && <div className={`adm__toast adm__toast--${toast.type}`} role="alert">{toast.text}</div>}
+        {tab === 'withdrawals' && (
+          <div className="adm__card">
+            {vis(withdrawals).length === 0 ? <p className="adm-empty">No withdrawals here.</p> : (
+              <div className="adm__scroll">
+                <table className="adm__table">
+                  <thead><tr><th>User</th><th>Amount</th><th>Coin / network</th><th>Address</th><th>User balance</th><th>Date</th><th>Status</th><th /></tr></thead>
+                  <tbody>
+                    {vis(withdrawals).map((w) => (
+                      <tr key={w.id}>
+                        <td>{who(w.user_id)}</td>
+                        <td><b>{money(w.amount)}</b></td>
+                        <td>{w.coin} · {w.network}</td>
+                        <td><code className="adm__addr">{w.address}</code></td>
+                        <td>{money(profiles[w.user_id]?.balance)}</td>
+                        <td>{when(w.created_at)}</td>
+                        <td><Badge s={w.status} /></td>
+                        <td className="adm__acts">
+                          {w.status === 'pending' && (
+                            <>
+                              <button type="button" className="adm-btn adm-btn--ok" disabled={busyId === `w${w.id}`} onClick={() => completeWithdrawal(w)}><Check size={15} /> Confirm</button>
+                              <button type="button" className="adm-btn adm-btn--no" disabled={busyId === `w${w.id}`} onClick={() => rejectWithdrawal(w)}><X size={15} /> Reject</button>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === 'kyc' && (
+          <div className="adm__card">
+            {vis(kycs).length === 0 ? <p className="adm-empty">No verifications here.</p> : (
+              <div className="adm__scroll">
+                <table className="adm__table">
+                  <thead><tr><th>User</th><th>ID type</th><th>Submitted</th><th>Status</th><th>Note</th><th /></tr></thead>
+                  <tbody>
+                    {vis(kycs).map((k) => (
+                      <tr key={k.id}>
+                        <td>{who(k.user_id)}</td>
+                        <td>{ID_LABEL[k.id_type] || k.id_type}</td>
+                        <td>{when(k.created_at)}</td>
+                        <td><Badge s={k.status} /></td>
+                        <td>{k.rejection_reason || ''}</td>
+                        <td className="adm__acts">
+                          <button type="button" className="adm-btn" onClick={() => openDocs(k)}><Eye size={15} /> View</button>
+                          {k.status === 'pending' && (
+                            <>
+                              <button type="button" className="adm-btn adm-btn--ok" disabled={busyId === `k${k.id}`} onClick={() => approveKyc(k)}><Check size={15} /> Approve</button>
+                              <button type="button" className="adm-btn adm-btn--no" disabled={busyId === `k${k.id}`} onClick={() => rejectKyc(k)}><X size={15} /> Reject</button>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === 'chat' && (
+          <div className="adm__chat">
+            <aside className="adm__threads">
+              {threads.length === 0 && <p className="adm-empty">No conversations yet.</p>}
+              {threads.map((t) => {
+                const last = t.list[t.list.length - 1]
+                return (
+                  <button key={t.id} type="button" className={`adm__thread ${t.id === sel ? 'is-on' : ''}`} onClick={() => setSel(t.id)}>
+                    <span className="adm__thread-top">
+                      <b>{who(t.id)}</b>
+                      {t.unread > 0 && <span className="adm__count">{t.unread}</span>}
+                    </span>
+                    <small>{last.body}</small>
+                  </button>
+                )
+              })}
+            </aside>
+
+            <section className="adm__conv">
+              {!thread ? <p className="adm-empty">Select a conversation.</p> : (
+                <>
+                  <div className="adm__conv-head">{who(thread.id)} <small>{profiles[thread.id]?.balance != null ? `· balance ${money(profiles[thread.id].balance)}` : ''}</small></div>
+                  <div className="adm__msgs" ref={threadRef}>
+                    {thread.list.map((m) => (
+                      <div key={m.id} className={`adm__msg adm__msg--${m.sender}`}>
+                        <div>{m.body}</div>
+                        <small>{when(m.created_at)}</small>
+                      </div>
+                    ))}
+                  </div>
+                  <form className="adm__reply" onSubmit={sendReply}>
+                    <input value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Type a reply…" aria-label="Reply" />
+                    <button type="submit" className="adm-btn adm-btn--ok" disabled={!reply.trim()}><Send size={15} /> Send</button>
+                  </form>
+                </>
+              )}
+            </section>
+          </div>
+        )}
+
+        {docs && (
+          <div className="adm__modal" onClick={() => setDocs(null)}>
+            <div className="adm__modal-card" onClick={(e) => e.stopPropagation()}>
+              <div className="adm__modal-head">
+                <h2>{who(docs.row.user_id)} · {ID_LABEL[docs.row.id_type] || docs.row.id_type}</h2>
+                <button type="button" className="adm__x" onClick={() => setDocs(null)} aria-label="Close"><X size={20} /></button>
+              </div>
+              {!docs.urls ? <p className="adm-empty">Loading photos…</p> : (
+                <div className="adm__photos">
+                  {[['ID front', docs.urls.front], ['ID back', docs.urls.back], ['Face photo', docs.urls.face]].map(([label, url]) =>
+                    url ? (
+                      <figure key={label}>
+                        <a href={url} target="_blank" rel="noreferrer"><img src={url} alt={label} /></a>
+                        <figcaption>{label}</figcaption>
+                      </figure>
+                    ) : null
+                  )}
+                </div>
+              )}
+              {docs.row.status === 'pending' && (
+                <div className="adm__modal-acts">
+                  <button type="button" className="adm-btn adm-btn--no" disabled={busyId === `k${docs.row.id}`} onClick={() => rejectKyc(docs.row)}><X size={15} /> Reject</button>
+                  <button type="button" className="adm-btn adm-btn--ok" disabled={busyId === `k${docs.row.id}`} onClick={() => approveKyc(docs.row)}><Check size={15} /> Approve</button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
