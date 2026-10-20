@@ -59,9 +59,15 @@ export default function Auth({ mode }) {
     setBusy(false)
 
     if (res.error) return setError(res.error.message)
+
+    // Only reached if "Confirm email" is still ON in Supabase (Authentication -> Providers -> Email).
+    // Turn it off so signup logs the user in and the 5-digit code screen takes over.
     if (isSignup && !res.data.session)
       return setInfo('Check your email to confirm your account, then sign in.')
-    nav('/dashboard')
+
+    // New accounts go straight to the 5-digit code screen.
+    // Unverified accounts that sign in are sent there by Protected in App.jsx.
+    nav(isSignup ? '/verify-email' : '/dashboard', { replace: true })
   }
 
   const forgot = async () => {
