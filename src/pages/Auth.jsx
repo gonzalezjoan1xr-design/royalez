@@ -56,18 +56,34 @@ export default function Auth({ mode }) {
           },
         })
       : await supabase.auth.signInWithPassword({ email, password })
-    setBusy(false)
 
-    if (res.error) return setError(res.error.message)
+    if (res.error) {
+      setBusy(false)
+      return setError(res.error.message)
+    }
 
     // Only reached if "Confirm email" is still ON in Supabase (Authentication -> Providers -> Email).
     // Turn it off so signup logs the user in and the 5-digit code screen takes over.
-    if (isSignup && !res.data.session)
+    if (isSignup && !res.data.session) {
+      setBusy(false)
       return setInfo('Check your email to confirm your account, then sign in.')
+    }
 
-    // New accounts go straight to the 5-digit code screen.
-    // Unverified accounts that sign in are sent there by Protected in App.jsx.
-    nav(isSignup ? '/verify-email' : '/dashboard', { replace: true })
+    // Every new account must verify the code before anything else.
+    if (isSignup) {
+      setBusy(false)
+      return nav('/verify-email', { replace: true })
+    }
+
+    // Sign-in: unverified accounts go to the code screen, verified ones to the dashboard.
+    const uid = res.data.user?.id
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('email_verified')
+      .eq('id', uid)
+      .maybeSingle()
+    setBusy(false)
+    nav(prof?.email_verified === true ? '/dashboard' : '/verify-email', { replace: true })
   }
 
   const forgot = async () => {
