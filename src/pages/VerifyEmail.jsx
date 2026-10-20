@@ -17,10 +17,21 @@ export default function VerifyEmail() {
   const refs = useRef([])
   const sentOnce = useRef(false)
 
+  // Shows the real reason, including the HTTP status and the server's own message
   const errText = async (data, error, fallback) => {
-    let text = data?.error
-    if (!text && error?.context?.json) text = (await error.context.json().catch(() => ({})))?.error
-    return text || fallback
+    if (data?.error) return data.error
+    const res = error?.context
+    if (res && typeof res.clone === 'function') {
+      let body = ''
+      try {
+        const j = await res.clone().json()
+        body = j?.error || j?.message || j?.msg || JSON.stringify(j)
+      } catch {
+        try { body = await res.clone().text() } catch { /* ignore */ }
+      }
+      return `${body || fallback} (HTTP ${res.status})`
+    }
+    return error?.message || fallback
   }
 
   const send = async () => {
