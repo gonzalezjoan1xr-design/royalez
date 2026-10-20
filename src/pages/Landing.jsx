@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import logoImg from '../Assets/justR.png'
 import heroImg from '../Assets/hero.jpg'
+import phoneImg from '../Assets/phone.jpeg'
 import './Landing.css'
 
 // Coin logos (inline SVG, 32x32)
@@ -242,14 +243,7 @@ export default function Landing() {
         </div>
 
         <div className="why__art">
-          <div className="why__phone" role="img" aria-label="Image placeholder">
-            <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <rect x="3" y="4" width="18" height="16" rx="2" />
-              <circle cx="9" cy="10" r="1.6" />
-              <path d="M21 16l-5-5-8 9" />
-            </svg>
-            <span>Image placeholder</span>
-          </div>
+          <img className="why__img" src={phoneImg} alt="Royal Markets trading app on a phone" loading="lazy" />
         </div>
       </section>
 
