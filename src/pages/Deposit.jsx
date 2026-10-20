@@ -2,6 +2,7 @@ import { Fragment, useEffect, useRef, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { ArrowUpRight, Wallet, Clock, ChevronDown, ChevronUp, Network, ArrowLeft, QrCode, Copy, Check, XCircle, CheckCircle2, AlertCircle, RefreshCw, Loader2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { toast } from '../lib/toast'
 import { useAuth } from '../context/AuthContext'
 import { coinIcon } from '../hooks/useTickers'
 import './Deposit.css'
@@ -88,7 +89,6 @@ export default function Deposit() {
   const [now, setNow] = useState(Date.now())
   const [copied, setCopied] = useState('')
   const [checking, setChecking] = useState(false)
-  const [note, setNote] = useState('')
 
   // Match the navbar background on this page only; restore on leave
   useEffect(() => {
@@ -157,9 +157,10 @@ export default function Deposit() {
       rec.id = data.id; rec.created = data.created_at || rec.created
     }
     setBusy(false); setDep(rec); setHistory((h) => [rec, ...h]); setStep(3)
+    toast({ type: 'deposit', title: 'Payment created', text: 'Send the exact amount to the address shown.' })
   }
 
-  const reset = () => { setStep(1); setDep(null); setAmount(''); setCoin('USDT'); setNet('TRC20'); setErr(''); setNote('') }
+  const reset = () => { setStep(1); setDep(null); setAmount(''); setCoin('USDT'); setNet('TRC20'); setErr('') }
 
   const statusOf = (d) => (d.status === 'pending' && new Date(d.expires).getTime() < now ? 'expired' : d.status)
   const left = dep ? Math.max(0, Math.floor((new Date(dep.expires).getTime() - now) / 1000)) : 0
@@ -168,7 +169,7 @@ export default function Deposit() {
 
   const checkStatus = async () => {
     if (!dep) return
-    setChecking(true); setNote('')
+    setChecking(true)
     let status = dep.status
     if (user && !String(dep.id).startsWith('local-')) {
       const { data } = await supabase.from('deposits').select('status').eq('id', dep.id).single()
@@ -179,12 +180,10 @@ export default function Deposit() {
     setHistory((h) => h.map((x) => (x.id === dep.id ? { ...x, status } : x)))
     setChecking(false)
     const s = statusOf(updated)
-    setNote(
-      s === 'completed' ? 'Payment received. Your deposit is complete.'
-      : s === 'expired' ? 'This deposit has expired. Start a new deposit.'
-      : s === 'failed' ? 'This deposit failed. Start a new deposit.'
-      : 'No payment detected yet. Confirmations can take a few minutes.'
-    )
+    if (s === 'completed') toast({ type: 'deposit', title: 'Deposit complete', text: 'Payment received. Your balance is updated.' })
+    else if (s === 'expired') toast({ type: 'err', title: 'Deposit expired', text: 'Start a new deposit.' })
+    else if (s === 'failed') toast({ type: 'err', title: 'Deposit failed', text: 'Start a new deposit.' })
+    else toast({ type: 'info', title: 'No payment yet', text: 'Confirmations can take a few minutes.' })
   }
 
   return (
@@ -307,8 +306,6 @@ export default function Deposit() {
                   </div>
                 </div>
               )}
-
-              {note && <p className="dep__note">{note}</p>}
 
               <div className="dep__pair">
                 <button className="dep__btn dep__btn--ghost" onClick={reset}>New Deposit</button>
