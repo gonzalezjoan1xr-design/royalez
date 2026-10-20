@@ -26,15 +26,26 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [unread, setUnread] = useState(0)
   
-  // Use local state for balance so we can update it via realtime
+  // Local state for balance
   const [liveBalance, setLiveBalance] = useState(Number(profile?.balance || 0))
 
-  // Sync when AuthContext updates
+  // Sync when AuthContext updates (e.g. page load or login)
   useEffect(() => {
     setLiveBalance(Number(profile?.balance || 0))
   }, [profile?.balance])
 
-  // Listen to real-time DB changes on the user's profile
+  // Listen to custom balance update events from the Bots page
+  useEffect(() => {
+    const handleBalanceUpdate = (e) => {
+      if (e.detail && typeof e.detail.delta === 'number') {
+        setLiveBalance(prev => Math.max(0, prev + e.detail.delta))
+      }
+    }
+    window.addEventListener('balance-update', handleBalanceUpdate)
+    return () => window.removeEventListener('balance-update', handleBalanceUpdate)
+  }, [])
+
+  // Fallback: Listen to Supabase real-time DB changes (if enabled)
   useEffect(() => {
     if (!user?.id) return
     const channel = supabase
@@ -53,16 +64,13 @@ export default function Navbar() {
     return () => supabase.removeChannel(channel)
   }, [user?.id])
 
-  // the navbar is hidden on the admin page (change '/admin' if your route differs)
   const hidden = location.pathname.startsWith('/admin')
 
-  // remove the body's top padding (reserved for the fixed navbar) while hidden
   useEffect(() => {
     document.body.classList.toggle('no-nav', hidden)
     return () => document.body.classList.remove('no-nav')
   }, [hidden])
 
-  // unread notification count (live)
   useEffect(() => {
     if (!user?.id) return
     let active = true
@@ -89,12 +97,10 @@ export default function Navbar() {
     }
   }, [user?.id])
 
-  // close drawer on route change
   useEffect(() => {
     setOpen(false)
   }, [location.pathname])
 
-  // lock body scroll + close on Escape while drawer is open
   useEffect(() => {
     if (!open) return
     const prev = document.body.style.overflow
@@ -114,7 +120,6 @@ export default function Navbar() {
     navigate(q ? `/markets?q=${encodeURIComponent(q)}` : '/markets')
   }
 
-  // render nothing on the admin page (all hooks above run first)
   if (hidden) return null
 
   const linkClass = ({ isActive }) => `nav__link ${isActive ? 'is-active' : ''}`
@@ -128,7 +133,6 @@ export default function Navbar() {
           <img src={logo} alt="Royal Markets" />
         </Link>
 
-        {/* Desktop links */}
         <nav className="nav__links">
           {links.map(({ to, label, Icon }) => (
             <NavLink key={to} to={to} className={linkClass}>
@@ -137,7 +141,6 @@ export default function Navbar() {
           ))}
         </nav>
 
-        {/* Desktop search */}
         <form className="nav__search" onSubmit={onSearch} role="search">
           <Search size={18} strokeWidth={1.8} />
           <input
@@ -180,7 +183,6 @@ export default function Navbar() {
             <LogOut size={20} strokeWidth={1.8} />
           </button>
 
-          {/* Mobile hamburger */}
           <button
             className="nav__icon nav__burger"
             onClick={() => setOpen(true)}
@@ -193,7 +195,6 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Mobile drawer */}
       <div
         className={`drawer__overlay ${open ? 'is-open' : ''}`}
         onClick={() => setOpen(false)}
