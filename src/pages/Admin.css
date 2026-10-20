@@ -1,8 +1,4 @@
 .adm { max-width: 1200px; margin: 0 auto; padding: 24px 20px 60px; color: #e5e7eb; }
-.adm__head { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-.adm__head h1 { margin: 0; font-size: 26px; }
-.adm__head p { margin: 2px 0 0; color: #9ca3af; font-size: 14px; }
-.adm__tile { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; background: rgba(34, 197, 94, 0.12); color: var(--green); }
 
 .adm__tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .adm__tabs button, .adm__filter button {
