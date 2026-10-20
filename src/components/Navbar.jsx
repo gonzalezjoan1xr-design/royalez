@@ -26,7 +26,6 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [unread, setUnread] = useState(0)
   
-  // Local state for balance
   const [liveBalance, setLiveBalance] = useState(Number(profile?.balance || 0))
 
   // Sync when AuthContext updates (e.g. page load or login)
@@ -38,6 +37,7 @@ export default function Navbar() {
   useEffect(() => {
     const handleBalanceUpdate = (e) => {
       if (e.detail && typeof e.detail.delta === 'number') {
+        console.log('⚡ CustomEvent received:', e.detail) // For debugging
         setLiveBalance(prev => Math.max(0, prev + e.detail.delta))
       }
     }
@@ -45,7 +45,7 @@ export default function Navbar() {
     return () => window.removeEventListener('balance-update', handleBalanceUpdate)
   }, [])
 
-  // Fallback: Listen to Supabase real-time DB changes (if enabled)
+  // Listen to Supabase real-time DB changes (Fallback for other tabs/devices)
   useEffect(() => {
     if (!user?.id) return
     const channel = supabase
@@ -55,6 +55,7 @@ export default function Navbar() {
         { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` },
         (payload) => {
           if (payload.new && typeof payload.new.balance !== 'undefined') {
+            console.log('🔌 Supabase Realtime update:', payload.new.balance) // For debugging
             setLiveBalance(Number(payload.new.balance))
           }
         }
