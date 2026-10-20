@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Upload, Cpu, Key, Activity, Settings, Bot, Play, Square, Trash2, ChevronDown } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { toast } from '../lib/toast'
 import { useAuth } from '../context/AuthContext'
 import './Bots.css'
 
@@ -78,7 +79,6 @@ export default function Bots() {
   const balance = Number(profile?.balance || 0)
 
   const [bots, setBots] = useState([])
-  const [note, setNote] = useState(null)
   const [busy, setBusy] = useState('')
 
   const [file, setFile] = useState(null)
@@ -93,7 +93,9 @@ export default function Bots() {
 
   const [simState, setSimState] = useState({})
 
-  const say = (t, m) => setNote({ t, m })
+  // shared popup: top on phones, side on desktop
+  const say = (t, m) =>
+    toast({ type: t === 'ok' ? 'ok' : 'err', title: t === 'ok' ? 'Done' : 'Something went wrong', text: m })
 
   const load = useCallback(async () => {
     if (!user) return
@@ -105,7 +107,7 @@ export default function Bots() {
       .order('id')
     setBots(data || [])
   }, [user])
-  
+
   useEffect(() => { load() }, [load])
 
   /* ---------- Upload & Passkey ---------- */
@@ -113,7 +115,7 @@ export default function Bots() {
     if (!f) return
     if (!EXT.test(f.name)) return say('err', 'Unsupported file type. Use .py, .js, .ts, .json or .zip.')
     if (f.size > MAX_MB * 1024 * 1024) return say('err', `File is too large (max ${MAX_MB} MB).`)
-    setNote(null); setFile(f)
+    setFile(f)
   }
   const onDrop = (e) => { e.preventDefault(); setDrag(false); pick(e.dataTransfer.files?.[0]) }
 
@@ -145,7 +147,7 @@ export default function Bots() {
   /* ---------- Simulation Logic ---------- */
   const startSim = async (b) => {
     const alloc = Number(amount)
-    
+
     if (balance <= 0) return say('err', 'Deposit funds to unlock your bots.')
     if (!(alloc > 0)) return say('err', 'Enter a valid trade amount.')
     if (alloc > balance) return say('err', 'Trade amount is higher than your available balance.')
@@ -154,19 +156,19 @@ export default function Bots() {
     const { error: deductErr } = await supabase.rpc('deduct_balance', { p_user_id: user.id, p_amount: alloc })
     if (deductErr) return say('err', deductErr.message)
 
-    setNote(null)
-
     // 2. Fire custom event to update Navbar immediately
     window.dispatchEvent(new CustomEvent('balance-update', { detail: { delta: -alloc } }))
+
+    toast({ type: 'ok', title: 'Bot started', text: `${b.name} is running with $${alloc.toFixed(2)}.` })
 
     // 3. Mark as active in UI
     setSimState(prev => ({
       ...prev,
-      [b.id]: { 
-        active: true, 
-        allocation: alloc, 
-        pnl: 0, 
-        log: [{ msg: `► Bot started. $${alloc.toFixed(2)} deducted from balance.`, color: '#00c853', ts: new Date().toLocaleTimeString() }] 
+      [b.id]: {
+        active: true,
+        allocation: alloc,
+        pnl: 0,
+        log: [{ msg: `► Bot started. $${alloc.toFixed(2)} deducted from balance.`, color: '#00c853', ts: new Date().toLocaleTimeString() }]
       }
     }))
 
@@ -184,7 +186,7 @@ export default function Bots() {
           : parseFloat((3.40 + Math.random() * 1.00).toFixed(2))
 
         const price = BASE_PRICES[b.pair] * (1 + (Math.random() - 0.5) * 0.004)
-        
+
         const newLog = [
           { msg: `${gained >= 0 ? '↑' : '↓'} Trade ${gained >= 0 ? '+' : ''}$${gained.toFixed(2)}`, color: gained >= 0 ? '#00c853' : '#ff3b5c', ts: new Date().toLocaleTimeString() },
           { msg: randomComment(b.pair, price), color: '#3b82f6', ts: new Date().toLocaleTimeString() },
@@ -225,20 +227,18 @@ export default function Bots() {
       [b.id]: { active: false, allocation: 0, pnl: 0, log: [] }
     }))
 
-    // Show notification based on the amount won (P&L) instead of the refund
+    // Popup based on the amount won (P&L), not the refund
     if (finalPnl > 0) {
-      say('ok', `Bot stopped. You won +$${finalPnl.toFixed(2)}!`)
+      toast({ type: 'win', title: 'You won!', text: `${b.name} stopped with a profit of +$${finalPnl.toFixed(2)}.`, duration: 8000 })
     } else if (finalPnl < 0) {
-      say('err', `Bot stopped. You lost -$${Math.abs(finalPnl).toFixed(2)}.`)
+      toast({ type: 'loss', title: 'Bot stopped', text: `${b.name} stopped with a loss of -$${Math.abs(finalPnl).toFixed(2)}.` })
     } else {
-      say('ok', 'Bot stopped. You broke even.')
+      toast({ type: 'ok', title: 'Bot stopped', text: 'You broke even.' })
     }
   }
 
   return (
     <div className="bots">
-      {note && <p className={`bots__note ${note.t}`}>{note.m}</p>}
-
       {/* ---------- upload ---------- */}
       <section className="bots__card">
         <header className="bots__chead"><Upload size={22} /> Upload Trading Bot</header>
@@ -321,9 +321,9 @@ export default function Bots() {
       {/* ---------- my bots ---------- */}
       <section className="bots__card bots__pad">
         <h2 className="bots__h2"><Bot size={20} /> My Bots ({bots.length + SIMULATED_BOTS.length})</h2>
-        
+
         <div className="bots__list">
-          
+
           {/* 1. Simulated Bots (Bitcoin & ETH) */}
           {SIMULATED_BOTS.map((b) => {
             const state = simState[b.id] || { active: false, pnl: 0, log: [] }
@@ -396,7 +396,7 @@ export default function Bots() {
               </article>
             )
           })}
-          
+
         </div>
       </section>
     </div>
