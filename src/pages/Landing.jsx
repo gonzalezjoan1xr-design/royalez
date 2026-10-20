@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import logoImg from '../Assets/justR.png'
 import heroImg from '../Assets/hero.jpg'
-import phoneImg from '../Assets/phone.jpeg'
+import phoneImg from '../Assets/Phone.jpeg'
 import './Landing.css'
 
 // Coin logos (inline SVG, 32x32)
