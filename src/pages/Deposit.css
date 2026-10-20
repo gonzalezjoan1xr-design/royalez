@@ -1,5 +1,7 @@
 .dep {
-  --d-green: #00ff88;
+  /* green now follows the navbar (#22c55e); fallbacks keep this file working on its own */
+  --d-green: var(--nav-green, #22c55e);
+  --d-green-bg: var(--nav-green-bg, rgba(34, 197, 94, 0.12));
   --d-btn: var(--d-green);
   --d-card: #101010;
   --d-line: #1c1c1c;
@@ -15,7 +17,7 @@
 
 /* ---- page header ---- */
 .dep__head { display: flex; align-items: center; gap: 16px; margin-bottom: 26px; }
-.dep__tile { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; background: #0b2a1a; color: var(--d-green); flex: none; }
+.dep__tile { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; background: var(--d-green-bg); color: var(--d-green); flex: none; }
 .dep__head h1 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.03em; }
 .dep__head p { margin: 2px 0 0; color: var(--d-dim); font-size: 14px; }
 
@@ -81,7 +83,7 @@
 .dep__menu { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; right: 0; max-height: 276px; overflow-y: auto; border-radius: 12px; border: 1px solid #222; background: #111; box-shadow: 0 14px 34px rgba(0, 0, 0, .6); }
 .dep__menu .dep__opt { width: 100%; height: 52px; padding: 0 18px; text-align: left; }
 .dep__menu .dep__opt:hover { background: #181818; }
-.dep__menu .dep__opt.is-on { background: #0e2a1b; }
+.dep__menu .dep__opt.is-on { background: var(--d-green-bg); }
 
 /* ---- payment step ---- */
 .dep__pay { display: flex; flex-direction: column; gap: 10px; padding: 20px; border-radius: 14px; border: 1px solid #1f1f1f; background: #121212; }
@@ -114,7 +116,7 @@
 .dep__badge { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border-radius: 999px; font-size: 14px; }
 .dep__badge.red { color: #f4525f; background: #2a1215; }
 .dep__badge.amber { color: #f5b50a; background: #2a2209; }
-.dep__badge.green { color: var(--d-green); background: #0b2a1a; }
+.dep__badge.green { color: var(--d-green); background: var(--d-green-bg); }
 .dep__r2 { margin-top: 10px; color: #cfd3d1; font-size: 14px; }
 .dep__r2 span { display: inline-flex; align-items: center; gap: 8px; }
 .dep__r2 button { display: inline-grid; color: var(--d-dim); }
