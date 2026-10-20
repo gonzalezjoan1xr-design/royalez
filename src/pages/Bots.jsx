@@ -142,16 +142,15 @@ export default function Bots() {
     setPasskey(''); say('ok', 'Bot activated. You can find it under My Bots.'); load()
   }
 
-  /* ---------- Simulation Logic (Deduct & Increment) ---------- */
+  /* ---------- Simulation Logic ---------- */
   const startSim = async (b) => {
     const alloc = Number(amount)
     
-    // Validation
     if (balance <= 0) return say('err', 'Deposit funds to unlock your bots.')
     if (!(alloc > 0)) return say('err', 'Enter a valid trade amount.')
     if (alloc > balance) return say('err', 'Trade amount is higher than your available balance.')
 
-    // 1. Deduct the exact amount (e.g. $10) from the database
+    // 1. Deduct the amount (e.g. $10) from the database
     const { error: deductErr } = await supabase.rpc('deduct_balance', { p_user_id: user.id, p_amount: alloc })
     if (deductErr) return say('err', deductErr.message)
 
@@ -176,7 +175,6 @@ export default function Bots() {
         const state = prev[b.id]
         if (!state || !state.active) return prev
 
-        // Calculate win/loss based on the bot's probability
         const isLoss = Math.random() < b.lossChance
         const gained = isLoss
           ? -parseFloat((2.90 + Math.random() * 0.50).toFixed(2))
@@ -190,7 +188,7 @@ export default function Bots() {
           ...state.log
         ].slice(0, 15)
 
-        // Add/subtract the gained amount to the database balance
+        // Add/subtract the gained amount to the database balance in real-time
         supabase.rpc('increment_balance', { p_user_id: user.id, p_delta: gained }).then()
 
         return { ...prev, [b.id]: { ...state, pnl: state.pnl + gained, log: newLog } }
@@ -208,6 +206,7 @@ export default function Bots() {
     delete botIntervals[intervalKey]
 
     const alloc = simState[b.id]?.allocation || 0
+    const finalPnl = simState[b.id]?.pnl || 0
 
     // Refund the original allocation back to the user
     if (alloc > 0) {
@@ -218,8 +217,15 @@ export default function Bots() {
       ...prev,
       [b.id]: { active: false, allocation: 0, pnl: 0, log: [] }
     }))
-    
-    say('ok', `Bot stopped. $${alloc.toFixed(2)} allocation refunded.`)
+
+    // Show notification based on the amount won (P&L) instead of the refund
+    if (finalPnl > 0) {
+      say('ok', `Bot stopped. You won +$${finalPnl.toFixed(2)}!`)
+    } else if (finalPnl < 0) {
+      say('err', `Bot stopped. You lost -$${Math.abs(finalPnl).toFixed(2)}.`)
+    } else {
+      say('ok', 'Bot stopped. You broke even.')
+    }
   }
 
   return (
