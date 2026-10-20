@@ -27,6 +27,15 @@ export default function Navbar() {
   const [unread, setUnread] = useState(0)
   const balance = Number(profile?.balance || 0)
 
+  // the navbar is hidden on the admin page (change '/admin' if your route differs)
+  const hidden = location.pathname.startsWith('/admin')
+
+  // remove the body's top padding (reserved for the fixed navbar) while hidden
+  useEffect(() => {
+    document.body.classList.toggle('no-nav', hidden)
+    return () => document.body.classList.remove('no-nav')
+  }, [hidden])
+
   // unread notification count (live)
   useEffect(() => {
     if (!user?.id) return
@@ -78,6 +87,9 @@ export default function Navbar() {
     setOpen(false)
     navigate(q ? `/markets?q=${encodeURIComponent(q)}` : '/markets')
   }
+
+  // render nothing on the admin page (all hooks above run first)
+  if (hidden) return null
 
   const linkClass = ({ isActive }) => `nav__link ${isActive ? 'is-active' : ''}`
   const drawerLinkClass = ({ isActive }) => `drawer__link ${isActive ? 'is-active' : ''}`
