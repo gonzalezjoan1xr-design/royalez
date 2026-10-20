@@ -5,16 +5,17 @@
 .kyc h1, .kyc h2, .kyc p, .kyc ul, .kyc ol, .kyc li, .kyc figure { margin: 0; padding: 0; letter-spacing: normal; text-transform: none; }
 .kyc button { font-family: inherit; -webkit-appearance: none; appearance: none; }
 
-/* Full-screen pure-black layer; own tokens so app theme variables can't change the look */
+/* Full-screen pure-black layer; own tokens so app theme variables can't change the look.
+   Green follows the navbar (#22c55e); the fallbacks keep this file working on its own. */
 .kyc {
   --v-bg: #000;
   --v-card: #0f0f0f;
   --v-line: #262626;
   --v-text: #fff;
   --v-sub: #a3a3a3;
-  --v-green: #00ff88;
-  --v-green-bg: rgba(0, 255, 136, 0.08);
-  --v-green-line: rgba(0, 255, 136, 0.3);
+  --v-green: var(--nav-green, #22c55e);
+  --v-green-bg: var(--nav-green-bg, rgba(34, 197, 94, 0.12));
+  --v-green-line: var(--nav-green-border, rgba(34, 197, 94, 0.28));
 
   position: fixed;
   inset: 0;
@@ -52,7 +53,7 @@
 
 .kyc__hero {
   display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%;
-  color: var(--v-green); background: rgba(0, 255, 136, 0.1); border: 1px solid var(--v-green-line);
+  color: var(--v-green); background: var(--v-green-bg); border: 1px solid var(--v-green-line);
 }
 .kyc__hero--wait { color: #e8a317; background: rgba(232, 163, 23, 0.1); border-color: rgba(232, 163, 23, 0.35); }
 
@@ -85,7 +86,7 @@
   padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5;
 }
 .kyc__banner svg { flex: none; margin-top: 1px; }
-.kyc__banner--info { background: var(--v-green-bg); border: 1px solid rgba(0, 255, 136, 0.25); color: var(--v-text); }
+.kyc__banner--info { background: var(--v-green-bg); border: 1px solid var(--v-green-line); color: var(--v-text); }
 .kyc__banner--info svg { color: var(--v-green); }
 .kyc__banner--err { background: rgba(255, 59, 78, 0.1); border: 1px solid rgba(255, 59, 78, 0.3); color: #ff8b97; }
 
@@ -147,7 +148,7 @@
 .kyc__face {
   position: relative; width: min(100%, 300px); aspect-ratio: 1; margin: 0 auto; overflow: hidden;
   border-radius: 50%; background: #0a0c0b; border: 2px solid var(--v-green-line);
-  box-shadow: 0 0 0 6px rgba(0, 255, 136, 0.05);
+  box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.06);
 }
 .kyc__face-media { width: 100%; height: 100%; object-fit: cover; display: block; transform: scaleX(-1); }
 img.kyc__face-media { transform: none; }
