@@ -14,14 +14,7 @@
 .bots__note.err { color: var(--b-red); background: color-mix(in srgb, var(--b-red) 10%, #000); border-color: color-mix(in srgb, var(--b-red) 40%, #000); }
 .bots__note.ok { color: var(--b-green); background: color-mix(in srgb, var(--b-green) 10%, #000); border-color: color-mix(in srgb, var(--b-green) 40%, #000); }
 
-/* ---- Hero Stats ---- */
-.bots__hero { padding: 20px 24px; border: 1px solid var(--b-line); border-radius: 16px; background: var(--b-card); }
-.bots__hero-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-.bots__stat { display: flex; flex-direction: column; gap: 4px; }
-.bots__stat-value { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
-.bots__stat-label { font-size: 11px; color: var(--b-dim); text-transform: uppercase; letter-spacing: .06em; }
-
-/* ---- Cards & Layout ---- */
+/* ---- cards ---- */
 .bots__card { background: var(--b-card); border: 1px solid var(--b-line); border-radius: 16px; overflow: hidden; }
 .bots__pad { padding: 24px; overflow: visible; }
 .bots__chead { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 20px; border-bottom: 1px solid var(--b-line); font-size: 20px; font-weight: 700; letter-spacing: -0.01em; text-transform: uppercase; }
@@ -31,7 +24,7 @@
 .bots__h2 svg { color: var(--b-green); }
 .bots__sub { margin: 6px 0 20px; color: var(--b-dim); font-size: 14px; }
 
-/* ---- Upload ---- */
+/* ---- upload ---- */
 .bots__drop { display: grid; justify-items: center; align-content: center; gap: 6px; min-height: 220px; padding: 24px; text-align: center; border: 2px dashed #2b2b2b; border-radius: 14px; background: #0f0f0f; cursor: pointer; transition: border-color .15s, background .15s; }
 .bots__drop:hover, .bots__drop:focus-visible, .bots__drop.is-drag { border-color: color-mix(in srgb, var(--b-green) 60%, #2b2b2b); background: color-mix(in srgb, var(--b-green) 5%, #0f0f0f); outline: 0; }
 .bots__drop-ic { display: grid; place-items: center; width: 60px; height: 60px; margin-bottom: 10px; border-radius: 50%; background: #1b1b1b; color: #d8dcda; }
@@ -45,7 +38,7 @@
 .bots__or { display: flex; align-items: center; gap: 26px; color: var(--b-dim); font-size: 15px; }
 .bots__or::before, .bots__or::after { content: ''; flex: 1; height: 1px; background: #2a2a2a; }
 
-/* ---- Passkey ---- */
+/* ---- passkey ---- */
 .bots__pass { text-align: center; padding: 22px 20px 20px; }
 .bots__pass p { margin: 0; color: var(--b-dim); font-size: 15px; }
 .bots__pass small { display: block; margin-top: 14px; color: var(--b-dim); font-size: 12px; }
@@ -58,7 +51,7 @@
 .bots__psubmit:disabled { background: color-mix(in srgb, var(--b-green) 50%, #000); cursor: not-allowed; }
 .bots__psubmit:not(:disabled):hover { filter: brightness(1.06); }
 
-/* ---- Settings (Uploaded Bots) ---- */
+/* ---- settings ---- */
 .bots__fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
 .bots__field { display: grid; gap: 10px; align-content: start; }
 .bots__field > label { color: var(--b-dim); font-size: 14px; }
@@ -80,7 +73,7 @@
 .bots__flags img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #222; border: 2px solid var(--b-field); }
 .bots__flags img + img { margin-left: -9px; }
 
-/* ---- Uploaded Bots List ---- */
+/* ---- my bots ---- */
 .bots__empty { margin: 22px 0 6px; padding: 26px; text-align: center; color: var(--b-dim); font-size: 14px; border: 1px dashed #262626; border-radius: 12px; }
 .bots__list { display: grid; gap: 14px; margin-top: 18px; }
 .bots__item { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; column-gap: 14px; row-gap: 14px; align-items: start; padding: 16px; border: 1px solid var(--b-line); border-radius: 12px; background: #0f0f0f; }
@@ -103,59 +96,14 @@
 .bots__btn.del { color: #d4d8d6; background: #141414; border-color: #262626; font-weight: 500; }
 .bots__btn.del:hover { border-color: color-mix(in srgb, var(--b-red) 50%, #262626); color: var(--b-red); }
 
-/* ---- Simulated DCA Bots (New Layout) ---- */
-.bots__item--sim { display: flex; flex-direction: column; gap: 14px; padding: 18px; }
-.bots__sim-head { display: flex; align-items: flex-start; gap: 14px; }
-.bots__sim-head .bots__ico { width: 40px; height: 40px; flex: none; }
-.bots__sim-head .bots__info { flex: 1; min-width: 0; }
-.bots__sim-head .bots__info h3 { margin: 0; font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bots__sim-head .bots__info p { margin: 4px 0 0; color: var(--b-dim); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bots__risk { padding: 2px 8px; border-radius: 5px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .02em; }
-.bots__risk.low { color: #4ade80; background: rgba(74, 222, 128, .12); }
-.bots__risk.medium { color: #60a5fa; background: rgba(96, 165, 250, .12); }
-.bots__risk.high { color: #ff6b81; background: rgba(255, 107, 129, .12); }
-.bots__sim-head .bots__badges { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-.bots__dot { display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; animation: bots-pulse 1.4s ease-in-out infinite; }
-@keyframes bots-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.7); } }
-
-.bots__desc { margin: 0; color: var(--b-dim); font-size: 14px; line-height: 1.45; }
-
-/* Config Panel */
-.bots__config { display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid var(--b-line); border-radius: 10px; background: #0c0c0c; }
-.bots__alert { padding: 10px 14px; border-radius: 8px; color: var(--b-red); background: color-mix(in srgb, var(--b-red) 10%, #000); border: 1px solid color-mix(in srgb, var(--b-red) 40%, #000); font-size: 13px; }
-.bots__config-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.bots__input-wrap { position: relative; }
-.bots__input-wrap input { padding-right: 48px; }
-.bots__unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--b-dim); font-size: 12px; font-weight: 600; pointer-events: none; }
-.bots__static { display: flex; align-items: center; height: 46px; padding: 0 14px; border-radius: 9px; border: 1px solid #222; background: #0a0a0a; color: #eaeaea; font-size: 15px; font-weight: 600; }
-.bots__hint { color: var(--b-dim); font-size: 12px; }
-.bots__config-actions { display: flex; gap: 10px; }
-
-.bots__item--sim .bots__acts { grid-column: auto; display: flex; gap: 10px; flex-wrap: wrap; }
-
-/* Activity Log */
-.bots__log { border: 1px solid var(--b-line); border-radius: 10px; overflow: hidden; background: #080808; }
+/* ---- Activity Log (Inserted after clicking Start) ---- */
+.bots__log { grid-column: 1 / -1; border: 1px solid var(--b-line); border-radius: 10px; overflow: hidden; background: #080808; margin-top: 6px; }
 .bots__log-head { padding: 8px 14px; border-bottom: 1px solid var(--b-line); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--b-dim); }
-.bots__log-body { padding: 10px 14px; overflow-y: auto; font-family: 'SF Mono', 'JetBrains Mono', Menlo, monospace; font-size: 12px; line-height: 1.55; }
+.bots__log-body { padding: 10px 14px; overflow-y: auto; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; line-height: 1.55; }
 .bots__log-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bots__log-ts { display: inline-block; width: 74px; color: #4a4a4a; margin-right: 8px; }
 
-.bots__disclaimer { display: flex; align-items: flex-start; gap: 8px; margin: 18px 0 0; padding: 14px; border: 1px dashed #262626; border-radius: 10px; color: var(--b-dim); font-size: 12.5px; line-height: 1.5; }
-.bots__disclaimer svg { flex: none; margin-top: 2px; }
-
-/* Skeleton Loading */
-.bots__item--skeleton { display: flex; flex-direction: column; gap: 12px; }
-.skel-line { height: 14px; border-radius: 6px; background: #1a1a1a; }
-.skel-line--60 { width: 60%; }
-.skel-line--40 { width: 40%; }
-.skel-block { height: 100px; border-radius: 8px; background: #131313; }
-
-/* Responsive */
 @media (max-width: 800px) {
-  .bots__hero-stats { grid-template-columns: repeat(2, 1fr); }
-  .bots__config-row { grid-template-columns: 1fr; }
-  .bots__sim-head { flex-wrap: wrap; }
-  .bots__sim-head .bots__badges { width: 100%; flex-direction: row; }
   .bots__fields { grid-template-columns: 1fr; }
   .bots__prow { flex-direction: column; }
   .bots__psubmit { width: 100%; }
