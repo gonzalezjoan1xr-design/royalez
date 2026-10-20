@@ -28,16 +28,13 @@ export default function Navbar() {
   
   const [liveBalance, setLiveBalance] = useState(Number(profile?.balance || 0))
 
-  // Sync when AuthContext updates (e.g. page load or login)
   useEffect(() => {
     setLiveBalance(Number(profile?.balance || 0))
   }, [profile?.balance])
 
-  // Listen to custom balance update events from the Bots page
   useEffect(() => {
     const handleBalanceUpdate = (e) => {
       if (e.detail && typeof e.detail.delta === 'number') {
-        console.log('⚡ CustomEvent received:', e.detail) // For debugging
         setLiveBalance(prev => Math.max(0, prev + e.detail.delta))
       }
     }
@@ -45,7 +42,6 @@ export default function Navbar() {
     return () => window.removeEventListener('balance-update', handleBalanceUpdate)
   }, [])
 
-  // Listen to Supabase real-time DB changes (Fallback for other tabs/devices)
   useEffect(() => {
     if (!user?.id) return
     const channel = supabase
@@ -55,7 +51,6 @@ export default function Navbar() {
         { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` },
         (payload) => {
           if (payload.new && typeof payload.new.balance !== 'undefined') {
-            console.log('🔌 Supabase Realtime update:', payload.new.balance) // For debugging
             setLiveBalance(Number(payload.new.balance))
           }
         }
@@ -158,12 +153,14 @@ export default function Navbar() {
             <Play size={16} strokeWidth={1.8} /> Get App
           </button>
 
+          {/* Balance is now here in the header */}
           <Link to="/deposit" className="nav__balance" aria-label="Balance">
             <Wallet size={18} strokeWidth={1.8} />
             <span>${liveBalance.toFixed(2)}</span>
           </Link>
 
-          <Link to="/verify" className="nav__icon nav__icon--green" aria-label="Verify identity">
+          {/* Added nav__hide-mobile to hide this on phone */}
+          <Link to="/verify" className="nav__icon nav__icon--green nav__hide-mobile" aria-label="Verify identity">
             <ShieldCheck size={20} strokeWidth={1.8} />
           </Link>
 
@@ -180,7 +177,8 @@ export default function Navbar() {
             <User size={20} strokeWidth={1.8} />
           </Link>
 
-          <button className="nav__icon nav__icon--red" onClick={signOut} aria-label="Sign out" type="button">
+          {/* Added nav__hide-mobile to hide this on phone */}
+          <button className="nav__icon nav__icon--red nav__hide-mobile" onClick={signOut} aria-label="Sign out" type="button">
             <LogOut size={20} strokeWidth={1.8} />
           </button>
 
@@ -228,10 +226,15 @@ export default function Navbar() {
 
         <div className="drawer__divider" />
 
-        <Link to="/deposit" className="drawer__balance">
-          <Wallet size={18} strokeWidth={1.8} />
-          <span>${liveBalance.toFixed(2)}</span>
-        </Link>
+        {/* Replaced the Balance link with Sign Out here */}
+        <button 
+          onClick={signOut} 
+          className="drawer__link" 
+          style={{ color: 'var(--red, #f4525f)', background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }} 
+          type="button"
+        >
+          <LogOut size={18} strokeWidth={1.8} /> <span>Sign Out</span>
+        </button>
 
         <form className="drawer__search" onSubmit={onSearch} role="search">
           <Search size={18} strokeWidth={1.8} />
