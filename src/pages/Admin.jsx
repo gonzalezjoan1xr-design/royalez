@@ -177,6 +177,14 @@ export default function Admin() {
 
   return (
     <div className="adm">
+      <header className="adm__head">
+        <span className="adm__tile"><ShieldCheck size={24} /></span>
+        <div>
+          <h1>Admin Panel</h1>
+          <p>Confirm deposits and withdrawals, review verifications, and answer chats</p>
+        </div>
+      </header>
+
       <nav className="adm__tabs">
         {TABS.map((t) => (
           <button key={t.id} type="button" className={tab === t.id ? 'is-on' : ''} onClick={() => setTab(t.id)}>
