@@ -225,6 +225,17 @@ function BotCard({ bot, balance, userId, onStatsChange, onBalanceChanged }) {
     if (active) {
       clearInterval(botIntervals[intervalKey])
       delete botIntervals[intervalKey]
+
+      // refund the allocation back to balance
+      if (allocatedRef.current > 0) {
+        const { error: refErr } = await supabase.rpc('refund_allocation', {
+          p_user_id: userId,
+          p_amount: allocatedRef.current,
+        })
+        if (refErr) console.error('Refund error:', refErr.message)
+        else onBalanceChanged?.(allocatedRef.current)
+      }
+
       setActive(false)
       setAllocation('')
       setConfigured(false)
@@ -411,7 +422,7 @@ function BotCard({ bot, balance, userId, onStatsChange, onBalanceChanged }) {
 }
 
 /* =================================================================== */
-/*  UPLOAD + PASSKEY (kept from your original file)                    */
+/*  UTILS & PICKERS                                                    */
 /* =================================================================== */
 const verifyPasskey = async (key) => key.trim().length > 0
 const splitVersion = (n = '') => {
@@ -511,9 +522,16 @@ export default function Bots() {
 
   const load = useCallback(async () => {
     if (!user) return
-    const { data } = await supabase.from('bots').select('*').eq('user_id', user.id).order('id')
+    const { data } = await supabase
+      .from('bots')
+      .select('*')
+      .eq('user_id', user.id)
+      // Filter out the built-in DCA bots so they don't duplicate in "My Uploaded Bots"
+      .not('name', 'in', '("Bitcoin Accumulation","ETH DCA Pro")')
+      .order('id')
     setBots(data || [])
   }, [user])
+  
   useEffect(() => { load() }, [load])
 
   const pick = (f) => {
@@ -561,6 +579,7 @@ export default function Bots() {
     await supabase.from('bots').update({ status: 'Active', schedule: interval, allocated: amt }).eq('id', b.id)
     say('ok', `${splitVersion(b.name)[0]} started on ${asset}, $${amt} every ${interval}.`); load()
   }
+  
   const remove = async (b) => {
     await supabase.from('bots').delete().eq('id', b.id)
     load()
@@ -570,7 +589,7 @@ export default function Bots() {
     <div className="bots">
       {note && <p className={`bots__note ${note.t}`}>{note.m}</p>}
 
-      {/* Hero stats (from placeholder) */}
+      {/* Hero stats */}
       <section className="bots__hero">
         <div className="bots__hero-stats">
           <div className="bots__stat">
@@ -677,7 +696,7 @@ export default function Bots() {
         </div>
       </section>
 
-      {/* ─── SIMULATED BOTS ─── */}
+      {/* ─── SIMULATED DCA BOTS ─── */}
       <section className="bots__card bots__pad">
         <h2 className="bots__h2"><Bot size={20} /> DCA Bots</h2>
         <p className="bots__sub">Dollar-cost averaging strategies with live simulation</p>
