@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useKyc, needsKyc, KYC_WITHDRAW_THRESHOLD } from '../lib/kyc'
 import { supabase } from '../lib/supabase' // adjust if your client lives elsewhere
+import { toast } from '../lib/toast'
 import './Withdraw.css'
 
 const MIN_WITHDRAWAL = 10
@@ -109,7 +110,6 @@ export default function Withdraw() {
   const [address, setAddress] = useState('')
   const [amount, setAmount] = useState('')
   const [busy, setBusy] = useState(false)
-  const [toast, setToast] = useState(null) // { type: 'ok' | 'err', title, text }
   const [history, setHistory] = useState([])
 
   // remove the layout's top/bottom spacing around this page (restored when you leave)
@@ -135,12 +135,8 @@ export default function Withdraw() {
   const receive = Math.max(0, (amt > 0 ? amt : 0) - fee)
   const kycBlocked = needsKyc(amt) && kycStatus !== 'approved'
 
-  const notify = useCallback((t) => setToast(t), [])
-  useEffect(() => {
-    if (!toast) return
-    const t = setTimeout(() => setToast(null), 5000)
-    return () => clearTimeout(t)
-  }, [toast])
+  // shared popup: top on phones, side on desktop
+  const notify = toast
 
   const loadHistory = useCallback(async () => {
     if (!user) return
@@ -154,6 +150,16 @@ export default function Withdraw() {
 
   useEffect(() => { loadHistory() }, [loadHistory])
 
+  // refresh the history list when the admin confirms or rejects a withdrawal
+  useEffect(() => {
+    if (!user?.id) return
+    const ch = supabase
+      .channel(`wd-history-${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'withdrawals', filter: `user_id=eq.${user.id}` }, loadHistory)
+      .subscribe()
+    return () => { supabase.removeChannel(ch) }
+  }, [user?.id, loadHistory])
+
   const changeCoin = (c) => {
     setCoin(c)
     setNetwork(NETWORKS[c][0].id)
@@ -161,7 +167,6 @@ export default function Withdraw() {
 
   const submit = async (e) => {
     e.preventDefault()
-    setToast(null)
 
     if (!address.trim()) return notify({ type: 'err', title: 'Address required', text: 'Enter a destination wallet address.' })
     if (!(amt > 0)) return notify({ type: 'err', title: 'Invalid amount', text: 'Enter a valid withdrawal amount.' })
@@ -175,7 +180,7 @@ export default function Withdraw() {
       }
       if (kycStatus === 'pending') {
         return notify({
-          type: 'err',
+          type: 'security',
           title: 'Verification under review',
           text: `Your ID and face verification is still being reviewed. Withdrawals of ${money(KYC_WITHDRAW_THRESHOLD).replace('.00', '')} or more unlock once it is approved.`,
         })
@@ -200,7 +205,7 @@ export default function Withdraw() {
     if (error) return notify({ type: 'err', title: 'Withdrawal failed', text: error.message })
     setAmount('')
     setAddress('')
-    notify({ type: 'ok', title: 'Withdrawal submitted', text: 'Your request will be reviewed and processed shortly.' })
+    notify({ type: 'withdrawal', title: 'Withdrawal submitted', text: 'Your request will be reviewed and processed shortly.' })
     loadHistory()
   }
 
@@ -331,14 +336,6 @@ export default function Withdraw() {
           )}
         </section>
       </div>
-
-      {toast && (
-        <div className={`wd-toast wd-toast--${toast.type}`} role="alert">
-          <button type="button" className="wd-toast__close" onClick={() => setToast(null)} aria-label="Dismiss">×</button>
-          <strong>{toast.title}</strong>
-          <p>{toast.text}</p>
-        </div>
-      )}
     </div>
   )
 }
