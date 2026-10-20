@@ -153,13 +153,13 @@ export default function Navbar() {
             <Play size={16} strokeWidth={1.8} /> Get App
           </button>
 
-          {/* Balance is now here in the header */}
+          {/* Mobile: This will show on the phone header now */}
           <Link to="/deposit" className="nav__balance" aria-label="Balance">
             <Wallet size={18} strokeWidth={1.8} />
             <span>${liveBalance.toFixed(2)}</span>
           </Link>
 
-          {/* Added nav__hide-mobile to hide this on phone */}
+          {/* Mobile: Hidden via nav__hide-mobile */}
           <Link to="/verify" className="nav__icon nav__icon--green nav__hide-mobile" aria-label="Verify identity">
             <ShieldCheck size={20} strokeWidth={1.8} />
           </Link>
@@ -177,7 +177,7 @@ export default function Navbar() {
             <User size={20} strokeWidth={1.8} />
           </Link>
 
-          {/* Added nav__hide-mobile to hide this on phone */}
+          {/* Mobile: Hidden via nav__hide-mobile */}
           <button className="nav__icon nav__icon--red nav__hide-mobile" onClick={signOut} aria-label="Sign out" type="button">
             <LogOut size={20} strokeWidth={1.8} />
           </button>
@@ -226,11 +226,11 @@ export default function Navbar() {
 
         <div className="drawer__divider" />
 
-        {/* Replaced the Balance link with Sign Out here */}
+        {/* Sign Out button moved here from header */}
         <button 
           onClick={signOut} 
           className="drawer__link" 
-          style={{ color: 'var(--red, #f4525f)', background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }} 
+          style={{ color: 'var(--nav-red)', background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }} 
           type="button"
         >
           <LogOut size={18} strokeWidth={1.8} /> <span>Sign Out</span>
