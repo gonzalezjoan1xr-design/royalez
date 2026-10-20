@@ -11,7 +11,6 @@ const PAIRS = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'USD/CHF',
 const FLAG = { EUR: 'eu', USD: 'us', GBP: 'gb', JPY: 'jp', AUD: 'au', CAD: 'ca', CHF: 'ch', NZD: 'nz' }
 const RISK_BADGE = { Low: ['conservative', 'green'], Medium: ['balanced', 'blue'], High: ['aggressive', 'red'] }
 
-// The two built-in bots
 const SIMULATED_BOTS = [
   { id: 1, name: 'Bitcoin Accumulation', description: 'Dollar-cost averaging into Bitcoin on a weekly basis.', risk: 'Low', interval: 3000, lossChance: 0.24, pair: 'BTC' },
   { id: 2, name: 'ETH DCA Pro', description: 'Dynamic DCA based on RSI and volume indicators.', risk: 'Medium', interval: 3000, lossChance: 0.25, pair: 'ETH' },
@@ -92,21 +91,7 @@ export default function Bots() {
   const [interval, setIntervalV] = useState('1 minute')
   const [asset, setAsset] = useState('EUR/USD')
 
-  // State for the simulation
   const [simState, setSimState] = useState({})
-  const [liveBalance, setLiveBalance] = useState(balance)
-
-  useEffect(() => { setLiveBalance(balance) }, [balance])
-
-  const handleBalanceChanged = useCallback((delta) => {
-    setLiveBalance(prev => Math.max(0, prev + delta))
-  }, [])
-
-  useEffect(() => {
-    const prev = document.body.style.background
-    document.body.style.background = 'var(--nav-bg, #050505)'
-    return () => { document.body.style.background = prev }
-  }, [])
 
   const say = (t, m) => setNote({ t, m })
 
@@ -116,7 +101,6 @@ export default function Bots() {
       .from('bots')
       .select('*')
       .eq('user_id', user.id)
-      // Filter out the built-in bots so they don't duplicate
       .not('name', 'in', '("Bitcoin Accumulation","ETH DCA Pro")')
       .order('id')
     setBots(data || [])
@@ -124,7 +108,7 @@ export default function Bots() {
   
   useEffect(() => { load() }, [load])
 
-  /* ---------- upload & passkey ---------- */
+  /* ---------- Upload & Passkey ---------- */
   const pick = (f) => {
     if (!f) return
     if (!EXT.test(f.name)) return say('err', 'Unsupported file type. Use .py, .js, .ts, .json or .zip.')
@@ -158,45 +142,56 @@ export default function Bots() {
     setPasskey(''); say('ok', 'Bot activated. You can find it under My Bots.'); load()
   }
 
-  /* ---------- simulation logic ---------- */
+  /* ---------- Simulation Logic (Deduct & Increment) ---------- */
   const startSim = async (b) => {
-    const amt = Number(amount)
-    if (liveBalance <= 0) return say('err', 'Deposit funds to unlock your bots.')
-    if (!(amt > 0)) return say('err', 'Enter a valid trade amount.')
-    if (amt > liveBalance) return say('err', 'Trade amount is higher than your available balance.')
+    const alloc = Number(amount)
+    
+    // Validation
+    if (balance <= 0) return say('err', 'Deposit funds to unlock your bots.')
+    if (!(alloc > 0)) return say('err', 'Enter a valid trade amount.')
+    if (alloc > balance) return say('err', 'Trade amount is higher than your available balance.')
 
-    // Deduct balance
-    const { error: deductErr } = await supabase.rpc('deduct_balance', { p_user_id: user.id, p_amount: amt })
+    // 1. Deduct the exact amount (e.g. $10) from the database
+    const { error: deductErr } = await supabase.rpc('deduct_balance', { p_user_id: user.id, p_amount: alloc })
     if (deductErr) return say('err', deductErr.message)
-    handleBalanceChanged(-amt)
 
-    // Set state to active
+    setNote(null)
+
+    // 2. Mark as active in UI
     setSimState(prev => ({
       ...prev,
-      [b.id]: { active: true, allocation: amt, pnl: 0, log: [{ msg: `► Bot started with $${amt.toFixed(2)} allocation`, color: '#00c853', ts: new Date().toLocaleTimeString() }] }
+      [b.id]: { 
+        active: true, 
+        allocation: alloc, 
+        pnl: 0, 
+        log: [{ msg: `► Bot started. $${alloc.toFixed(2)} deducted from balance.`, color: '#00c853', ts: new Date().toLocaleTimeString() }] 
+      }
     }))
 
     const intervalKey = `${user.id}-${b.id}`
 
+    // 3. Run the trade loop
     const tick = () => {
       setSimState(prev => {
         const state = prev[b.id]
         if (!state || !state.active) return prev
 
-        const gained = Math.random() < b.lossChance
+        // Calculate win/loss based on the bot's probability
+        const isLoss = Math.random() < b.lossChance
+        const gained = isLoss
           ? -parseFloat((2.90 + Math.random() * 0.50).toFixed(2))
           : parseFloat((3.40 + Math.random() * 1.00).toFixed(2))
 
         const price = BASE_PRICES[b.pair] * (1 + (Math.random() - 0.5) * 0.004)
+        
         const newLog = [
           { msg: `${gained >= 0 ? '↑' : '↓'} Trade ${gained >= 0 ? '+' : ''}$${gained.toFixed(2)}`, color: gained >= 0 ? '#00c853' : '#ff3b5c', ts: new Date().toLocaleTimeString() },
           { msg: randomComment(b.pair, price), color: '#3b82f6', ts: new Date().toLocaleTimeString() },
           ...state.log
         ].slice(0, 15)
 
-        // Sync with DB
+        // Add/subtract the gained amount to the database balance
         supabase.rpc('increment_balance', { p_user_id: user.id, p_delta: gained }).then()
-        handleBalanceChanged(gained)
 
         return { ...prev, [b.id]: { ...state, pnl: state.pnl + gained, log: newLog } }
       })
@@ -214,16 +209,17 @@ export default function Bots() {
 
     const alloc = simState[b.id]?.allocation || 0
 
-    // Refund balance
+    // Refund the original allocation back to the user
     if (alloc > 0) {
-      const { error } = await supabase.rpc('refund_allocation', { p_user_id: user.id, p_amount: alloc })
-      if (!error) handleBalanceChanged(alloc)
+      await supabase.rpc('refund_allocation', { p_user_id: user.id, p_amount: alloc })
     }
 
     setSimState(prev => ({
       ...prev,
       [b.id]: { active: false, allocation: 0, pnl: 0, log: [] }
     }))
+    
+    say('ok', `Bot stopped. $${alloc.toFixed(2)} allocation refunded.`)
   }
 
   return (
