@@ -1,0 +1,81 @@
+.rmt {
+  position: fixed;
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* phone: top of the screen */
+  top: 12px;
+  left: 12px;
+  right: 12px;
+}
+
+.rmt__item {
+  --c: #22c55e;
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 40px 14px 14px;
+  position: relative;
+  border-radius: 12px;
+  color: #fff;
+  background: #0d110f;
+  border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  animation: rmt-top 0.28s ease-out;
+}
+.rmt__ic { flex: none; margin-top: 1px; color: var(--c); }
+.rmt__body { min-width: 0; }
+.rmt__body strong { display: block; font-size: 15px; font-weight: 700; line-height: 1.3; }
+.rmt__body p { margin: 4px 0 0; font-size: 14px; line-height: 1.45; color: #cfd6d2; }
+.rmt__x {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: inherit;
+  opacity: 0.6;
+  cursor: pointer;
+}
+.rmt__x:hover { opacity: 1; background: rgba(255, 255, 255, 0.1); }
+
+.rmt__item--info,
+.rmt__item--security { --c: #3b82f6; }
+
+/* errors and losses are solid red, like the "Insufficient Balance" popup */
+.rmt__item--err,
+.rmt__item--loss {
+  --c: #fff;
+  background: #dc2626;
+  border-color: #dc2626;
+}
+.rmt__item--err .rmt__body p,
+.rmt__item--loss .rmt__body p { color: #ffe4e4; }
+
+.rmt__item--win { background: #0b1f12; }
+
+/* desktop: bottom right, above the chat bubble */
+@media (min-width: 761px) {
+  .rmt {
+    top: auto;
+    left: auto;
+    right: 24px;
+    bottom: 104px;
+    width: min(420px, calc(100vw - 48px));
+    flex-direction: column-reverse;
+  }
+  .rmt__item { animation-name: rmt-side; }
+}
+
+@keyframes rmt-top { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
+@keyframes rmt-side { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .rmt__item { animation: none; } }
