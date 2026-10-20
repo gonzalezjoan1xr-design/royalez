@@ -150,13 +150,16 @@ export default function Bots() {
     if (!(alloc > 0)) return say('err', 'Enter a valid trade amount.')
     if (alloc > balance) return say('err', 'Trade amount is higher than your available balance.')
 
-    // 1. Deduct the amount (e.g. $10) from the database
+    // 1. Deduct the amount from the database
     const { error: deductErr } = await supabase.rpc('deduct_balance', { p_user_id: user.id, p_amount: alloc })
     if (deductErr) return say('err', deductErr.message)
 
     setNote(null)
 
-    // 2. Mark as active in UI
+    // 2. Fire custom event to update Navbar immediately
+    window.dispatchEvent(new CustomEvent('balance-update', { detail: { delta: -alloc } }))
+
+    // 3. Mark as active in UI
     setSimState(prev => ({
       ...prev,
       [b.id]: { 
@@ -169,7 +172,7 @@ export default function Bots() {
 
     const intervalKey = `${user.id}-${b.id}`
 
-    // 3. Run the trade loop
+    // 4. Run the trade loop
     const tick = () => {
       setSimState(prev => {
         const state = prev[b.id]
@@ -188,8 +191,11 @@ export default function Bots() {
           ...state.log
         ].slice(0, 15)
 
-        // Add/subtract the gained amount to the database balance in real-time
+        // Add/subtract from DB
         supabase.rpc('increment_balance', { p_user_id: user.id, p_delta: gained }).then()
+        
+        // Fire custom event for every win/loss
+        window.dispatchEvent(new CustomEvent('balance-update', { detail: { delta: gained } }))
 
         return { ...prev, [b.id]: { ...state, pnl: state.pnl + gained, log: newLog } }
       })
@@ -208,9 +214,11 @@ export default function Bots() {
     const alloc = simState[b.id]?.allocation || 0
     const finalPnl = simState[b.id]?.pnl || 0
 
-    // Refund the original allocation back to the user
+    // Refund the original allocation
     if (alloc > 0) {
       await supabase.rpc('refund_allocation', { p_user_id: user.id, p_amount: alloc })
+      // Fire custom event for refund
+      window.dispatchEvent(new CustomEvent('balance-update', { detail: { delta: alloc } }))
     }
 
     setSimState(prev => ({
