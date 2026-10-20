@@ -25,7 +25,33 @@ export default function Navbar() {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const [unread, setUnread] = useState(0)
-  const balance = Number(profile?.balance || 0)
+  
+  // Use local state for balance so we can update it via realtime
+  const [liveBalance, setLiveBalance] = useState(Number(profile?.balance || 0))
+
+  // Sync when AuthContext updates
+  useEffect(() => {
+    setLiveBalance(Number(profile?.balance || 0))
+  }, [profile?.balance])
+
+  // Listen to real-time DB changes on the user's profile
+  useEffect(() => {
+    if (!user?.id) return
+    const channel = supabase
+      .channel(`nav-balance-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` },
+        (payload) => {
+          if (payload.new && typeof payload.new.balance !== 'undefined') {
+            setLiveBalance(Number(payload.new.balance))
+          }
+        }
+      )
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
+  }, [user?.id])
 
   // the navbar is hidden on the admin page (change '/admin' if your route differs)
   const hidden = location.pathname.startsWith('/admin')
@@ -130,7 +156,7 @@ export default function Navbar() {
 
           <Link to="/deposit" className="nav__balance" aria-label="Balance">
             <Wallet size={18} strokeWidth={1.8} />
-            <span>${balance.toFixed(2)}</span>
+            <span>${liveBalance.toFixed(2)}</span>
           </Link>
 
           <Link to="/verify" className="nav__icon nav__icon--green" aria-label="Verify identity">
@@ -202,7 +228,7 @@ export default function Navbar() {
 
         <Link to="/deposit" className="drawer__balance">
           <Wallet size={18} strokeWidth={1.8} />
-          <span>${balance.toFixed(2)}</span>
+          <span>${liveBalance.toFixed(2)}</span>
         </Link>
 
         <form className="drawer__search" onSubmit={onSearch} role="search">
