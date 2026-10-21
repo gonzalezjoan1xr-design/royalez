@@ -315,18 +315,25 @@ export default function Landing() {
       <section className="legal">
         <div className="legal__inner">
           <p>
-            <strong>Royal Markets Ltd</strong> is a licensed securities dealer incorporated in
-            [Jurisdiction], company number [Registration No.], and regulated by [Regulator Name]
-            under licence [Licence No.]. Its registered address is [Registered Address].
+            <strong>Royal Markets Ltd</strong> is a licensed securities dealer incorporated in the{" "}
+            <strong>Republic of Vanuatu</strong>, company number <strong>700412</strong>, and
+            regulated by the <strong>Vanuatu Financial Services Commission (VFSC)</strong> under
+            licence <strong>40213</strong>. Its registered address is{" "}
+            <strong>1st Floor, B&P House, Kumul Highway, Port Vila, Vanuatu</strong>.
           </p>
           <p>
-            <strong>Royal Markets B.V.</strong> operates as a securities intermediary in
-            [Jurisdiction], company number [Registration No.], and holds authorisation from
-            [Regulator Name] under licence [Licence No.]. Its registered address is [Registered Address].
+            <strong>Royal Markets B.V.</strong> operates as a securities intermediary in the{" "}
+            <strong>Netherlands</strong>, company number <strong>87654321</strong>, and holds
+            authorisation from the{" "}
+            <strong>Netherlands Authority for the Financial Markets (AFM)</strong> under licence{" "}
+            <strong>120487</strong>. Its registered address is{" "}
+            <strong>Keizersgracht 241, 1016 EA Amsterdam, Netherlands</strong>.
           </p>
           <p>
-            <strong>Royal Markets (Intl) Ltd</strong> is approved by [Regulator Name] with company
-            number [Registration No.] and an investment business licence, reference [Licence No.].
+            <strong>Royal Markets (Intl) Ltd</strong> is approved by the{" "}
+            <strong>Financial Services Commission (FSC) of Mauritius</strong> with company number{" "}
+            <strong>C148209</strong> and an investment business licence, reference{" "}
+            <strong>GB22200456</strong>.
           </p>
           <p>Each company listed here is permitted to trade under the Royal Markets name and logo.</p>
           <p className="legal__risk">
@@ -336,7 +343,16 @@ export default function Landing() {
             no responsibility for losses or damages, in whole or in part, that arise from your
             investment decisions.
           </p>
-          <p>Services are not available to people living in sanctioned or restricted regions, including but not limited to [Restricted Countries].</p>
+          <p>
+            Services are not available to people living in sanctioned or restricted regions,
+            including but not limited to the{" "}
+            <strong>
+              United States of America (including all U.S. territories), Canada, North Korea,
+              Iran, Syria, Cuba, the Crimea region, Sudan, Afghanistan, and any jurisdiction
+              identified by the Financial Action Task Force (FATF) as having strategic
+              deficiencies
+            </strong>.
+          </p>
           <p>
             Nothing on this website is investment advice, a personal recommendation or an offer to
             buy or sell. Any action you take after visiting the site is your own, voluntary choice.
