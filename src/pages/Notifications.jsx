@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Bell, ArrowUpRight, ArrowDownLeft, ShieldCheck, CheckCheck, Trash2 } from 'lucide-react'
+import { Bell, ArrowUpRight, ArrowDownLeft, ShieldCheck, CheckCheck, Trash2, Trophy, MessageSquare } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import './Notifications.css'
@@ -8,6 +8,8 @@ const ICONS = {
   deposit: ArrowUpRight,
   withdrawal: ArrowDownLeft,
   security: ShieldCheck,
+  win: Trophy,
+  message: MessageSquare,
 }
 
 function timeAgo(iso) {
@@ -98,7 +100,7 @@ export default function Notifications() {
         <div className="notifs__empty">
           <Bell size={32} strokeWidth={1.5} />
           <h2>No notifications yet</h2>
-          <p>Deposits, withdrawals and account alerts will show up here.</p>
+          <p>Deposits, withdrawals, bot wins and messages from support will show up here.</p>
         </div>
       )}
 
