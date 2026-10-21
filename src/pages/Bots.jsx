@@ -230,6 +230,8 @@ export default function Bots() {
     // Popup based on the amount won (P&L), not the refund
     if (finalPnl > 0) {
       toast({ type: 'win', title: 'You won!', text: `${b.name} stopped with a profit of +$${finalPnl.toFixed(2)}.`, duration: 8000 })
+      // save the win to the Notifications page
+      supabase.rpc('notify_bot_win', { p_amount: Number(finalPnl.toFixed(2)), p_bot: b.name }).then(() => {})
     } else if (finalPnl < 0) {
       toast({ type: 'loss', title: 'Bot stopped', text: `${b.name} stopped with a loss of -$${Math.abs(finalPnl).toFixed(2)}.` })
     } else {
