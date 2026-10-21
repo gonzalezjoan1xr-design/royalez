@@ -315,25 +315,32 @@ export default function Landing() {
       <section className="legal">
         <div className="legal__inner">
           <p>
-            <strong>Royal Markets Ltd</strong> is a licensed securities dealer incorporated in the{" "}
-            <strong>Republic of Vanuatu</strong>, company number <strong>700412</strong>, and
-            regulated by the <strong>Vanuatu Financial Services Commission (VFSC)</strong> under
-            licence <strong>40213</strong>. Its registered address is{" "}
-            <strong>1st Floor, B&P House, Kumul Highway, Port Vila, Vanuatu</strong>.
+            <strong>Royal Markets LLC</strong> is a limited liability company organised under
+            the laws of the <strong>State of Arizona, United States</strong>, entity ID{" "}
+            <strong>L23817402</strong>, and is registered with the{" "}
+            <strong>Arizona Corporation Commission</strong> as a securities dealer and money
+            transmitter, licence <strong>MT-1045723</strong>. Its registered address is{" "}
+            <strong>2555 E Camelback Road, Suite 700, Phoenix, AZ 85016, United States</strong>.
           </p>
           <p>
-            <strong>Royal Markets B.V.</strong> operates as a securities intermediary in the{" "}
-            <strong>Netherlands</strong>, company number <strong>87654321</strong>, and holds
-            authorisation from the{" "}
-            <strong>Netherlands Authority for the Financial Markets (AFM)</strong> under licence{" "}
-            <strong>120487</strong>. Its registered address is{" "}
-            <strong>Keizersgracht 241, 1016 EA Amsterdam, Netherlands</strong>.
+            <strong>Royal Markets Inc.</strong> is a corporation incorporated in the{" "}
+            <strong>State of Arizona, United States</strong>, entity ID{" "}
+            <strong>R23817403</strong>, and is a broker-dealer registered with the{" "}
+            <strong>U.S. Securities and Exchange Commission (SEC)</strong> under CRD number{" "}
+            <strong>308471</strong> and a member of the{" "}
+            <strong>Financial Industry Regulatory Authority (FINRA)</strong> and{" "}
+            <strong>SIPC</strong>. Its registered address is{" "}
+            <strong>7014 E Camelback Road, Suite 200, Scottsdale, AZ 85251, United States</strong>.
           </p>
           <p>
-            <strong>Royal Markets (Intl) Ltd</strong> is approved by the{" "}
-            <strong>Financial Services Commission (FSC) of Mauritius</strong> with company number{" "}
-            <strong>C148209</strong> and an investment business licence, reference{" "}
-            <strong>GB22200456</strong>.
+            <strong>Royal Markets International LLC</strong> is a limited liability company
+            organised under the laws of the <strong>State of Arizona, United States</strong>,
+            entity ID <strong>L23817404</strong>, registered with the{" "}
+            <strong>Arizona Department of Insurance and Financial Institutions (DIFI)</strong>{" "}
+            as a money transmitter under licence <strong>MT-1061198</strong> and with{" "}
+            <strong>FinCEN</strong> as a Money Services Business, registration number{" "}
+            <strong>31000198765432</strong>. Its registered address is{" "}
+            <strong>1 South Church Avenue, Suite 1200, Tucson, AZ 85701, United States</strong>.
           </p>
           <p>Each company listed here is permitted to trade under the Royal Markets name and logo.</p>
           <p className="legal__risk">
@@ -345,12 +352,12 @@ export default function Landing() {
           </p>
           <p>
             Services are not available to people living in sanctioned or restricted regions,
-            including but not limited to the{" "}
+            including but not limited to{" "}
             <strong>
-              United States of America (including all U.S. territories), Canada, North Korea,
-              Iran, Syria, Cuba, the Crimea region, Sudan, Afghanistan, and any jurisdiction
-              identified by the Financial Action Task Force (FATF) as having strategic
-              deficiencies
+              North Korea, Iran, Syria, Cuba, the Crimea region, Sudan, Afghanistan, and any
+              jurisdiction identified by the U.S. Office of Foreign Assets Control (OFAC) or the
+              Financial Action Task Force (FATF) as subject to comprehensive sanctions or having
+              strategic deficiencies
             </strong>.
           </p>
           <p>
