@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import Navbar from './components/Navbar'
 import ChatButton from './components/ChatButton'
+import InstallPrompt from './components/InstallPrompt'
 import Landing from './pages/Landing'
 import Auth from './pages/Auth'
 import VerifyEmail from './pages/VerifyEmail'
@@ -54,6 +55,7 @@ export default function App() {
         </Routes>
       </main>
       {!adminPage && emailVerified !== false && <ChatButton />}
+      {!adminPage && <InstallPrompt />}
     </>
   )
 }
